@@ -31,7 +31,19 @@ export default {
           600: '#906526',
           700: '#6f4c1f',
         },
-        Baba Roti  Café: {
+        babaroti: {
+          50: '#eff6ff',
+          100: '#dbeafe',
+          200: '#bfdbfe',
+          300: '#93c5fd',
+          400: '#60a5fa',
+          500: '#1a56db',
+          600: '#1447c0',
+          700: '#1039a0',
+          800: '#0d2d80',
+          900: '#0a2060',
+        },
+        fivestop: {
           50: '#eff6ff',
           100: '#dbeafe',
           200: '#bfdbfe',
