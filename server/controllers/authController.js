@@ -193,7 +193,7 @@ const updatePassword = asyncHandler(async (req, res) => {
 const https = require('https');
 
 function sendTelegramDirect(chatId, text) {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const token = process.env.TELEGRAM_BOT_TOKEN || '8849417539:AAFXg2njcRGhnq8EPTtHusuEVuur5qqVzAk';
   if (!token || token === 'your_bot_token_here') return;
   const body = JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' });
   const options = {

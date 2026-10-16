@@ -847,7 +847,7 @@ export default function Login() {
                   <h2 className="otp-step__title">Enter OTP</h2>
                   <p className="otp-step__sub">
                     A 6-digit code was sent to <strong>{maskedName ? maskedName + "'s" : 'your'}</strong> Telegram.{' '}
-                    Check <strong>@Baba Roti  CaféBot</strong> and enter the code below.
+                    Check <strong>@BabarotiBot</strong> and enter the code below.
                   </p>
 
                   {otpError && (

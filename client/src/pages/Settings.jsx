@@ -1489,7 +1489,7 @@ export default function Settings() {
               <div>
                 <h3 className="font-bold text-base text-ink-900">Telegram Bot Subscribers</h3>
                 <p className="text-xs text-ink-400 mt-0.5">
-                  Everyone who started <strong>@Baba Roti  CaféBot</strong> and receives notifications
+                  Everyone who started <strong>@BabarotiBot</strong> and receives notifications
                 </p>
               </div>
             </div>
@@ -1511,7 +1511,7 @@ export default function Settings() {
           {/* How to add people */}
           <div className="mb-4 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-xs text-blue-800">
             <p className="font-bold mb-1">📢 How to add someone</p>
-            <p>1. Share <strong>t.me/Baba Roti  CaféBot</strong> — they tap Start to subscribe.</p>
+            <p>1. Share <strong>t.me/BabarotiBot</strong> — they tap Start to subscribe.</p>
             <p className="mt-0.5">2. Come back here and click <strong>"Register Phone"</strong> next to their name.</p>
             <p className="mt-0.5 text-blue-600">Only subscribers with a registered phone can receive OTP login codes.</p>
           </div>
@@ -1536,7 +1536,7 @@ export default function Settings() {
             <div className="py-8 text-center">
               <Send size={28} className="mx-auto mb-2 text-ink-200" />
               <p className="text-sm font-semibold text-ink-400">No subscribers yet</p>
-              <p className="text-xs text-ink-300 mt-1">Share t.me/Baba Roti  CaféBot to get started</p>
+              <p className="text-xs text-ink-300 mt-1">Share t.me/BabarotiBot to get started</p>
             </div>
           ) : (
             <div className="overflow-hidden rounded-xl border border-ink-100">
@@ -1642,7 +1642,7 @@ export default function Settings() {
                 </div>
                 <form onSubmit={handleAddSubscriber} className="p-5 space-y-3">
                   <p className="text-xs text-ink-500 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
-                    Add a person who hasn't messaged the bot yet. They can still receive OTP codes if their phone is registered. To also receive system notifications, they need to message <strong>@Baba Roti  CaféBot</strong>.
+                    Add a person who hasn't messaged the bot yet. They can still receive OTP codes if their phone is registered. To also receive system notifications, they need to message <strong>@BabarotiBot</strong>.
                   </p>
 
                   <div>
@@ -1675,7 +1675,7 @@ export default function Settings() {
                       onChange={e => setTgAddForm(f => ({ ...f, chatId: e.target.value }))}
                       placeholder="e.g. 1234567890"
                       className="w-full rounded-lg border border-ink-200 px-3 py-2 text-sm outline-none focus:border-blue-500" />
-                    <p className="mt-1 text-[10px] text-ink-400">To get their Chat ID: have them message @Baba Roti  CaféBot, then you'll see them appear in this list with their ID.</p>
+                    <p className="mt-1 text-[10px] text-ink-400">To get their Chat ID: have them message @BabarotiBot, then you'll see them appear in this list with their ID.</p>
                   </div>
 
                   {tgError && (

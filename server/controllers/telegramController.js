@@ -1,7 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const Setting = require('../models/Setting');
 
-const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8849417539:AAFXg2njcRGhnq8EPTtHusuEVuur5qqVzAk';
 
 // ── Send a reply directly to one chat ────────────────────────────
 async function reply(chatId, text) {
