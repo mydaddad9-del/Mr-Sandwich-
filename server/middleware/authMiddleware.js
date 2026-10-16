@@ -3,6 +3,8 @@ const asyncHandler = require('express-async-handler');
 const User = require('../models/User');
 const Setting = require('../models/Setting');
 
+const JWT_SECRET = process.env.JWT_SECRET || 'baba_roti_cafe_super_secret_jwt_key_2024';
+
 const DEFAULT_ROLE_PERMISSIONS = {
   recordGoods: { storekeeper: true, manager: true, admin: true },
   checkReview: { storekeeper: false, manager: true, admin: true },
@@ -50,7 +52,7 @@ const protect = asyncHandler(async (req, res, next) => {
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     try {
       token = req.headers.authorization.split(' ')[1];
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, JWT_SECRET);
       req.user = await User.findById(decoded.id).select('-password');
       if (!req.user || !req.user.isActive) {
         res.status(401);
