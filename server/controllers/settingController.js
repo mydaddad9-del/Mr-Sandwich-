@@ -1,18 +1,18 @@
-const asyncHandler      = require('express-async-handler');
-const Setting           = require('../models/Setting');
+const asyncHandler = require('express-async-handler');
+const Setting = require('../models/Setting');
 const { clearSettingsCache, DEFAULT_ROLE_PERMISSIONS } = require('../middleware/authMiddleware');
 const tg = require('../utils/telegramNotifier');
 
 const DEFAULT_NAV_VISIBILITY = {
-  dashboard:      { storekeeper: true,  manager: true,  admin: true },
-  rawMaterials:   { storekeeper: true,  manager: true,  admin: true },
-  products:       { storekeeper: true,  manager: true,  admin: true },
-  stockMovements: { storekeeper: true,  manager: true,  admin: true },
-  suppliers:      { storekeeper: false, manager: true,  admin: true },
-  consumption:    { storekeeper: true,  manager: true,  admin: true },
-  reports:        { storekeeper: false, manager: true,  admin: true },
-  analytics:      { storekeeper: false, manager: true,  admin: true },
-  staffAccounts:  { storekeeper: false, manager: false, admin: true },
+  dashboard: { storekeeper: true, manager: true, admin: true },
+  rawMaterials: { storekeeper: true, manager: true, admin: true },
+  products: { storekeeper: true, manager: true, admin: true },
+  stockMovements: { storekeeper: true, manager: true, admin: true },
+  suppliers: { storekeeper: false, manager: true, admin: true },
+  consumption: { storekeeper: true, manager: true, admin: true },
+  reports: { storekeeper: false, manager: true, admin: true },
+  analytics: { storekeeper: false, manager: true, admin: true },
+  staffAccounts: { storekeeper: false, manager: false, admin: true },
 };
 
 // @desc   Get system settings (creates default if none exists)
@@ -22,8 +22,8 @@ const getSettings = asyncHandler(async (req, res) => {
   let settings = await Setting.findOne();
   if (!settings) {
     settings = await Setting.create({
-      hotelName: 'Five Stop',
-      systemEmail: 'info@fivestop.com',
+      hotelName: 'Baba Roti  Café',
+      systemEmail: 'info@Baba Roti  Café.com',
       phone: '+251 911 000 111',
       address: 'Addis Ababa, Ethiopia',
       currency: 'ETB',

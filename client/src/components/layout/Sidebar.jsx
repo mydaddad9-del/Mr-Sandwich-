@@ -12,39 +12,38 @@ import {
 import { useAuth } from '../../context/AuthContext';
 
 const STOCK_ITEMS = [
-  { to: '/transactions',                label: 'All Movements',           icon: ArrowLeftRight, end: true },
-  { to: '/transactions/cash-grv',       label: 'Cash Goods Receiving',    icon: ShoppingBag  },
-  { to: '/transactions/credit-grv',     label: 'Credit Goods Receiving',  icon: CreditCard   },
-  { to: '/transactions/fresh-bazaar',   label: 'Fresh Bazaar Receiving',  icon: Leaf         },
-  { to: '/transactions/pos-adjustment', label: 'Positive Adjustment',     icon: TrendingUp   },
-  { to: '/transactions/disposal',       label: 'Goods Disposal',          icon: Flame        },
-  { to: '/transactions/neg-adjustment', label: 'Negative Adjustment',     icon: TrendingDown },
-  { to: '/sales-import',                label: 'Import Sales Report',     icon: UploadCloud  },
+  { to: '/transactions', label: 'All Movements', icon: ArrowLeftRight, end: true },
+  { to: '/transactions/cash-grv', label: 'Cash Goods Receiving', icon: ShoppingBag },
+  { to: '/transactions/credit-grv', label: 'Credit Goods Receiving', icon: CreditCard },
+  { to: '/transactions/fresh-bazaar', label: 'Fresh Bazaar Receiving', icon: Leaf },
+  { to: '/transactions/pos-adjustment', label: 'Positive Adjustment', icon: TrendingUp },
+  { to: '/transactions/disposal', label: 'Goods Disposal', icon: Flame },
+  { to: '/transactions/neg-adjustment', label: 'Negative Adjustment', icon: TrendingDown },
+  { to: '/sales-import', label: 'Import Sales Report', icon: UploadCloud },
 ];
 
 const REPORT_ITEMS = [
-  { to: '/reports/summary',          label: 'Overview',              icon: BarChart2      },
-  { to: '/reports/stock-balance',    label: 'Stock Balance Sheet',   icon: Scale          },
-  { to: '/reports/inventory-count',  label: 'Inventory Count',       icon: ClipboardList  },
-  { to: '/reports/daily',            label: 'Daily Report',          icon: Calendar       },
-  { to: '/reports/cash-grv',         label: 'Cash GRV Report',       icon: ShoppingBag    },
-  { to: '/reports/credit-grv',       label: 'Credit GRV Report',     icon: CreditCard     },
-  { to: '/reports/fresh-bazaar',     label: 'Fresh Bazaar Report',   icon: Leaf           },
-  { to: '/reports/pos-adjustment',   label: '+ve Adjustment Report', icon: TrendingUp     },
-  { to: '/reports/disposal',         label: 'Disposal Report',       icon: Flame          },
-  { to: '/reports/neg-adjustment',   label: '−ve Adjustment Report', icon: TrendingDown   },
-  { to: '/reports/stock-levels',     label: 'Stock Levels',          icon: PackageOpen    },
-  { to: '/reports/purchases',        label: 'Purchase History',      icon: ShoppingCart   },
+  { to: '/reports/summary', label: 'Overview', icon: BarChart2 },
+  { to: '/reports/stock-balance', label: 'Stock Balance Sheet', icon: Scale },
+  { to: '/reports/inventory-count', label: 'Inventory Count', icon: ClipboardList },
+  { to: '/reports/daily', label: 'Daily Report', icon: Calendar },
+  { to: '/reports/cash-grv', label: 'Cash GRV Report', icon: ShoppingBag },
+  { to: '/reports/credit-grv', label: 'Credit GRV Report', icon: CreditCard },
+  { to: '/reports/fresh-bazaar', label: 'Fresh Bazaar Report', icon: Leaf },
+  { to: '/reports/pos-adjustment', label: '+ve Adjustment Report', icon: TrendingUp },
+  { to: '/reports/disposal', label: 'Disposal Report', icon: Flame },
+  { to: '/reports/neg-adjustment', label: '−ve Adjustment Report', icon: TrendingDown },
+  { to: '/reports/stock-levels', label: 'Stock Levels', icon: PackageOpen },
+  { to: '/reports/purchases', label: 'Purchase History', icon: ShoppingCart },
 ];
 
 /* ── Sub-item link ── */
 const SubLink = ({ to, label, icon: Icon, end = false, onClick }) => (
   <NavLink to={to} end={end} onClick={onClick}
     className={({ isActive }) =>
-      `group flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-150 ${
-        isActive
-          ? 'bg-white/15 text-white font-semibold'
-          : 'text-blue-300/80 hover:bg-white/8 hover:text-white'
+      `group flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-150 ${isActive
+        ? 'bg-white/15 text-white font-semibold'
+        : 'text-blue-300/80 hover:bg-white/8 hover:text-white'
       }`
     }
   >
@@ -66,17 +65,14 @@ const SectionLabel = ({ children, collapsed }) =>
 const CollapsibleNav = ({ label, icon: Icon, isActive, open, onToggle, children, collapsed }) => (
   <div>
     <button onClick={onToggle} title={collapsed ? label : undefined}
-      className={`group w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
-        collapsed ? 'justify-center' : ''
-      } ${
-        isActive
+      className={`group w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${collapsed ? 'justify-center' : ''
+        } ${isActive
           ? 'bg-white/15 text-white shadow-sm ring-1 ring-white/10'
           : 'text-blue-100/80 hover:bg-white/8 hover:text-white'
-      }`}
+        }`}
     >
-      <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all ${
-        isActive ? 'bg-white/20' : 'bg-white/5 group-hover:bg-white/10'
-      }`}>
+      <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all ${isActive ? 'bg-white/20' : 'bg-white/5 group-hover:bg-white/10'
+        }`}>
         <Icon size={15} strokeWidth={2} />
       </span>
       {!collapsed && (
@@ -208,23 +204,20 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
   const location = useLocation();
 
   const onTransactions = location.pathname.startsWith('/transactions');
-  const onReports      = location.pathname.startsWith('/reports');
+  const onReports = location.pathname.startsWith('/reports');
 
-  const [stockOpen,        setStockOpen]        = useState(onTransactions);
-  const [reportOpen,       setReportOpen]        = useState(onReports);
+  const [stockOpen, setStockOpen] = useState(onTransactions);
+  const [reportOpen, setReportOpen] = useState(onReports);
 
   const linkCls = (isActive) =>
-    `group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
-      collapsed ? 'justify-center' : ''
-    } ${
-      isActive
-        ? 'bg-white/15 text-white shadow-sm ring-1 ring-white/10'
-        : 'text-blue-100/80 hover:bg-white/8 hover:text-white'
+    `group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${collapsed ? 'justify-center' : ''
+    } ${isActive
+      ? 'bg-white/15 text-white shadow-sm ring-1 ring-white/10'
+      : 'text-blue-100/80 hover:bg-white/8 hover:text-white'
     }`;
 
   const iconSpan = (isActive) =>
-    `flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all ${
-      isActive ? 'bg-white/20' : 'bg-white/5 group-hover:bg-white/10'
+    `flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all ${isActive ? 'bg-white/20' : 'bg-white/5 group-hover:bg-white/10'
     }`;
 
   const fullLink = (to, Icon, label, end = false) => (
@@ -255,8 +248,8 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
     collapsed ? iconLink(to, Icon, label, end) : fullLink(to, Icon, label, end);
 
   const roleColors = {
-    admin:       'from-amber-400 to-orange-500',
-    manager:     'from-emerald-400 to-teal-500',
+    admin: 'from-amber-400 to-orange-500',
+    manager: 'from-emerald-400 to-teal-500',
     storekeeper: 'from-blue-400 to-indigo-500',
   };
 
@@ -301,7 +294,7 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
           </div>
           {!collapsed && (
             <div>
-              <p className="text-[15px] font-extrabold leading-none text-white tracking-tight">Five Stop</p>
+              <p className="text-[15px] font-extrabold leading-none text-white tracking-tight">Baba Roti  Café</p>
               <p className="text-[10px] text-blue-300/70 mt-0.5 tracking-wide font-medium">Hotel Management</p>
             </div>
           )}
@@ -374,20 +367,17 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
           {(canSeeNav('staffAccounts') || user?.role === 'admin' || user?.role === 'manager') && (
             <NavLink to="/recycle-bin" onClick={onClose} title="Recycle Bin"
               className={({ isActive }) =>
-                `group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
-                  collapsed ? 'justify-center' : ''
-                } ${
-                  isActive
-                    ? 'bg-red-500/20 text-red-300 ring-1 ring-red-500/20'
-                    : 'text-red-400/60 hover:bg-red-500/10 hover:text-red-300'
+                `group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${collapsed ? 'justify-center' : ''
+                } ${isActive
+                  ? 'bg-red-500/20 text-red-300 ring-1 ring-red-500/20'
+                  : 'text-red-400/60 hover:bg-red-500/10 hover:text-red-300'
                 }`
               }
             >
               {({ isActive }) => (
                 <>
-                  <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all ${
-                    isActive ? 'bg-red-500/25' : 'bg-red-500/10 group-hover:bg-red-500/15'
-                  }`}>
+                  <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all ${isActive ? 'bg-red-500/25' : 'bg-red-500/10 group-hover:bg-red-500/15'
+                    }`}>
                     <Trash2 size={14} strokeWidth={2} />
                   </span>
                   {!collapsed && <span className="text-[13px]">Recycle Bin</span>}

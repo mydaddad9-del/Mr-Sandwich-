@@ -18,9 +18,9 @@ const autoSeed = async () => {
   try {
     const User = require('./models/User');
     const defaults = [
-      { name: 'Five Stop Admin', email: 'admin@hotel.com',       password: 'admin123', role: 'admin',       phone: '0918592028' },
-      { name: 'Hotel Manager',   email: 'manager@hotel.com',     password: 'admin123', role: 'manager'      },
-      { name: 'Store Keeper',    email: 'storekeeper@hotel.com', password: 'admin123', role: 'storekeeper'  },
+      { name: 'Baba Roti  CaféAdmin', email: 'admin@hotel.com', password: 'admin123', role: 'admin', phone: '0918592028' },
+      { name: 'Hotel Manager', email: 'manager@hotel.com', password: 'admin123', role: 'manager' },
+      { name: 'Store Keeper', email: 'storekeeper@hotel.com', password: 'admin123', role: 'storekeeper' },
     ];
     for (const u of defaults) {
       const exists = await User.findOne({ email: u.email });
@@ -70,18 +70,18 @@ app.use('/api/settings', require('./routes/settingRoutes'));
 app.use('/api/analytics', require('./routes/analyticsRoutes'));
 app.use('/api/upload', require('./routes/uploadRoutes'));
 app.use('/api/inventory-count', require('./routes/inventoryCountRoutes'));
-app.use('/api/recycle-bin',    require('./routes/recycleBinRoutes'));
-app.use('/api/telegram',      require('./routes/telegramRoutes'));
-app.use('/api/consumption',   require('./routes/consumptionRoutes'));
-app.use('/api/employees',     require('./routes/employeeRoutes'));
+app.use('/api/recycle-bin', require('./routes/recycleBinRoutes'));
+app.use('/api/telegram', require('./routes/telegramRoutes'));
+app.use('/api/consumption', require('./routes/consumptionRoutes'));
+app.use('/api/employees', require('./routes/employeeRoutes'));
 app.use('/api/stock-requests', require('./routes/stockRequestRoutes'));
-app.use('/api/notifications',  require('./routes/notificationRoutes'));
-app.use('/api/ai',             require('./routes/aiRoutes'));
+app.use('/api/notifications', require('./routes/notificationRoutes'));
+app.use('/api/ai', require('./routes/aiRoutes'));
 
 // Serve Frontend in production (for Aletcloud, Render, etc.)
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../client/dist')));
-  
+
   // Exclude /api routes from being caught by the wildcard
   app.get(/^(?!\/api).*/, (req, res) => {
     res.sendFile(path.resolve(__dirname, '../client/dist', 'index.html'));
@@ -107,7 +107,7 @@ if (!process.env.VERCEL) {
     const publicUrl = process.env.PUBLIC_URL;
     if (publicUrl) {
       const https = require('https');
-      const http  = require('http');
+      const http = require('http');
       const INTERVAL = 10 * 60 * 1000; // 10 minutes
 
       setInterval(() => {

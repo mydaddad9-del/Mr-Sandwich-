@@ -54,11 +54,9 @@ const connectDB = async () => {
       );
     }
   };
-
   connectionPromise = attempt();
   return connectionPromise;
 };
-
 // Handle unexpected disconnection — log and attempt reconnect
 mongoose.connection.on('disconnected', () => {
   console.warn('[DB] MongoDB disconnected. Will reconnect on next request.');
@@ -69,5 +67,4 @@ mongoose.connection.on('error', (err) => {
   console.error('[DB] MongoDB error:', err.message);
   connectionPromise = null;
 });
-
 module.exports = connectDB;

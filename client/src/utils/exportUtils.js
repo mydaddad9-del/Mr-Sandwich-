@@ -57,7 +57,7 @@ export function exportToPDF({
   title = 'Inventory Report',
   columns = [],
   data = [],
-  hotelName = 'Nobir Trading Plc Stock / Five Stop',
+  hotelName = 'Baba Roti  Café Plc Stock / Baba Roti  Café',
   summary = null,
 }) {
   if (!data || data.length === 0) {
@@ -81,10 +81,8 @@ export function exportToPDF({
   const theadHtml = columns
     .map(
       (c) =>
-        `<th style="padding: 9px 12px; background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1; text-align: ${
-          c.align || 'left'
-        }; font-size: 11px; font-weight: 700; color: #1e293b; text-transform: uppercase; letter-spacing: 0.5px;">${
-          c.header
+        `<th style="padding: 9px 12px; background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1; text-align: ${c.align || 'left'
+        }; font-size: 11px; font-weight: 700; color: #1e293b; text-transform: uppercase; letter-spacing: 0.5px;">${c.header
         }</th>`
     )
     .join('');
@@ -98,9 +96,8 @@ export function exportToPDF({
             typeof c.accessor === 'function'
               ? c.accessor(row)
               : row[c.accessor] ?? '—';
-          return `<td style="padding: 8px 12px; border-bottom: 1px solid #e2e8f0; text-align: ${
-            c.align || 'left'
-          }; font-size: 11px; color: #334155;">${val}</td>`;
+          return `<td style="padding: 8px 12px; border-bottom: 1px solid #e2e8f0; text-align: ${c.align || 'left'
+            }; font-size: 11px; color: #334155;">${val}</td>`;
         })
         .join('');
       return `<tr style="background-color: ${bg};">${cells}</tr>`;
@@ -110,15 +107,15 @@ export function exportToPDF({
   const summaryHtml = summary
     ? `<div style="display: flex; gap: 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px;">
         ${summary
-          .map(
-            (s) => `
+      .map(
+        (s) => `
           <div>
             <div style="font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 600;">${s.label}</div>
             <div style="font-size: 14px; font-weight: 700; color: #0f172a; margin-top: 2px;">${s.value}</div>
           </div>
         `
-          )
-          .join('')}
+      )
+      .join('')}
       </div>`
     : '';
 
@@ -151,7 +148,7 @@ export function exportToPDF({
           <tbody>${tbodyHtml}</tbody>
         </table>
         <div class="footer">
-          <span>Five Stop Hotel Inventory & Stock Management System</span>
+          <span>Baba Roti  CaféHotel Inventory & Stock Management System</span>
           <span>Confidential Internal Document</span>
         </div>
         <script>

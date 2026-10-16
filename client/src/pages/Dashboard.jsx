@@ -53,7 +53,7 @@ const formatCompactETB = (n) => {
 };
 
 const PIE_COLORS = [
-  '#1a56db', // Five stop blue
+  '#1a56db', // Baba Roti  Caféblue
   '#10b981', // emerald
   '#f59e0b', // amber
   '#8b5cf6', // purple
@@ -137,7 +137,7 @@ const getStoredDashboardData = () => {
   try {
     const raw = localStorage.getItem('five_stop_dash_cache_v1');
     if (raw) return JSON.parse(raw);
-  } catch (e) {}
+  } catch (e) { }
   return null;
 };
 
@@ -158,7 +158,7 @@ export default function Dashboard() {
       setData(res.data);
       try {
         localStorage.setItem('five_stop_dash_cache_v1', JSON.stringify(res.data));
-      } catch (e) {}
+      } catch (e) { }
     } catch (err) {
       console.error('Failed to load dashboard summary', err);
     } finally {
@@ -177,10 +177,10 @@ export default function Dashboard() {
     // Fallback profile matching user diagram when days have 0 recorded movements
     const fallbackProfile = [
       { stockIn: 11, stockOut: 4 }, // Tue
-      { stockIn: 9,  stockOut: 5 }, // Wed
-      { stockIn: 8,  stockOut: 3 }, // Thu
-      { stockIn: 7,  stockOut: 4 }, // Fri
-      { stockIn: 8,  stockOut: 6 }, // Sat
+      { stockIn: 9, stockOut: 5 }, // Wed
+      { stockIn: 8, stockOut: 3 }, // Thu
+      { stockIn: 7, stockOut: 4 }, // Fri
+      { stockIn: 8, stockOut: 6 }, // Sat
       { stockIn: 10, stockOut: 5 }, // Sun
       { stockIn: 15, stockOut: 4 }, // Mon
     ];
@@ -448,11 +448,11 @@ export default function Dashboard() {
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1.5 rounded-lg bg-blue-50 px-2.5 py-1.5 text-[11px] font-bold text-blue-700 border border-blue-100">
                     <ArrowDownCircle size={11} />
-                    {trendData.reduce((s,d) => s + (d.stockIn||0), 0).toLocaleString()} in
+                    {trendData.reduce((s, d) => s + (d.stockIn || 0), 0).toLocaleString()} in
                   </div>
                   <div className="flex items-center gap-1.5 rounded-lg bg-amber-50 px-2.5 py-1.5 text-[11px] font-bold text-amber-700 border border-amber-100">
                     <ArrowUpCircle size={11} />
-                    {trendData.reduce((s,d) => s + (d.stockOut||0), 0).toLocaleString()} out
+                    {trendData.reduce((s, d) => s + (d.stockOut || 0), 0).toLocaleString()} out
                   </div>
                 </div>
 
@@ -460,21 +460,19 @@ export default function Dashboard() {
                 <div className="inline-flex rounded-xl border border-ink-200 bg-ink-50/60 p-0.5 text-xs font-semibold text-ink-600">
                   <button
                     onClick={() => setMovementView('area')}
-                    className={`rounded-lg px-3 py-1.5 transition ${
-                      movementView === 'area'
+                    className={`rounded-lg px-3 py-1.5 transition ${movementView === 'area'
                         ? 'bg-white text-blue-700 shadow-sm'
                         : 'hover:text-ink-900'
-                    }`}
+                      }`}
                   >
                     Area Curve
                   </button>
                   <button
                     onClick={() => setMovementView('bar')}
-                    className={`rounded-lg px-3 py-1.5 transition ${
-                      movementView === 'bar'
+                    className={`rounded-lg px-3 py-1.5 transition ${movementView === 'bar'
                         ? 'bg-white text-blue-700 shadow-sm'
                         : 'hover:text-ink-900'
-                    }`}
+                      }`}
                   >
                     Bar Chart
                   </button>
@@ -937,11 +935,10 @@ export default function Dashboard() {
                   </div>
 
                   <div className="text-right flex-shrink-0">
-                    <span className={`inline-flex items-center gap-1 rounded-xl px-2.5 py-1 text-xs font-bold border ${
-                      isOut
+                    <span className={`inline-flex items-center gap-1 rounded-xl px-2.5 py-1 text-xs font-bold border ${isOut
                         ? 'bg-rose-50 text-rose-700 border-rose-200'
                         : 'bg-amber-50 text-amber-700 border-amber-200'
-                    }`}>
+                      }`}>
                       {m.currentStock} {m.unit}
                     </span>
                   </div>
@@ -993,9 +990,8 @@ export default function Dashboard() {
                 <div key={t._id} className="py-3 flex items-start justify-between gap-3">
                   <div className="flex items-start gap-2.5 min-w-0">
                     <span
-                      className={`mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg ${
-                        isIn ? 'bg-emerald-50 text-emerald-600' : 'bg-ink-100 text-ink-700'
-                      }`}
+                      className={`mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg ${isIn ? 'bg-emerald-50 text-emerald-600' : 'bg-ink-100 text-ink-700'
+                        }`}
                     >
                       {isIn ? <ArrowDownCircle size={16} /> : <ArrowUpCircle size={16} />}
                     </span>

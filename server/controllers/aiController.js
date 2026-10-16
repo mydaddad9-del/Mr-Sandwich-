@@ -1,5 +1,5 @@
 /**
- * AI Controller — Five Stop Stock Management System
+ * AI Controller — Baba Roti  CaféStock Management System
  * ──────────────────────────────────────────────────────────────────
  * Uses Google Gemini 2.5 Flash with live system context from MongoDB.
  * Each request gets a fresh snapshot so the AI always has current data.
@@ -26,8 +26,8 @@ const getGemini = (modelIndex = 0) => {
   return genAI.getGenerativeModel({
     model: MODELS[modelIndex] || MODELS[0],
     generationConfig: {
-      temperature:     0.4,
-      topP:            0.9,
+      temperature: 0.4,
+      topP: 0.9,
       maxOutputTokens: 1024,
     },
   });
@@ -53,7 +53,7 @@ const getFriendlyError = (err) => {
 
 // ── System prompt template ────────────────────────────────────────
 const buildSystemPrompt = (systemContext, userRole) => `
-You are MEGA — Five Stop AI Resource Assistant — an intelligent stock management assistant embedded inside the Five Stop Hotel Stock Management System in Addis Ababa, Ethiopia.
+You are MEGA — Baba Roti  CaféAI Resource Assistant — an intelligent stock management assistant embedded inside the Baba Roti  CaféHotel Stock Management System in Addis Ababa, Ethiopia.
 
 Your job is to help hotel staff understand their stock, identify problems, suggest actions, and answer questions about inventory, purchases, suppliers, consumption, and staff.
 
@@ -128,15 +128,15 @@ const chat = asyncHandler(async (req, res) => {
   // Block sensitive security requests immediately
   if (isSensitiveRequest(message)) {
     return res.json({
-      reply:     SECURITY_REFUSAL,
+      reply: SECURITY_REFUSAL,
       timestamp: new Date().toISOString(),
-      model:     MODELS[0],
+      model: MODELS[0],
     });
   }
 
   // Build live system context for this user's role
   const systemContext = await buildSystemContext(req.user?.role || 'storekeeper');
-  const systemPrompt  = buildSystemPrompt(systemContext, req.user?.role || 'storekeeper');
+  const systemPrompt = buildSystemPrompt(systemContext, req.user?.role || 'storekeeper');
 
   // Try primary model, fall back to lite on quota error
   let result;
@@ -145,14 +145,14 @@ const chat = asyncHandler(async (req, res) => {
       const model = getGemini(i);
       const recentHistory = history.slice(-10);
       const geminiHistory = recentHistory.map(turn => ({
-        role:  turn.role === 'assistant' ? 'model' : 'user',
+        role: turn.role === 'assistant' ? 'model' : 'user',
         parts: [{ text: turn.content }],
       }));
 
       const chatSession = model.startChat({
         history: [
-          { role: 'user',  parts: [{ text: systemPrompt }] },
-          { role: 'model', parts: [{ text: 'Understood. I am MEGA, your Five Stop AI Resource Assistant. I have the current system data loaded. How can I help you?' }] },
+          { role: 'user', parts: [{ text: systemPrompt }] },
+          { role: 'model', parts: [{ text: 'Understood. I am MEGA, your Baba Roti  CaféAI Resource Assistant. I have the current system data loaded. How can I help you?' }] },
           ...geminiHistory,
         ],
       });
@@ -165,17 +165,17 @@ const chat = asyncHandler(async (req, res) => {
       if (isQuota && i < MODELS.length - 1) continue;
       // Otherwise return a friendly error
       return res.json({
-        reply:     getFriendlyError(err),
+        reply: getFriendlyError(err),
         timestamp: new Date().toISOString(),
-        model:     MODELS[i],
+        model: MODELS[i],
       });
     }
   }
 
   res.json({
-    reply:     result.response.text(),
+    reply: result.response.text(),
     timestamp: new Date().toISOString(),
-    model:     MODELS[0],
+    model: MODELS[0],
   });
 });
 
@@ -203,9 +203,9 @@ Return ONLY valid JSON, no markdown, no extra text.
 `.trim();
   for (let i = 0; i < MODELS.length; i++) {
     try {
-      const model  = getGemini(i);
+      const model = getGemini(i);
       const result = await model.generateContent(prompt);
-      const raw     = result.response.text().trim();
+      const raw = result.response.text().trim();
       const cleaned = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '');
       return res.json(JSON.parse(cleaned));
     } catch (err) {
@@ -213,9 +213,9 @@ Return ONLY valid JSON, no markdown, no extra text.
       if (isQuota && i < MODELS.length - 1) continue;
       // Fallback silent response on any error
       return res.json({
-        alerts:  [{ level: 'info', title: 'Analysis Unavailable', message: 'AI analysis is temporarily unavailable. Check individual modules for details.', action: 'Review dashboard' }],
+        alerts: [{ level: 'info', title: 'Analysis Unavailable', message: 'AI analysis is temporarily unavailable. Check individual modules for details.', action: 'Review dashboard' }],
         summary: 'System operational',
-        score:   75,
+        score: 75,
       });
     }
   }
@@ -227,9 +227,9 @@ const quickSuggestions = asyncHandler(async (req, res) => {
   const systemContext = await buildSystemContext(req.user?.role || 'storekeeper');
 
   // Parse critical data for dynamic suggestions
-  const hasLowStock   = systemContext.includes('Low Stock') && !systemContext.includes('Low Stock (below reorder): 0');
+  const hasLowStock = systemContext.includes('Low Stock') && !systemContext.includes('Low Stock (below reorder): 0');
   const hasOutOfStock = systemContext.includes('Out of Stock: 0') === false;
-  const hasPending    = systemContext.includes('Pending Requests: 0') === false;
+  const hasPending = systemContext.includes('Pending Requests: 0') === false;
 
   const base = [
     "What is our current stock status?",
@@ -248,8 +248,8 @@ const quickSuggestions = asyncHandler(async (req, res) => {
 
   const dynamic = [];
   if (hasOutOfStock) dynamic.unshift("Which items are completely out of stock?");
-  if (hasLowStock)   dynamic.unshift("Which items are running low and need reordering?");
-  if (hasPending)    dynamic.unshift("What stock requests are waiting for approval?");
+  if (hasLowStock) dynamic.unshift("Which items are running low and need reordering?");
+  if (hasPending) dynamic.unshift("What stock requests are waiting for approval?");
 
   const suggestions = [...new Set([...dynamic, ...base])].slice(0, 12);
   res.json({ suggestions });

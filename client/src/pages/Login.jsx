@@ -6,9 +6,9 @@ import api from '../api/axios';
 
 /* ─── role quick-fill data ─────────────────────────────────────── */
 const ROLES = [
-  { label: 'Admin',       email: 'admin@hotel.com'       },
-  { label: 'Manager',     email: 'manager@hotel.com'     },
-  { label: 'Store Keeper',email: 'storekeeper@hotel.com' },
+  { label: 'Admin', email: 'admin@hotel.com' },
+  { label: 'Manager', email: 'manager@hotel.com' },
+  { label: 'Store Keeper', email: 'storekeeper@hotel.com' },
 ];
 
 /* ─── Starburst / asterisk SVG logo mark ───────────────────────── */
@@ -20,12 +20,12 @@ function Starburst() {
       aria-hidden="true"
     >
       {/* 3 crossing rounded strokes */}
-      <line x1="32" y1="4"  x2="32" y2="60" stroke="white" strokeWidth="7" strokeLinecap="round"/>
-      <line x1="4"  y1="32" x2="60" y2="32" stroke="white" strokeWidth="7" strokeLinecap="round"/>
-      <line x1="10" y1="10" x2="54" y2="54" stroke="white" strokeWidth="7" strokeLinecap="round"/>
-      <line x1="54" y1="10" x2="10" y2="54" stroke="white" strokeWidth="7" strokeLinecap="round"/>
-      <line x1="5"  y1="20" x2="59" y2="44" stroke="white" strokeWidth="5" strokeLinecap="round" opacity="0.5"/>
-      <line x1="5"  y1="44" x2="59" y2="20" stroke="white" strokeWidth="5" strokeLinecap="round" opacity="0.5"/>
+      <line x1="32" y1="4" x2="32" y2="60" stroke="white" strokeWidth="7" strokeLinecap="round" />
+      <line x1="4" y1="32" x2="60" y2="32" stroke="white" strokeWidth="7" strokeLinecap="round" />
+      <line x1="10" y1="10" x2="54" y2="54" stroke="white" strokeWidth="7" strokeLinecap="round" />
+      <line x1="54" y1="10" x2="10" y2="54" stroke="white" strokeWidth="7" strokeLinecap="round" />
+      <line x1="5" y1="20" x2="59" y2="44" stroke="white" strokeWidth="5" strokeLinecap="round" opacity="0.5" />
+      <line x1="5" y1="44" x2="59" y2="20" stroke="white" strokeWidth="5" strokeLinecap="round" opacity="0.5" />
     </svg>
   );
 }
@@ -39,10 +39,10 @@ function CurvedLines() {
       fill="none" xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
     >
-      <ellipse cx="580" cy="80"  rx="340" ry="340" stroke="white" strokeWidth="1.2" opacity="0.14"/>
-      <ellipse cx="580" cy="80"  rx="260" ry="260" stroke="white" strokeWidth="1.2" opacity="0.14"/>
-      <ellipse cx="580" cy="80"  rx="180" ry="180" stroke="white" strokeWidth="1.2" opacity="0.14"/>
-      <ellipse cx="580" cy="80"  rx="100" ry="100" stroke="white" strokeWidth="1.2" opacity="0.14"/>
+      <ellipse cx="580" cy="80" rx="340" ry="340" stroke="white" strokeWidth="1.2" opacity="0.14" />
+      <ellipse cx="580" cy="80" rx="260" ry="260" stroke="white" strokeWidth="1.2" opacity="0.14" />
+      <ellipse cx="580" cy="80" rx="180" ry="180" stroke="white" strokeWidth="1.2" opacity="0.14" />
+      <ellipse cx="580" cy="80" rx="100" ry="100" stroke="white" strokeWidth="1.2" opacity="0.14" />
     </svg>
   );
 }
@@ -93,30 +93,30 @@ const FloatingInput = React.forwardRef(function FloatingInput({
 ═══════════════════════════════════════════════════════════════════ */
 export default function Login() {
   // ── OTP gate state ──────────────────────────────────────────
-  const [step,       setStep]       = useState('phone');  // 'phone' | 'otp' | 'login'
-  const [phone,      setPhone]      = useState('');
-  const [otp,        setOtp]        = useState('');
-  const [otpToken,   setOtpToken]   = useState('');       // short-lived JWT after OTP verified
-  const [userId,     setUserId]     = useState('');
+  const [step, setStep] = useState('phone');  // 'phone' | 'otp' | 'login'
+  const [phone, setPhone] = useState('');
+  const [otp, setOtp] = useState('');
+  const [otpToken, setOtpToken] = useState('');       // short-lived JWT after OTP verified
+  const [userId, setUserId] = useState('');
   const [maskedName, setMaskedName] = useState('');
   const [otpLoading, setOtpLoading] = useState(false);
-  const [otpError,   setOtpError]   = useState('');
+  const [otpError, setOtpError] = useState('');
   const [resendTimer, setResendTimer] = useState(0);       // countdown seconds
 
   // ── Login form state ────────────────────────────────────────
-  const [email,    setEmail]    = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPw,   setShowPw]   = useState(false);
-  const [touched,  setTouched]  = useState({ email: false, password: false });
+  const [showPw, setShowPw] = useState(false);
+  const [touched, setTouched] = useState({ email: false, password: false });
   const [activeRole, setActiveRole] = useState('Admin');
   const [serverError, setServerError] = useState('');
-  const [loading, setLoading]   = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const { login }    = useAuth();
-  const navigate     = useNavigate();
-  const location     = useLocation();
-  const passwordRef  = useRef(null);
-  const otpRefs      = [useRef(), useRef(), useRef(), useRef(), useRef(), useRef()];
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const passwordRef = useRef(null);
+  const otpRefs = [useRef(), useRef(), useRef(), useRef(), useRef(), useRef()];
 
   // ── Resend countdown ────────────────────────────────────────
   React.useEffect(() => {
@@ -168,7 +168,7 @@ export default function Login() {
   };
 
   /* validation */
-  const emailErr    = touched.email    && !email.trim();
+  const emailErr = touched.email && !email.trim();
   const passwordErr = touched.password && !password;
 
   /* ── handlers (unchanged logic) ─────────────────────────────── */
@@ -761,7 +761,7 @@ export default function Login() {
           <div className="login-hero__content">
             <h1 className="login-hero__heading">
               Hello<br />
-              Five Stop!&nbsp;
+              Baba Roti  Café!&nbsp;
               <span className="login-hero__wave" role="img" aria-label="waving hand">👋</span>
             </h1>
             <p className="login-hero__desc">
@@ -772,7 +772,7 @@ export default function Login() {
 
           {/* left footer */}
           <footer className="login-hero__footer">
-            © 2026 Five Stop Hotel &amp; Resort Management SC. All rights reserved.
+            © 2026 Baba Roti  CaféHotel &amp; Resort Management SC. All rights reserved.
           </footer>
         </section>
 
@@ -781,7 +781,7 @@ export default function Login() {
 
           {/* top bar */}
           <div className="login-topbar">
-            <span className="login-wordmark" aria-label="Five Stop">
+            <span className="login-wordmark" aria-label="Baba Roti  Café">
               <span className="login-wordmark__five">Five</span>
               <span className="login-wordmark__stop">Stop</span>
             </span>
@@ -847,7 +847,7 @@ export default function Login() {
                   <h2 className="otp-step__title">Enter OTP</h2>
                   <p className="otp-step__sub">
                     A 6-digit code was sent to <strong>{maskedName ? maskedName + "'s" : 'your'}</strong> Telegram.{' '}
-                    Check <strong>@FivestopBot</strong> and enter the code below.
+                    Check <strong>@Baba Roti  CaféBot</strong> and enter the code below.
                   </p>
 
                   {otpError && (
@@ -858,7 +858,7 @@ export default function Login() {
 
                   <form onSubmit={handleVerifyOtp}>
                     <div className="otp-boxes">
-                      {[0,1,2,3,4,5].map(idx => (
+                      {[0, 1, 2, 3, 4, 5].map(idx => (
                         <input
                           key={idx}
                           ref={otpRefs[idx]}
@@ -873,7 +873,7 @@ export default function Login() {
                             }
                           }}
                           onPaste={e => {
-                            const text = e.clipboardData.getData('text').replace(/\D/g,'').slice(0,6);
+                            const text = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
                             if (text) { setOtp(text); setTimeout(() => otpRefs[Math.min(text.length, 5)]?.current?.focus(), 0); }
                             e.preventDefault();
                           }}
@@ -899,10 +899,10 @@ export default function Login() {
                     {resendTimer > 0
                       ? <span>Resend in {resendTimer}s</span>
                       : <><span>Didn't receive it? </span>
-                          <button type="button" onClick={() => { setStep('phone'); setOtp(''); setOtpError(''); }}>
-                            Go back & resend
-                          </button>
-                        </>
+                        <button type="button" onClick={() => { setStep('phone'); setOtp(''); setOtpError(''); }}>
+                          Go back & resend
+                        </button>
+                      </>
                     }
                   </div>
                 </div>
@@ -1026,7 +1026,7 @@ export default function Login() {
             </div>
             <div className="login-footer__bottom">
               <a
-                href="mailto:support@fivestop.com"
+                href="mailto:support@Baba Roti  Café.com"
                 className="login-footer__support"
               >
                 Contact support

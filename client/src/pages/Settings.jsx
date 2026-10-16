@@ -30,25 +30,25 @@ import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 
 const CAPABILITIES = [
-  { key: 'recordGoods',      label: 'Record Goods Receiving (Cash/Credit GRV)' },
-  { key: 'checkReview',      label: 'Check & Review Transactions (Stage 1)' },
-  { key: 'approveGoods',     label: 'Approve Goods & Vouchers (Stage 2)' },
-  { key: 'postLedger',       label: 'Post Documents to Ledger (Final Stage)' },
+  { key: 'recordGoods', label: 'Record Goods Receiving (Cash/Credit GRV)' },
+  { key: 'checkReview', label: 'Check & Review Transactions (Stage 1)' },
+  { key: 'approveGoods', label: 'Approve Goods & Vouchers (Stage 2)' },
+  { key: 'postLedger', label: 'Post Documents to Ledger (Final Stage)' },
   { key: 'voidTransactions', label: 'Void / Reverse Transactions' },
-  { key: 'viewReports',      label: 'View Financial & Valuation Reports' },
-  { key: 'manageAccounts',   label: 'Manage Staff Accounts & Passwords' },
+  { key: 'viewReports', label: 'View Financial & Valuation Reports' },
+  { key: 'manageAccounts', label: 'Manage Staff Accounts & Passwords' },
 ];
 
 const NAV_ITEMS = [
-  { key: 'dashboard',      label: 'Dashboard' },
-  { key: 'rawMaterials',   label: 'Raw Materials' },
-  { key: 'products',       label: 'Products' },
+  { key: 'dashboard', label: 'Dashboard' },
+  { key: 'rawMaterials', label: 'Raw Materials' },
+  { key: 'products', label: 'Products' },
   { key: 'stockMovements', label: 'Stock Movements' },
-  { key: 'suppliers',      label: 'Suppliers' },
-  { key: 'consumption',    label: 'Consumption' },
-  { key: 'reports',        label: 'Reports' },
-  { key: 'analytics',      label: 'Analytics & P&L' },
-  { key: 'staffAccounts',  label: 'Staff Accounts' },
+  { key: 'suppliers', label: 'Suppliers' },
+  { key: 'consumption', label: 'Consumption' },
+  { key: 'reports', label: 'Reports' },
+  { key: 'analytics', label: 'Analytics & P&L' },
+  { key: 'staffAccounts', label: 'Staff Accounts' },
 ];
 
 export default function Settings() {
@@ -85,8 +85,8 @@ export default function Settings() {
 
   // System settings state (Admin)
   const [systemForm, setSystemForm] = useState({
-    hotelName: 'Five Stop',
-    systemEmail: 'info@fivestop.com',
+    hotelName: 'Baba Roti  Café',
+    systemEmail: 'info@Baba Roti  Café.com',
     phone: '+251 911 000 111',
     address: 'Addis Ababa, Ethiopia',
     currency: 'ETB',
@@ -112,15 +112,15 @@ export default function Settings() {
       manageAccounts: { storekeeper: false, manager: false, admin: true }
     },
     navVisibility: {
-      dashboard:      { storekeeper: true,  manager: true,  admin: true },
-      rawMaterials:   { storekeeper: true,  manager: true,  admin: true },
-      products:       { storekeeper: true,  manager: true,  admin: true },
-      stockMovements: { storekeeper: true,  manager: true,  admin: true },
-      suppliers:      { storekeeper: false, manager: true,  admin: true },
-      consumption:    { storekeeper: true,  manager: true,  admin: true },
-      reports:        { storekeeper: false, manager: true,  admin: true },
-      analytics:      { storekeeper: false, manager: true,  admin: true },
-      staffAccounts:  { storekeeper: false, manager: false, admin: true },
+      dashboard: { storekeeper: true, manager: true, admin: true },
+      rawMaterials: { storekeeper: true, manager: true, admin: true },
+      products: { storekeeper: true, manager: true, admin: true },
+      stockMovements: { storekeeper: true, manager: true, admin: true },
+      suppliers: { storekeeper: false, manager: true, admin: true },
+      consumption: { storekeeper: true, manager: true, admin: true },
+      reports: { storekeeper: false, manager: true, admin: true },
+      analytics: { storekeeper: false, manager: true, admin: true },
+      staffAccounts: { storekeeper: false, manager: false, admin: true },
     },
     notes: '',
   });
@@ -130,25 +130,25 @@ export default function Settings() {
   const [systemError, setSystemError] = useState('');
 
   // Bulk product price adjustment state
-  const [bulkPricePercent, setBulkPricePercent]   = useState('');
+  const [bulkPricePercent, setBulkPricePercent] = useState('');
   const [bulkPriceApplying, setBulkPriceApplying] = useState(false);
-  const [bulkPriceSuccess, setBulkPriceSuccess]   = useState('');
-  const [bulkPriceError, setBulkPriceError]       = useState('');
+  const [bulkPriceSuccess, setBulkPriceSuccess] = useState('');
+  const [bulkPriceError, setBulkPriceError] = useState('');
 
   // Telegram subscribers state (Admin)
-  const [tgSubscribers,   setTgSubscribers]   = useState([]);
-  const [tgLoading,       setTgLoading]       = useState(false);
-  const [tgRemoving,      setTgRemoving]      = useState(null);
-  const [tgSuccess,       setTgSuccess]       = useState('');
-  const [tgError,         setTgError]         = useState('');
+  const [tgSubscribers, setTgSubscribers] = useState([]);
+  const [tgLoading, setTgLoading] = useState(false);
+  const [tgRemoving, setTgRemoving] = useState(null);
+  const [tgSuccess, setTgSuccess] = useState('');
+  const [tgError, setTgError] = useState('');
   // Phone registration inline edit state
-  const [tgEditPhone,     setTgEditPhone]     = useState(null);  // chatId being edited
-  const [tgPhoneVal,      setTgPhoneVal]      = useState('');
-  const [tgPhoneSaving,   setTgPhoneSaving]   = useState(false);
+  const [tgEditPhone, setTgEditPhone] = useState(null);  // chatId being edited
+  const [tgPhoneVal, setTgPhoneVal] = useState('');
+  const [tgPhoneSaving, setTgPhoneSaving] = useState(false);
   // Manual add subscriber modal
-  const [tgAddOpen,       setTgAddOpen]       = useState(false);
-  const [tgAddForm,       setTgAddForm]       = useState({ name: '', phone: '', username: '', chatId: '' });
-  const [tgAddSaving,     setTgAddSaving]     = useState(false);
+  const [tgAddOpen, setTgAddOpen] = useState(false);
+  const [tgAddForm, setTgAddForm] = useState({ name: '', phone: '', username: '', chatId: '' });
+  const [tgAddSaving, setTgAddSaving] = useState(false);
 
   // Sync profile when user updates
   useEffect(() => {
@@ -226,7 +226,8 @@ export default function Settings() {
     } catch (err) {
       setTgError(err.response?.data?.message || 'Failed to register phone.');
     } finally {
-      setTgPhoneSaving(false); }
+      setTgPhoneSaving(false);
+    }
   };
 
   // Handle manually adding a new subscriber
@@ -391,7 +392,7 @@ export default function Settings() {
       } else {
         await refreshPermissions();
       }
-      setSystemSuccess('Five Stop system settings & role permissions saved and activated immediately.');
+      setSystemSuccess('Baba Roti  Cafésystem settings & role permissions saved and activated immediately.');
       setTimeout(() => setSystemSuccess(''), 4000);
     } catch (err) {
       setSystemError(err.response?.data?.message || 'Failed to update system settings.');
@@ -434,7 +435,7 @@ export default function Settings() {
           Account &amp; System Settings
         </h1>
         <p className="text-sm text-ink-400 mt-1">
-          Manage your personal credentials, profile identity, and Five Stop hotel management configurations
+          Manage your personal credentials, profile identity, and Baba Roti  Caféhotel management configurations
         </p>
       </div>
 
@@ -442,22 +443,20 @@ export default function Settings() {
       <div className="flex border-b border-ink-100 space-x-1 sm:space-x-4 overflow-x-auto">
         <button
           onClick={() => setTab('profile')}
-          className={`flex items-center gap-2 border-b-2 px-3.5 py-3 text-sm font-semibold transition whitespace-nowrap ${
-            currentTab === 'profile'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-ink-400 hover:text-ink-700'
-          }`}
+          className={`flex items-center gap-2 border-b-2 px-3.5 py-3 text-sm font-semibold transition whitespace-nowrap ${currentTab === 'profile'
+            ? 'border-blue-600 text-blue-600'
+            : 'border-transparent text-ink-400 hover:text-ink-700'
+            }`}
         >
           <User size={16} /> My Profile
         </button>
 
         <button
           onClick={() => setTab('security')}
-          className={`flex items-center gap-2 border-b-2 px-3.5 py-3 text-sm font-semibold transition whitespace-nowrap ${
-            currentTab === 'security'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-ink-400 hover:text-ink-700'
-          }`}
+          className={`flex items-center gap-2 border-b-2 px-3.5 py-3 text-sm font-semibold transition whitespace-nowrap ${currentTab === 'security'
+            ? 'border-blue-600 text-blue-600'
+            : 'border-transparent text-ink-400 hover:text-ink-700'
+            }`}
         >
           <Shield size={16} /> Security &amp; Password
         </button>
@@ -465,11 +464,10 @@ export default function Settings() {
         {hasRole('admin') && (
           <button
             onClick={() => setTab('system')}
-            className={`flex items-center gap-2 border-b-2 px-3.5 py-3 text-sm font-semibold transition whitespace-nowrap ${
-              currentTab === 'system'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-ink-400 hover:text-ink-700'
-            }`}
+            className={`flex items-center gap-2 border-b-2 px-3.5 py-3 text-sm font-semibold transition whitespace-nowrap ${currentTab === 'system'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-ink-400 hover:text-ink-700'
+              }`}
           >
             <Building size={16} /> Hotel &amp; System Config
           </button>
@@ -477,11 +475,10 @@ export default function Settings() {
 
         <button
           onClick={() => setTab('permissions')}
-          className={`flex items-center gap-2 border-b-2 px-3.5 py-3 text-sm font-semibold transition whitespace-nowrap ${
-            currentTab === 'permissions'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-ink-400 hover:text-ink-700'
-          }`}
+          className={`flex items-center gap-2 border-b-2 px-3.5 py-3 text-sm font-semibold transition whitespace-nowrap ${currentTab === 'permissions'
+            ? 'border-blue-600 text-blue-600'
+            : 'border-transparent text-ink-400 hover:text-ink-700'
+            }`}
         >
           <Layers size={16} /> Role Privileges
         </button>
@@ -489,11 +486,10 @@ export default function Settings() {
         {hasRole('admin') && (
           <button
             onClick={() => setTab('telegram')}
-            className={`flex items-center gap-2 border-b-2 px-3.5 py-3 text-sm font-semibold transition whitespace-nowrap ${
-              currentTab === 'telegram'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-ink-400 hover:text-ink-700'
-            }`}
+            className={`flex items-center gap-2 border-b-2 px-3.5 py-3 text-sm font-semibold transition whitespace-nowrap ${currentTab === 'telegram'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-ink-400 hover:text-ink-700'
+              }`}
           >
             <Send size={16} /> Telegram Subscribers
           </button>
@@ -521,9 +517,8 @@ export default function Settings() {
 
               {/* Upload Badge Button */}
               <label
-                className={`absolute -bottom-1 -right-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-blue-600 text-white shadow-md ring-2 ring-white transition hover:bg-blue-700 hover:scale-105 ${
-                  avatarUploading ? 'animate-pulse pointer-events-none opacity-80' : ''
-                }`}
+                className={`absolute -bottom-1 -right-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-blue-600 text-white shadow-md ring-2 ring-white transition hover:bg-blue-700 hover:scale-105 ${avatarUploading ? 'animate-pulse pointer-events-none opacity-80' : ''
+                  }`}
                 title="Upload profile photo"
               >
                 <Camera size={15} />
@@ -578,7 +573,7 @@ export default function Settings() {
               </div>
               <div className="flex justify-between">
                 <span>Enterprise:</span>
-                <span className="font-semibold text-ink-800">Five Stop</span>
+                <span className="font-semibold text-ink-800">Baba Roti  Café</span>
               </div>
               <div className="flex justify-between">
                 <span>Contact Phone:</span>
@@ -773,11 +768,10 @@ export default function Settings() {
                   Session Inactivity &amp; Auto-Logout
                 </h3>
               </div>
-              <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full border ${
-                timeoutMinutes === 0
-                  ? 'bg-slate-100 text-slate-600 border-slate-300'
-                  : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-              }`}>
+              <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full border ${timeoutMinutes === 0
+                ? 'bg-slate-100 text-slate-600 border-slate-300'
+                : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                }`}>
                 {timeoutMinutes === 0 ? 'Auto-Logout: Disabled' : `Active Policy: ${timeoutMinutes} min idle`}
               </span>
             </div>
@@ -809,11 +803,10 @@ export default function Settings() {
                           setSessionTimeoutSuccess(`Session timeout updated to ${opt.label}.`);
                           setTimeout(() => setSessionTimeoutSuccess(''), 3500);
                         }}
-                        className={`flex items-center justify-between p-3 rounded-xl border text-left transition ${
-                          isSelected
-                            ? 'border-blue-600 bg-blue-50/70 text-blue-900 ring-1 ring-blue-500'
-                            : 'border-ink-200 bg-white text-ink-700 hover:border-ink-300 hover:bg-ink-50/50'
-                        }`}
+                        className={`flex items-center justify-between p-3 rounded-xl border text-left transition ${isSelected
+                          ? 'border-blue-600 bg-blue-50/70 text-blue-900 ring-1 ring-blue-500'
+                          : 'border-ink-200 bg-white text-ink-700 hover:border-ink-300 hover:bg-ink-50/50'
+                          }`}
                       >
                         <div>
                           <p className="text-xs font-bold leading-tight">{opt.label}</p>
@@ -821,8 +814,8 @@ export default function Settings() {
                             {opt.value === 0
                               ? 'Remain logged in indefinitely'
                               : opt.value === 2
-                              ? 'Recommended security standard'
-                              : `Signs out after ${opt.value} minutes idle`}
+                                ? 'Recommended security standard'
+                                : `Signs out after ${opt.value} minutes idle`}
                           </p>
                         </div>
                         {isSelected && (
@@ -856,496 +849,493 @@ export default function Settings() {
       {/* ── Tab 3: Hotel & System Config (Admin Only) ── */}
       {currentTab === 'system' && hasRole('admin') && (
         <div className="space-y-6">
-        <Card className="max-w-3xl">
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center gap-2">
-              <span className="rounded-lg bg-brass-100 p-1.5 text-brass-700">
-                <Building size={16} />
+          <Card className="max-w-3xl">
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-2">
+                <span className="rounded-lg bg-brass-100 p-1.5 text-brass-700">
+                  <Building size={16} />
+                </span>
+                <h3 className="font-display text-base font-bold text-ink-900">
+                  Hotel &amp; Inventory Parameters
+                </h3>
+              </div>
+              <span className="rounded-full bg-brass-50 border border-brass-200 px-2.5 py-0.5 text-xs font-bold text-brass-800">
+                Admin Exclusive
               </span>
-              <h3 className="font-display text-base font-bold text-ink-900">
-                Hotel &amp; Inventory Parameters
-              </h3>
             </div>
-            <span className="rounded-full bg-brass-50 border border-brass-200 px-2.5 py-0.5 text-xs font-bold text-brass-800">
-              Admin Exclusive
-            </span>
-          </div>
-          <p className="text-xs text-ink-400 mb-6">
-            Configure hotel branding, currency symbols, and default stock safety thresholds
-          </p>
-
-          {systemSuccess && (
-            <div className="mb-4 flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-700">
-              <CheckCircle2 size={16} className="flex-shrink-0" />
-              <span>{systemSuccess}</span>
-            </div>
-          )}
-          {systemError && (
-            <div className="mb-4 flex items-center gap-2 rounded-xl bg-red-50 border border-red-200 p-3 text-xs text-red-600">
-              <AlertCircle size={16} className="flex-shrink-0" />
-              <span>{systemError}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleSystemSubmit} className="space-y-5">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <label className="block text-xs font-semibold text-ink-700 mb-1">
-                  Hotel / Brand Name
-                </label>
-                <div className="relative">
-                  <Building size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-300" />
-                  <input
-                    type="text"
-                    required
-                    value={systemForm.hotelName}
-                    onChange={(e) => setSystemForm({ ...systemForm, hotelName: e.target.value })}
-                    className="w-full rounded-xl border border-ink-200 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-blue-500"
-                    placeholder="Five Stop"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-ink-700 mb-1">
-                  Currency Symbol / Code
-                </label>
-                <div className="relative">
-                  <Coins size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-300" />
-                  <input
-                    type="text"
-                    required
-                    value={systemForm.currency}
-                    onChange={(e) => setSystemForm({ ...systemForm, currency: e.target.value })}
-                    className="w-full rounded-xl border border-ink-200 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-blue-500"
-                    placeholder="ETB"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-ink-700 mb-1">
-                  Official Contact Email
-                </label>
-                <div className="relative">
-                  <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-300" />
-                  <input
-                    type="email"
-                    value={systemForm.systemEmail}
-                    onChange={(e) => setSystemForm({ ...systemForm, systemEmail: e.target.value })}
-                    className="w-full rounded-xl border border-ink-200 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-blue-500"
-                    placeholder="info@fivestop.com"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-ink-700 mb-1">
-                  Official Phone
-                </label>
-                <div className="relative">
-                  <Phone size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-300" />
-                  <input
-                    type="text"
-                    value={systemForm.phone}
-                    onChange={(e) => setSystemForm({ ...systemForm, phone: e.target.value })}
-                    className="w-full rounded-xl border border-ink-200 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-blue-500"
-                    placeholder="+251 911 000 111"
-                  />
-                </div>
-              </div>
-
-              <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-ink-700 mb-1">
-                  Physical Address / Location
-                </label>
-                <div className="relative">
-                  <MapPin size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-300" />
-                  <input
-                    type="text"
-                    value={systemForm.address}
-                    onChange={(e) => setSystemForm({ ...systemForm, address: e.target.value })}
-                    className="w-full rounded-xl border border-ink-200 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-blue-500"
-                    placeholder="Addis Ababa, Ethiopia"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-ink-700 mb-1">
-                  Default Low Stock Safety Threshold (Units)
-                </label>
-                <input
-                  type="number"
-                  min={1}
-                  value={systemForm.lowStockThresholdDefault}
-                  onChange={(e) => setSystemForm({ ...systemForm, lowStockThresholdDefault: Number(e.target.value) })}
-                  className="w-full rounded-xl border border-ink-200 py-2.5 px-3 text-sm outline-none focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-ink-700 mb-1">
-                  Applicable VAT / Tax Rate (%)
-                </label>
-                <input
-                  type="number"
-                  min={0}
-                  max={100}
-                  value={systemForm.taxRate}
-                  onChange={(e) => setSystemForm({ ...systemForm, taxRate: Number(e.target.value) })}
-                  className="w-full rounded-xl border border-ink-200 py-2.5 px-3 text-sm outline-none focus:border-blue-500"
-                />
-              </div>
-            </div>
-
-            {/* Toggles */}
-            <div className="space-y-3 pt-2 border-t border-ink-100">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={systemForm.autoGenerateVoucherNo}
-                  onChange={(e) => setSystemForm({ ...systemForm, autoGenerateVoucherNo: e.target.checked })}
-                  className="h-4 w-4 rounded border-ink-300 text-blue-600 focus:ring-blue-500"
-                />
-                <div>
-                  <p className="text-xs font-semibold text-ink-900">Auto-generate Voucher Numbers</p>
-                  <p className="text-[11px] text-ink-400">Automatically creates serial voucher codes (e.g. CGRV-2026-001) if left blank</p>
-                </div>
-              </label>
-
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={systemForm.allowNegativeStock}
-                  onChange={(e) => setSystemForm({ ...systemForm, allowNegativeStock: e.target.checked })}
-                  className="h-4 w-4 rounded border-ink-300 text-blue-600 focus:ring-blue-500"
-                />
-                <div>
-                  <p className="text-xs font-semibold text-ink-900">Permit Negative Stock Quantities</p>
-                  <p className="text-[11px] text-ink-400">Allows issuing or disposing stock even when logged balance is below zero</p>
-                </div>
-              </label>
-            </div>
-
-            <div className="pt-3 flex justify-end">
-              <Button type="submit" disabled={systemSaving} className="bg-blue-600 hover:bg-blue-700 text-white">
-                <Save size={15} /> {systemSaving ? 'Saving Settings…' : 'Save Hotel Settings'}
-              </Button>
-            </div>
-          </form>
-        </Card>
-
-        {/* ── Pricing & Cost Parameters Card ── */}
-        <Card className="mt-6 max-w-3xl">
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center gap-2">
-              <span className="rounded-lg bg-emerald-50 p-1.5 text-emerald-600">
-                <Coins size={16} />
-              </span>
-              <h3 className="font-display text-base font-bold text-ink-900">Pricing &amp; Cost Parameters</h3>
-            </div>
-            <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[11px] font-bold text-amber-700">Admin Exclusive</span>
-          </div>
-          <p className="text-xs text-ink-400 mb-6">
-            Configure contingency, overhead, food cost %, and raw material price adjustments. These are applied automatically when calculating recipe costs and suggested selling prices on all products.
-          </p>
-
-          {/* Live Preview */}
-          {(() => {
-            const adjType  = systemForm.rawMaterialPriceAdjustType;
-            const adjVal   = Number(systemForm.rawMaterialPriceAdjustValue) || 0;
-            const cont     = Number(systemForm.contingencyPercent) || 0;
-            const ovhd     = Number(systemForm.overheadPercent) || 0;
-            const fc       = Math.max(Number(systemForm.defaultFoodCostPercent) || 30, 1);
-            // Example: raw material cost = 357.90 ETB (from the screenshot)
-            const exampleRaw = 357.90;
-            const adjCost  = adjType === 'percent'
-              ? exampleRaw * (1 + adjVal / 100)
-              : exampleRaw + adjVal;
-            const withCont = adjCost * (1 + cont / 100);
-            const total    = withCont * (1 + ovhd / 100);
-            const selling  = total / (fc / 100);
-            const fmt = (n) => `ETB ${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
-            return (
-              <div className="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-teal-50 p-4 mb-6">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 mb-3">Live Preview (example: {fmt(exampleRaw)} raw material cost)</p>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6 text-xs">
-                  {[
-                    { label: 'Adjusted Cost',        value: fmt(adjCost),   color: 'text-ink-700' },
-                    { label: `+ Contingency ${cont}%`, value: fmt(withCont - adjCost), color: 'text-amber-600' },
-                    { label: 'After Contingency',    value: fmt(withCont),  color: 'text-ink-700' },
-                    { label: `+ Overhead ${ovhd}%`,  value: fmt(total - withCont), color: 'text-violet-600' },
-                    { label: 'Total Cost',            value: fmt(total),     color: 'text-ink-900 font-black' },
-                    { label: `Selling @ ${fc}% FC`,  value: fmt(selling),   color: 'text-emerald-700 font-black' },
-                  ].map(({ label, value, color }) => (
-                    <div key={label} className="rounded-xl bg-white border border-emerald-100 px-3 py-2 text-center">
-                      <p className="text-[10px] text-ink-400 mb-0.5">{label}</p>
-                      <p className={`font-bold ${color}`}>{value}</p>
-                    </div>
-                  ))}
-                </div>
-                {/* Selling price at all benchmarks */}
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {[30, 35, 40, 50].map(pct => (
-                    <span key={pct} className="rounded-lg bg-white border border-emerald-200 px-2.5 py-1 text-[11px] font-semibold text-emerald-800">
-                      Food cost {pct}% → Sell at {fmt(total / (pct / 100))}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            );
-          })()}
-
-          <form onSubmit={handleSystemSubmit} className="space-y-5">
-            {/* Raw Material Price Adjustment */}
-            <div className="rounded-2xl border border-ink-100 bg-ink-50/30 p-4 space-y-3">
-              <p className="text-xs font-bold text-ink-800">Raw Material Price Adjustment</p>
-              <p className="text-[11px] text-ink-400">Apply a global adjustment to all raw material unit costs before calculating recipe costs. Use this to simulate future price increases.</p>
-              <div className="flex items-center gap-3">
-                <div className="flex rounded-xl border border-ink-200 overflow-hidden">
-                  {[
-                    { val: 'percent', label: '% Percent' },
-                    { val: 'fixed',   label: 'ETB Fixed' },
-                  ].map(opt => (
-                    <button
-                      key={opt.val}
-                      type="button"
-                      onClick={() => setSystemForm(p => ({ ...p, rawMaterialPriceAdjustType: opt.val }))}
-                      className={`px-4 py-2 text-xs font-semibold transition ${
-                        systemForm.rawMaterialPriceAdjustType === opt.val
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-white text-ink-600 hover:bg-ink-50'
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-                <div className="relative flex-1 max-w-[160px]">
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={systemForm.rawMaterialPriceAdjustValue}
-                    onChange={e => setSystemForm(p => ({ ...p, rawMaterialPriceAdjustValue: e.target.value }))}
-                    className="w-full rounded-xl border border-ink-200 py-2.5 pl-3 pr-10 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                    placeholder="0"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-ink-400">
-                    {systemForm.rawMaterialPriceAdjustType === 'percent' ? '%' : 'ETB'}
-                  </span>
-                </div>
-                {Number(systemForm.rawMaterialPriceAdjustValue) > 0 && (
-                  <span className="text-[11px] font-semibold text-amber-600 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-lg">
-                    {systemForm.rawMaterialPriceAdjustType === 'percent'
-                      ? `+${systemForm.rawMaterialPriceAdjustValue}% on all material costs`
-                      : `+ETB ${systemForm.rawMaterialPriceAdjustValue} per unit`}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Contingency & Overhead */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <label className="block text-xs font-bold text-ink-700 mb-1.5">
-                  Contingency % <span className="font-normal text-ink-400">(waste, spoilage, price buffer)</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    step="0.1"
-                    value={systemForm.contingencyPercent}
-                    onChange={e => setSystemForm(p => ({ ...p, contingencyPercent: e.target.value }))}
-                    className="w-full rounded-xl border border-ink-200 py-2.5 pl-3 pr-10 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                    placeholder="10"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-amber-500">%</span>
-                </div>
-                <p className="text-[10px] text-ink-400 mt-1">Added to raw material cost. Industry standard: 5–15%</p>
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-ink-700 mb-1.5">
-                  Overhead % <span className="font-normal text-ink-400">(electricity, labour, equipment)</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    step="0.1"
-                    value={systemForm.overheadPercent}
-                    onChange={e => setSystemForm(p => ({ ...p, overheadPercent: e.target.value }))}
-                    className="w-full rounded-xl border border-ink-200 py-2.5 pl-3 pr-10 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                    placeholder="25"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-violet-500">%</span>
-                </div>
-                <p className="text-[10px] text-ink-400 mt-1">Applied after contingency. Industry standard: 20–30%</p>
-              </div>
-            </div>
-
-            {/* Default Food Cost % */}
-            <div>
-              <label className="block text-xs font-bold text-ink-700 mb-1.5">
-                Default Food Cost % <span className="font-normal text-ink-400">(used to calculate suggested selling price)</span>
-              </label>
-              <div className="flex items-center gap-4">
-                <div className="relative w-48">
-                  <input
-                    type="number"
-                    min="1"
-                    max="100"
-                    step="1"
-                    value={systemForm.defaultFoodCostPercent}
-                    onChange={e => setSystemForm(p => ({ ...p, defaultFoodCostPercent: e.target.value }))}
-                    className="w-full rounded-xl border border-ink-200 py-2.5 pl-3 pr-10 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                    placeholder="30"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-emerald-600">%</span>
-                </div>
-                <div className="flex gap-2">
-                  {[25, 30, 35, 40].map(pct => (
-                    <button
-                      key={pct}
-                      type="button"
-                      onClick={() => setSystemForm(p => ({ ...p, defaultFoodCostPercent: pct }))}
-                      className={`rounded-lg px-3 py-1.5 text-xs font-bold transition border ${
-                        Number(systemForm.defaultFoodCostPercent) === pct
-                          ? 'bg-emerald-600 text-white border-emerald-600'
-                          : 'bg-white text-ink-600 border-ink-200 hover:border-emerald-400 hover:text-emerald-700'
-                      }`}
-                    >
-                      {pct}%
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <p className="text-[10px] text-ink-400 mt-1">
-                If total cost = ETB 492, at 30% food cost → suggested price = ETB 1,640. Industry standard: 28–35%
-              </p>
-            </div>
+            <p className="text-xs text-ink-400 mb-6">
+              Configure hotel branding, currency symbols, and default stock safety thresholds
+            </p>
 
             {systemSuccess && (
-              <div className="flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-700">
-                <CheckCircle2 size={14} className="flex-shrink-0" /> {systemSuccess}
+              <div className="mb-4 flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-700">
+                <CheckCircle2 size={16} className="flex-shrink-0" />
+                <span>{systemSuccess}</span>
               </div>
             )}
             {systemError && (
-              <div className="flex items-center gap-2 rounded-xl bg-red-50 border border-red-200 p-3 text-xs text-red-700">
-                <AlertCircle size={14} className="flex-shrink-0" /> {systemError}
+              <div className="mb-4 flex items-center gap-2 rounded-xl bg-red-50 border border-red-200 p-3 text-xs text-red-600">
+                <AlertCircle size={16} className="flex-shrink-0" />
+                <span>{systemError}</span>
               </div>
             )}
 
-            {/* ── Bulk Product Selling Price Adjustment ── */}
-            <div className="rounded-2xl overflow-hidden border border-blue-100">
-              {/* Header */}
-              <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-blue-600 to-indigo-600">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/20">
-                    <Sparkles size={18} className="text-white" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-black text-white">Bulk Product Price Increase</p>
-                    <p className="text-[11px] text-blue-200">Apply a % increase to all product selling prices at once</p>
+            <form onSubmit={handleSystemSubmit} className="space-y-5">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="block text-xs font-semibold text-ink-700 mb-1">
+                    Hotel / Brand Name
+                  </label>
+                  <div className="relative">
+                    <Building size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-300" />
+                    <input
+                      type="text"
+                      required
+                      value={systemForm.hotelName}
+                      onChange={(e) => setSystemForm({ ...systemForm, hotelName: e.target.value })}
+                      className="w-full rounded-xl border border-ink-200 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-blue-500"
+                      placeholder="Baba Roti  Café"
+                    />
                   </div>
                 </div>
-                <span className="rounded-full bg-white/20 px-3 py-1 text-[11px] font-bold text-white">Permanent Action</span>
+
+                <div>
+                  <label className="block text-xs font-semibold text-ink-700 mb-1">
+                    Currency Symbol / Code
+                  </label>
+                  <div className="relative">
+                    <Coins size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-300" />
+                    <input
+                      type="text"
+                      required
+                      value={systemForm.currency}
+                      onChange={(e) => setSystemForm({ ...systemForm, currency: e.target.value })}
+                      className="w-full rounded-xl border border-ink-200 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-blue-500"
+                      placeholder="ETB"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-ink-700 mb-1">
+                    Official Contact Email
+                  </label>
+                  <div className="relative">
+                    <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-300" />
+                    <input
+                      type="email"
+                      value={systemForm.systemEmail}
+                      onChange={(e) => setSystemForm({ ...systemForm, systemEmail: e.target.value })}
+                      className="w-full rounded-xl border border-ink-200 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-blue-500"
+                      placeholder="info@Baba Roti  Café.com"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-ink-700 mb-1">
+                    Official Phone
+                  </label>
+                  <div className="relative">
+                    <Phone size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-300" />
+                    <input
+                      type="text"
+                      value={systemForm.phone}
+                      onChange={(e) => setSystemForm({ ...systemForm, phone: e.target.value })}
+                      className="w-full rounded-xl border border-ink-200 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-blue-500"
+                      placeholder="+251 911 000 111"
+                    />
+                  </div>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold text-ink-700 mb-1">
+                    Physical Address / Location
+                  </label>
+                  <div className="relative">
+                    <MapPin size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-300" />
+                    <input
+                      type="text"
+                      value={systemForm.address}
+                      onChange={(e) => setSystemForm({ ...systemForm, address: e.target.value })}
+                      className="w-full rounded-xl border border-ink-200 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-blue-500"
+                      placeholder="Addis Ababa, Ethiopia"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-ink-700 mb-1">
+                    Default Low Stock Safety Threshold (Units)
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={systemForm.lowStockThresholdDefault}
+                    onChange={(e) => setSystemForm({ ...systemForm, lowStockThresholdDefault: Number(e.target.value) })}
+                    className="w-full rounded-xl border border-ink-200 py-2.5 px-3 text-sm outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-ink-700 mb-1">
+                    Applicable VAT / Tax Rate (%)
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={systemForm.taxRate}
+                    onChange={(e) => setSystemForm({ ...systemForm, taxRate: Number(e.target.value) })}
+                    className="w-full rounded-xl border border-ink-200 py-2.5 px-3 text-sm outline-none focus:border-blue-500"
+                  />
+                </div>
               </div>
 
-              <div className="p-5 space-y-4 bg-blue-50/30">
-                <p className="text-xs text-ink-600">
-                  Use this when your menu prices need to increase across the board — for example, a 10% price rise due to inflation.
-                  This <strong>permanently updates</strong> the selling price stored on every active product.
-                </p>
+              {/* Toggles */}
+              <div className="space-y-3 pt-2 border-t border-ink-100">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={systemForm.autoGenerateVoucherNo}
+                    onChange={(e) => setSystemForm({ ...systemForm, autoGenerateVoucherNo: e.target.checked })}
+                    className="h-4 w-4 rounded border-ink-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <div>
+                    <p className="text-xs font-semibold text-ink-900">Auto-generate Voucher Numbers</p>
+                    <p className="text-[11px] text-ink-400">Automatically creates serial voucher codes (e.g. CGRV-2026-001) if left blank</p>
+                  </div>
+                </label>
 
-                {/* Input row */}
-                <div className="flex items-center gap-3 flex-wrap">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={systemForm.allowNegativeStock}
+                    onChange={(e) => setSystemForm({ ...systemForm, allowNegativeStock: e.target.checked })}
+                    className="h-4 w-4 rounded border-ink-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <div>
+                    <p className="text-xs font-semibold text-ink-900">Permit Negative Stock Quantities</p>
+                    <p className="text-[11px] text-ink-400">Allows issuing or disposing stock even when logged balance is below zero</p>
+                  </div>
+                </label>
+              </div>
+
+              <div className="pt-3 flex justify-end">
+                <Button type="submit" disabled={systemSaving} className="bg-blue-600 hover:bg-blue-700 text-white">
+                  <Save size={15} /> {systemSaving ? 'Saving Settings…' : 'Save Hotel Settings'}
+                </Button>
+              </div>
+            </form>
+          </Card>
+
+          {/* ── Pricing & Cost Parameters Card ── */}
+          <Card className="mt-6 max-w-3xl">
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-2">
+                <span className="rounded-lg bg-emerald-50 p-1.5 text-emerald-600">
+                  <Coins size={16} />
+                </span>
+                <h3 className="font-display text-base font-bold text-ink-900">Pricing &amp; Cost Parameters</h3>
+              </div>
+              <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[11px] font-bold text-amber-700">Admin Exclusive</span>
+            </div>
+            <p className="text-xs text-ink-400 mb-6">
+              Configure contingency, overhead, food cost %, and raw material price adjustments. These are applied automatically when calculating recipe costs and suggested selling prices on all products.
+            </p>
+
+            {/* Live Preview */}
+            {(() => {
+              const adjType = systemForm.rawMaterialPriceAdjustType;
+              const adjVal = Number(systemForm.rawMaterialPriceAdjustValue) || 0;
+              const cont = Number(systemForm.contingencyPercent) || 0;
+              const ovhd = Number(systemForm.overheadPercent) || 0;
+              const fc = Math.max(Number(systemForm.defaultFoodCostPercent) || 30, 1);
+              // Example: raw material cost = 357.90 ETB (from the screenshot)
+              const exampleRaw = 357.90;
+              const adjCost = adjType === 'percent'
+                ? exampleRaw * (1 + adjVal / 100)
+                : exampleRaw + adjVal;
+              const withCont = adjCost * (1 + cont / 100);
+              const total = withCont * (1 + ovhd / 100);
+              const selling = total / (fc / 100);
+              const fmt = (n) => `ETB ${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+              return (
+                <div className="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-teal-50 p-4 mb-6">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 mb-3">Live Preview (example: {fmt(exampleRaw)} raw material cost)</p>
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6 text-xs">
+                    {[
+                      { label: 'Adjusted Cost', value: fmt(adjCost), color: 'text-ink-700' },
+                      { label: `+ Contingency ${cont}%`, value: fmt(withCont - adjCost), color: 'text-amber-600' },
+                      { label: 'After Contingency', value: fmt(withCont), color: 'text-ink-700' },
+                      { label: `+ Overhead ${ovhd}%`, value: fmt(total - withCont), color: 'text-violet-600' },
+                      { label: 'Total Cost', value: fmt(total), color: 'text-ink-900 font-black' },
+                      { label: `Selling @ ${fc}% FC`, value: fmt(selling), color: 'text-emerald-700 font-black' },
+                    ].map(({ label, value, color }) => (
+                      <div key={label} className="rounded-xl bg-white border border-emerald-100 px-3 py-2 text-center">
+                        <p className="text-[10px] text-ink-400 mb-0.5">{label}</p>
+                        <p className={`font-bold ${color}`}>{value}</p>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Selling price at all benchmarks */}
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {[30, 35, 40, 50].map(pct => (
+                      <span key={pct} className="rounded-lg bg-white border border-emerald-200 px-2.5 py-1 text-[11px] font-semibold text-emerald-800">
+                        Food cost {pct}% → Sell at {fmt(total / (pct / 100))}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+
+            <form onSubmit={handleSystemSubmit} className="space-y-5">
+              {/* Raw Material Price Adjustment */}
+              <div className="rounded-2xl border border-ink-100 bg-ink-50/30 p-4 space-y-3">
+                <p className="text-xs font-bold text-ink-800">Raw Material Price Adjustment</p>
+                <p className="text-[11px] text-ink-400">Apply a global adjustment to all raw material unit costs before calculating recipe costs. Use this to simulate future price increases.</p>
+                <div className="flex items-center gap-3">
+                  <div className="flex rounded-xl border border-ink-200 overflow-hidden">
+                    {[
+                      { val: 'percent', label: '% Percent' },
+                      { val: 'fixed', label: 'ETB Fixed' },
+                    ].map(opt => (
+                      <button
+                        key={opt.val}
+                        type="button"
+                        onClick={() => setSystemForm(p => ({ ...p, rawMaterialPriceAdjustType: opt.val }))}
+                        className={`px-4 py-2 text-xs font-semibold transition ${systemForm.rawMaterialPriceAdjustType === opt.val
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-white text-ink-600 hover:bg-ink-50'
+                          }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="relative flex-1 max-w-[160px]">
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={systemForm.rawMaterialPriceAdjustValue}
+                      onChange={e => setSystemForm(p => ({ ...p, rawMaterialPriceAdjustValue: e.target.value }))}
+                      className="w-full rounded-xl border border-ink-200 py-2.5 pl-3 pr-10 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      placeholder="0"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-ink-400">
+                      {systemForm.rawMaterialPriceAdjustType === 'percent' ? '%' : 'ETB'}
+                    </span>
+                  </div>
+                  {Number(systemForm.rawMaterialPriceAdjustValue) > 0 && (
+                    <span className="text-[11px] font-semibold text-amber-600 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-lg">
+                      {systemForm.rawMaterialPriceAdjustType === 'percent'
+                        ? `+${systemForm.rawMaterialPriceAdjustValue}% on all material costs`
+                        : `+ETB ${systemForm.rawMaterialPriceAdjustValue} per unit`}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Contingency & Overhead */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="block text-xs font-bold text-ink-700 mb-1.5">
+                    Contingency % <span className="font-normal text-ink-400">(waste, spoilage, price buffer)</span>
+                  </label>
                   <div className="relative">
                     <input
                       type="number"
-                      min="0.01"
-                      max="500"
+                      min="0"
+                      max="100"
                       step="0.1"
-                      value={bulkPricePercent}
-                      onChange={e => { setBulkPricePercent(e.target.value); setBulkPriceError(''); setBulkPriceSuccess(''); }}
-                      placeholder="e.g. 10"
-                      className="w-36 rounded-xl border-2 border-blue-200 bg-white py-2.5 pl-4 pr-10 text-sm font-bold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                      value={systemForm.contingencyPercent}
+                      onChange={e => setSystemForm(p => ({ ...p, contingencyPercent: e.target.value }))}
+                      className="w-full rounded-xl border border-ink-200 py-2.5 pl-3 pr-10 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      placeholder="10"
                     />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-black text-blue-500">%</span>
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-amber-500">%</span>
                   </div>
+                  <p className="text-[10px] text-ink-400 mt-1">Added to raw material cost. Industry standard: 5–15%</p>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-ink-700 mb-1.5">
+                    Overhead % <span className="font-normal text-ink-400">(electricity, labour, equipment)</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.1"
+                      value={systemForm.overheadPercent}
+                      onChange={e => setSystemForm(p => ({ ...p, overheadPercent: e.target.value }))}
+                      className="w-full rounded-xl border border-ink-200 py-2.5 pl-3 pr-10 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      placeholder="25"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-violet-500">%</span>
+                  </div>
+                  <p className="text-[10px] text-ink-400 mt-1">Applied after contingency. Industry standard: 20–30%</p>
+                </div>
+              </div>
 
-                  {/* Live example */}
-                  {Number(bulkPricePercent) > 0 && (
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {[100, 250, 500, 1000].map(ex => (
-                        <div key={ex} className="rounded-xl border border-blue-200 bg-white px-3 py-2 text-center">
-                          <p className="text-[10px] text-ink-400">ETB {ex} →</p>
-                          <p className="text-xs font-black text-blue-700">
-                            ETB {(ex * (1 + Number(bulkPricePercent) / 100)).toFixed(2)}
-                          </p>
-                        </div>
-                      ))}
+              {/* Default Food Cost % */}
+              <div>
+                <label className="block text-xs font-bold text-ink-700 mb-1.5">
+                  Default Food Cost % <span className="font-normal text-ink-400">(used to calculate suggested selling price)</span>
+                </label>
+                <div className="flex items-center gap-4">
+                  <div className="relative w-48">
+                    <input
+                      type="number"
+                      min="1"
+                      max="100"
+                      step="1"
+                      value={systemForm.defaultFoodCostPercent}
+                      onChange={e => setSystemForm(p => ({ ...p, defaultFoodCostPercent: e.target.value }))}
+                      className="w-full rounded-xl border border-ink-200 py-2.5 pl-3 pr-10 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      placeholder="30"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-emerald-600">%</span>
+                  </div>
+                  <div className="flex gap-2">
+                    {[25, 30, 35, 40].map(pct => (
+                      <button
+                        key={pct}
+                        type="button"
+                        onClick={() => setSystemForm(p => ({ ...p, defaultFoodCostPercent: pct }))}
+                        className={`rounded-lg px-3 py-1.5 text-xs font-bold transition border ${Number(systemForm.defaultFoodCostPercent) === pct
+                          ? 'bg-emerald-600 text-white border-emerald-600'
+                          : 'bg-white text-ink-600 border-ink-200 hover:border-emerald-400 hover:text-emerald-700'
+                          }`}
+                      >
+                        {pct}%
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <p className="text-[10px] text-ink-400 mt-1">
+                  If total cost = ETB 492, at 30% food cost → suggested price = ETB 1,640. Industry standard: 28–35%
+                </p>
+              </div>
+
+              {systemSuccess && (
+                <div className="flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-700">
+                  <CheckCircle2 size={14} className="flex-shrink-0" /> {systemSuccess}
+                </div>
+              )}
+              {systemError && (
+                <div className="flex items-center gap-2 rounded-xl bg-red-50 border border-red-200 p-3 text-xs text-red-700">
+                  <AlertCircle size={14} className="flex-shrink-0" /> {systemError}
+                </div>
+              )}
+
+              {/* ── Bulk Product Selling Price Adjustment ── */}
+              <div className="rounded-2xl overflow-hidden border border-blue-100">
+                {/* Header */}
+                <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-blue-600 to-indigo-600">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/20">
+                      <Sparkles size={18} className="text-white" />
                     </div>
-                  )}
+                    <div>
+                      <p className="text-sm font-black text-white">Bulk Product Price Increase</p>
+                      <p className="text-[11px] text-blue-200">Apply a % increase to all product selling prices at once</p>
+                    </div>
+                  </div>
+                  <span className="rounded-full bg-white/20 px-3 py-1 text-[11px] font-bold text-white">Permanent Action</span>
                 </div>
 
-                {/* Quick % buttons */}
-                <div className="flex gap-2 flex-wrap">
-                  <p className="text-[11px] font-semibold text-ink-500 self-center">Quick:</p>
-                  {[5, 10, 15, 20, 25].map(pct => (
-                    <button
-                      key={pct}
-                      type="button"
-                      onClick={() => { setBulkPricePercent(pct); setBulkPriceError(''); }}
-                      className={`rounded-lg px-3 py-1.5 text-xs font-bold border transition ${
-                        Number(bulkPricePercent) === pct
+                <div className="p-5 space-y-4 bg-blue-50/30">
+                  <p className="text-xs text-ink-600">
+                    Use this when your menu prices need to increase across the board — for example, a 10% price rise due to inflation.
+                    This <strong>permanently updates</strong> the selling price stored on every active product.
+                  </p>
+
+                  {/* Input row */}
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <div className="relative">
+                      <input
+                        type="number"
+                        min="0.01"
+                        max="500"
+                        step="0.1"
+                        value={bulkPricePercent}
+                        onChange={e => { setBulkPricePercent(e.target.value); setBulkPriceError(''); setBulkPriceSuccess(''); }}
+                        placeholder="e.g. 10"
+                        className="w-36 rounded-xl border-2 border-blue-200 bg-white py-2.5 pl-4 pr-10 text-sm font-bold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-black text-blue-500">%</span>
+                    </div>
+
+                    {/* Live example */}
+                    {Number(bulkPricePercent) > 0 && (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {[100, 250, 500, 1000].map(ex => (
+                          <div key={ex} className="rounded-xl border border-blue-200 bg-white px-3 py-2 text-center">
+                            <p className="text-[10px] text-ink-400">ETB {ex} →</p>
+                            <p className="text-xs font-black text-blue-700">
+                              ETB {(ex * (1 + Number(bulkPricePercent) / 100)).toFixed(2)}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Quick % buttons */}
+                  <div className="flex gap-2 flex-wrap">
+                    <p className="text-[11px] font-semibold text-ink-500 self-center">Quick:</p>
+                    {[5, 10, 15, 20, 25].map(pct => (
+                      <button
+                        key={pct}
+                        type="button"
+                        onClick={() => { setBulkPricePercent(pct); setBulkPriceError(''); }}
+                        className={`rounded-lg px-3 py-1.5 text-xs font-bold border transition ${Number(bulkPricePercent) === pct
                           ? 'bg-blue-600 text-white border-blue-600'
                           : 'bg-white text-ink-600 border-ink-200 hover:border-blue-400 hover:text-blue-700'
-                      }`}
-                    >
-                      +{pct}%
-                    </button>
-                  ))}
+                          }`}
+                      >
+                        +{pct}%
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Feedback */}
+                  {bulkPriceSuccess && (
+                    <div className="flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-xs font-semibold text-emerald-700">
+                      <CheckCircle2 size={14} className="flex-shrink-0" /> {bulkPriceSuccess}
+                    </div>
+                  )}
+                  {bulkPriceError && (
+                    <div className="flex items-center gap-2 rounded-xl bg-red-50 border border-red-200 p-3 text-xs font-semibold text-red-700">
+                      <AlertCircle size={14} className="flex-shrink-0" /> {bulkPriceError}
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={handleBulkPriceApply}
+                    disabled={bulkPriceApplying || !Number(bulkPricePercent)}
+                    className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-700 transition disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+                  >
+                    {bulkPriceApplying
+                      ? <><Sparkles size={15} className="animate-spin" /> Applying…</>
+                      : <><Sparkles size={15} /> Apply +{bulkPricePercent || '0'}% to All Products</>
+                    }
+                  </button>
                 </div>
-
-                {/* Feedback */}
-                {bulkPriceSuccess && (
-                  <div className="flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-xs font-semibold text-emerald-700">
-                    <CheckCircle2 size={14} className="flex-shrink-0" /> {bulkPriceSuccess}
-                  </div>
-                )}
-                {bulkPriceError && (
-                  <div className="flex items-center gap-2 rounded-xl bg-red-50 border border-red-200 p-3 text-xs font-semibold text-red-700">
-                    <AlertCircle size={14} className="flex-shrink-0" /> {bulkPriceError}
-                  </div>
-                )}
-
-                <button
-                  type="button"
-                  onClick={handleBulkPriceApply}
-                  disabled={bulkPriceApplying || !Number(bulkPricePercent)}
-                  className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-700 transition disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
-                >
-                  {bulkPriceApplying
-                    ? <><Sparkles size={15} className="animate-spin" /> Applying…</>
-                    : <><Sparkles size={15} /> Apply +{bulkPricePercent || '0'}% to All Products</>
-                  }
-                </button>
               </div>
-            </div>
 
-            <div className="pt-2 flex justify-end">
-              <Button type="submit" disabled={systemSaving} className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                <Save size={15} /> {systemSaving ? 'Saving…' : 'Save Pricing Settings'}
-              </Button>
-            </div>
-          </form>
-        </Card>
+              <div className="pt-2 flex justify-end">
+                <Button type="submit" disabled={systemSaving} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                  <Save size={15} /> {systemSaving ? 'Saving…' : 'Save Pricing Settings'}
+                </Button>
+              </div>
+            </form>
+          </Card>
         </div>
       )}
 
@@ -1471,7 +1461,7 @@ export default function Settings() {
                 </Button>
               </div>
             )}
-            
+
             {systemSuccess && currentTab === 'permissions' && (
               <div className="mt-4 flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-700">
                 <CheckCircle2 size={16} className="flex-shrink-0" />
@@ -1499,7 +1489,7 @@ export default function Settings() {
               <div>
                 <h3 className="font-bold text-base text-ink-900">Telegram Bot Subscribers</h3>
                 <p className="text-xs text-ink-400 mt-0.5">
-                  Everyone who started <strong>@FivestopBot</strong> and receives notifications
+                  Everyone who started <strong>@Baba Roti  CaféBot</strong> and receives notifications
                 </p>
               </div>
             </div>
@@ -1521,7 +1511,7 @@ export default function Settings() {
           {/* How to add people */}
           <div className="mb-4 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-xs text-blue-800">
             <p className="font-bold mb-1">📢 How to add someone</p>
-            <p>1. Share <strong>t.me/FivestopBot</strong> — they tap Start to subscribe.</p>
+            <p>1. Share <strong>t.me/Baba Roti  CaféBot</strong> — they tap Start to subscribe.</p>
             <p className="mt-0.5">2. Come back here and click <strong>"Register Phone"</strong> next to their name.</p>
             <p className="mt-0.5 text-blue-600">Only subscribers with a registered phone can receive OTP login codes.</p>
           </div>
@@ -1546,7 +1536,7 @@ export default function Settings() {
             <div className="py-8 text-center">
               <Send size={28} className="mx-auto mb-2 text-ink-200" />
               <p className="text-sm font-semibold text-ink-400">No subscribers yet</p>
-              <p className="text-xs text-ink-300 mt-1">Share t.me/FivestopBot to get started</p>
+              <p className="text-xs text-ink-300 mt-1">Share t.me/Baba Roti  CaféBot to get started</p>
             </div>
           ) : (
             <div className="overflow-hidden rounded-xl border border-ink-100">
@@ -1652,13 +1642,13 @@ export default function Settings() {
                 </div>
                 <form onSubmit={handleAddSubscriber} className="p-5 space-y-3">
                   <p className="text-xs text-ink-500 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
-                    Add a person who hasn't messaged the bot yet. They can still receive OTP codes if their phone is registered. To also receive system notifications, they need to message <strong>@FivestopBot</strong>.
+                    Add a person who hasn't messaged the bot yet. They can still receive OTP codes if their phone is registered. To also receive system notifications, they need to message <strong>@Baba Roti  CaféBot</strong>.
                   </p>
 
                   <div>
                     <label className="block text-xs font-semibold text-ink-700 mb-1">Full Name *</label>
                     <input required value={tgAddForm.name}
-                      onChange={e => setTgAddForm(f => ({...f, name: e.target.value}))}
+                      onChange={e => setTgAddForm(f => ({ ...f, name: e.target.value }))}
                       placeholder="e.g. Anteneh Bekele"
                       className="w-full rounded-lg border border-ink-200 px-3 py-2 text-sm outline-none focus:border-blue-500" />
                   </div>
@@ -1666,7 +1656,7 @@ export default function Settings() {
                   <div>
                     <label className="block text-xs font-semibold text-ink-700 mb-1">Phone Number * <span className="text-blue-600">(used for OTP login)</span></label>
                     <input required type="tel" value={tgAddForm.phone}
-                      onChange={e => setTgAddForm(f => ({...f, phone: e.target.value}))}
+                      onChange={e => setTgAddForm(f => ({ ...f, phone: e.target.value }))}
                       placeholder="e.g. 0911000000"
                       className="w-full rounded-lg border border-ink-200 px-3 py-2 text-sm outline-none focus:border-blue-500" />
                   </div>
@@ -1674,7 +1664,7 @@ export default function Settings() {
                   <div>
                     <label className="block text-xs font-semibold text-ink-700 mb-1">Telegram Username <span className="text-ink-400">(optional, without @)</span></label>
                     <input value={tgAddForm.username}
-                      onChange={e => setTgAddForm(f => ({...f, username: e.target.value.replace(/^@/,'')}))}
+                      onChange={e => setTgAddForm(f => ({ ...f, username: e.target.value.replace(/^@/, '') }))}
                       placeholder="e.g. anteneh21"
                       className="w-full rounded-lg border border-ink-200 px-3 py-2 text-sm outline-none focus:border-blue-500" />
                   </div>
@@ -1682,10 +1672,10 @@ export default function Settings() {
                   <div>
                     <label className="block text-xs font-semibold text-ink-700 mb-1">Telegram Chat ID <span className="text-ink-400">(optional — needed for notifications)</span></label>
                     <input value={tgAddForm.chatId}
-                      onChange={e => setTgAddForm(f => ({...f, chatId: e.target.value}))}
+                      onChange={e => setTgAddForm(f => ({ ...f, chatId: e.target.value }))}
                       placeholder="e.g. 1234567890"
                       className="w-full rounded-lg border border-ink-200 px-3 py-2 text-sm outline-none focus:border-blue-500" />
-                    <p className="mt-1 text-[10px] text-ink-400">To get their Chat ID: have them message @FivestopBot, then you'll see them appear in this list with their ID.</p>
+                    <p className="mt-1 text-[10px] text-ink-400">To get their Chat ID: have them message @Baba Roti  CaféBot, then you'll see them appear in this list with their ID.</p>
                   </div>
 
                   {tgError && (

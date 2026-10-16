@@ -997,7 +997,6 @@ export default function SalesImport() {
                   </div>
                 </div>
               )}
-
               {/* Image preview + results side by side */}
               {!ocrLoading && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1124,7 +1123,6 @@ export default function SalesImport() {
                     <Plus size={12} /> Add Row
                   </button>
                 </div>
-
                 {/* Column headers */}
                 <div className="grid gap-2 mb-1 px-1 text-[10px] font-bold text-ink-400 uppercase tracking-wider"
                   style={{ gridTemplateColumns: '2fr 3fr 80px 110px 110px 32px' }}>
@@ -1135,12 +1133,10 @@ export default function SalesImport() {
                   <span className="text-right">Total Amount</span>
                   <span />
                 </div>
-
                 <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
                   {manualRows.map((row) => (
                     <div key={row._id} className="grid gap-2 items-center"
                       style={{ gridTemplateColumns: '2fr 3fr 80px 110px 110px 32px' }}>
-
                       {/* Code */}
                       <input value={row.code}
                         onChange={e => updateManualRow(row._id, 'code', e.target.value)}
@@ -1161,12 +1157,10 @@ export default function SalesImport() {
                           ))}
                         </datalist>
                       </div>
-
                       {/* Qty */}
                       <input type="number" step="0.5" min="0.5" value={row.qty}
                         onChange={e => updateManualRow(row._id, 'qty', e.target.value)}
                         className="rounded-lg border border-ink-200 px-2 py-2 text-xs text-right outline-none focus:border-blue-500 tabular" />
-
                       {/* Avg Amount */}
                       <input type="number" step="0.01" min="0" value={row.avgAmt}
                         onChange={e => updateManualRow(row._id, 'avgAmt', e.target.value)}
@@ -1210,14 +1204,12 @@ export default function SalesImport() {
                   <strong> Avg Amount</strong> = unit selling price &nbsp;|&nbsp; <strong>Total Amount</strong> = line revenue.
                 </span>
               </div>
-
               {manualError && (
                 <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-2.5 text-xs text-red-700 flex items-center gap-2">
                   <XCircle size={13} className="shrink-0" /> {manualError}
                 </div>
               )}
             </div>
-
             {/* Footer */}
             <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-ink-100 bg-ink-50/50 rounded-b-2xl">
               <button onClick={() => setManualOpen(false)}
@@ -1235,7 +1227,6 @@ export default function SalesImport() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

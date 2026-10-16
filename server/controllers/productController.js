@@ -14,10 +14,10 @@ const tg = require('../utils/telegramNotifier');
 //   suggestedSellingPrice = totalCost / (foodCostPercent / 100)
 function calcRecipeCostBreakdown(ingredients, settings = {}) {
   const {
-    contingencyPercent          = 10,
-    overheadPercent             = 25,
-    defaultFoodCostPercent      = 30,
-    rawMaterialPriceAdjustType  = 'percent',
+    contingencyPercent = 10,
+    overheadPercent = 25,
+    defaultFoodCostPercent = 30,
+    rawMaterialPriceAdjustType = 'percent',
     rawMaterialPriceAdjustValue = 0,
   } = settings;
 
@@ -46,17 +46,17 @@ function calcRecipeCostBreakdown(ingredients, settings = {}) {
   const suggestedSellingPrice = totalCost / foodCostFraction;
 
   return {
-    rawMaterialCost:      Math.round(rawMaterialCost      * 100) / 100,
-    contingencyAmount:    Math.round((withContingency - rawMaterialCost) * 100) / 100,
-    withContingency:      Math.round(withContingency      * 100) / 100,
-    overheadAmount:       Math.round((totalCost - withContingency) * 100) / 100,
-    totalCost:            Math.round(totalCost             * 100) / 100,
-    suggestedSellingPrice:Math.round(suggestedSellingPrice * 100) / 100,
+    rawMaterialCost: Math.round(rawMaterialCost * 100) / 100,
+    contingencyAmount: Math.round((withContingency - rawMaterialCost) * 100) / 100,
+    withContingency: Math.round(withContingency * 100) / 100,
+    overheadAmount: Math.round((totalCost - withContingency) * 100) / 100,
+    totalCost: Math.round(totalCost * 100) / 100,
+    suggestedSellingPrice: Math.round(suggestedSellingPrice * 100) / 100,
     // Selling prices at common food cost benchmarks
-    sellingAt30pct:  Math.round((totalCost / 0.30) * 100) / 100,
-    sellingAt35pct:  Math.round((totalCost / 0.35) * 100) / 100,
-    sellingAt40pct:  Math.round((totalCost / 0.40) * 100) / 100,
-    sellingAt50pct:  Math.round((totalCost / 0.50) * 100) / 100,
+    sellingAt30pct: Math.round((totalCost / 0.30) * 100) / 100,
+    sellingAt35pct: Math.round((totalCost / 0.35) * 100) / 100,
+    sellingAt40pct: Math.round((totalCost / 0.40) * 100) / 100,
+    sellingAt50pct: Math.round((totalCost / 0.50) * 100) / 100,
     // Settings used (for display in UI)
     settings: { contingencyPercent, overheadPercent, defaultFoodCostPercent, rawMaterialPriceAdjustType, rawMaterialPriceAdjustValue },
   };
@@ -177,26 +177,26 @@ const updateProduct = asyncHandler(async (req, res) => {
   const oldPrice = product.sellingPrice;
   const oldIngCount = product.ingredients?.length || 0;
 
-  if (trimmedCode !== null)   product.code          = trimmedCode;
-  if (trimmedName)            product.name          = trimmedName;
-  product.category     = category     ?? product.category;
+  if (trimmedCode !== null) product.code = trimmedCode;
+  if (trimmedName) product.name = trimmedName;
+  product.category = category ?? product.category;
   product.parentCategory = parentCategory ?? product.parentCategory;
-  product.uom          = uom          ?? product.uom;
-  product.description  = description  ?? product.description;
+  product.uom = uom ?? product.uom;
+  product.description = description ?? product.description;
   product.sellingPrice = sellingPrice ?? product.sellingPrice;
-  product.ingredients  = ingredients  ?? product.ingredients;
+  product.ingredients = ingredients ?? product.ingredients;
 
-  const updated   = await product.save();
+  const updated = await product.save();
   const populated = await updated.populate('ingredients.material', 'name unit unitCost');
 
   // Build diff for notification
   const changes = [];
-  if (name        !== undefined && name !== populated.name)               changes.push({ label: 'Name',           from: product.name,     to: name });
-  if (category    !== undefined && category !== populated.category)       changes.push({ label: 'Category',        from: product.category, to: category });
+  if (name !== undefined && name !== populated.name) changes.push({ label: 'Name', from: product.name, to: name });
+  if (category !== undefined && category !== populated.category) changes.push({ label: 'Category', from: product.category, to: category });
   if (sellingPrice !== undefined && Number(sellingPrice) !== Number(oldPrice))
     changes.push({ label: 'Selling Price', from: `ETB ${Number(oldPrice).toFixed(2)}`, to: `ETB ${Number(sellingPrice).toFixed(2)}` });
   if (ingredients !== undefined && ingredients.length !== oldIngCount)
-    changes.push({ label: 'Ingredients',   from: `${oldIngCount} items`, to: `${ingredients.length} items` });
+    changes.push({ label: 'Ingredients', from: `${oldIngCount} items`, to: `${ingredients.length} items` });
 
   tg.notifyProductUpdated(populated, req.user, changes);
   invalidateDashboardCache();
@@ -207,9 +207,9 @@ const updateProduct = asyncHandler(async (req, res) => {
 const deleteProduct = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
   if (!product) { res.status(404); throw new Error('Product not found'); }
-  product.isActive    = false;
-  product.deletedAt   = new Date();
-  product.deletedBy   = req.user?.name || 'System';
+  product.isActive = false;
+  product.deletedAt = new Date();
+  product.deletedBy = req.user?.name || 'System';
   product.deletedFrom = 'products';
   await product.save();
   tg.notifyProductDeleted(product, req.user);
@@ -233,9 +233,9 @@ const bulkDeleteProducts = asyncHandler(async (req, res) => {
 const restoreProduct = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
   if (!product) { res.status(404); throw new Error('Product not found'); }
-  product.isActive    = true;
-  product.deletedAt   = null;
-  product.deletedBy   = null;
+  product.isActive = true;
+  product.deletedAt = null;
+  product.deletedBy = null;
   product.deletedFrom = null;
   await product.save();
   invalidateDashboardCache();
@@ -253,7 +253,7 @@ const permanentDeleteProduct = asyncHandler(async (req, res) => {
 
 
 // GET /api/products/export/excel
-// Exports in the Five Stop format:
+// Exports in the Baba Roti  Caféformat:
 // Code | Name | UOM | Child Category | Parent Category | Default Value | Default Tax | Created On | State
 const exportProductsExcel = asyncHandler(async (req, res) => {
   const products = await Product.find({ isActive: true })
@@ -284,7 +284,7 @@ const exportProductsExcel = asyncHandler(async (req, res) => {
 });
 
 // POST /api/products/import/excel
-// Accepts the Five Stop format:
+// Accepts the Baba Roti  Caféformat:
 // Code | Name | UOM | Child Category | Parent Category | Default Value | Default Tax | Created On | State
 const importProductsExcel = asyncHandler(async (req, res) => {
   if (!req.file) { res.status(400); throw new Error('No file uploaded'); }
@@ -304,11 +304,11 @@ const importProductsExcel = asyncHandler(async (req, res) => {
     return true;
   });
 
-  const total   = validRows.length;
-  let created   = 0;
-  let updated   = 0;
-  let skipped   = 0;
-  const errors  = [];
+  const total = validRows.length;
+  let created = 0;
+  let updated = 0;
+  let skipped = 0;
+  const errors = [];
 
   // Use SSE (Server-Sent Events) to stream progress back to client
   res.setHeader('Content-Type', 'text/event-stream');
@@ -334,11 +334,11 @@ const importProductsExcel = asyncHandler(async (req, res) => {
     const data = {
       name,
       code,
-      uom:            String(row['UOM']             || 'Pcs').trim(),
-      category:       String(row['Child Category']  || row['Category'] || 'General').trim(),
+      uom: String(row['UOM'] || 'Pcs').trim(),
+      category: String(row['Child Category'] || row['Category'] || 'General').trim(),
       parentCategory: String(row['Parent Category'] || 'FOOD').trim(),
-      sellingPrice:   Number(row['Default Value']   ?? row['Selling Price'] ?? 0) || 0,
-      description:    String(row['Description']     || '').trim(),
+      sellingPrice: Number(row['Default Value'] ?? row['Selling Price'] ?? 0) || 0,
+      description: String(row['Description'] || '').trim(),
     };
 
     try {
@@ -369,14 +369,14 @@ const importProductsExcel = asyncHandler(async (req, res) => {
 
       if (existing) {
         // Update existing record — preserve ingredients
-        existing.name           = data.name;
-        existing.code           = data.code || existing.code;
-        existing.uom            = data.uom;
-        existing.category       = data.category;
+        existing.name = data.name;
+        existing.code = data.code || existing.code;
+        existing.uom = data.uom;
+        existing.category = data.category;
         existing.parentCategory = data.parentCategory;
-        existing.sellingPrice   = data.sellingPrice;
-        existing.description    = data.description || existing.description;
-        existing.isActive       = true;
+        existing.sellingPrice = data.sellingPrice;
+        existing.description = data.description || existing.description;
+        existing.isActive = true;
         await existing.save();
         processedIds.add(existing._id.toString()); // Mark as processed
         updated++;
@@ -393,10 +393,10 @@ const importProductsExcel = asyncHandler(async (req, res) => {
 
     // Send progress every row
     send({
-      type:     'progress',
-      current:  i + 1,
+      type: 'progress',
+      current: i + 1,
       total,
-      percent:  Math.round(((i + 1) / total) * 100),
+      percent: Math.round(((i + 1) / total) * 100),
       created,
       updated,
       skipped,
@@ -424,21 +424,21 @@ const exportRecipeTemplate = asyncHandler(async (req, res) => {
     if (p.ingredients && p.ingredients.length > 0) {
       for (const ing of p.ingredients) {
         rows.push({
-          'Product Code':    p.code || '',
-          'Product Name':    p.name,
+          'Product Code': p.code || '',
+          'Product Name': p.name,
           'Ingredient Name': ing.material?.name || '',
-          'Quantity':        ing.quantity,
-          'Unit':            ing.material?.unit || '',
+          'Quantity': ing.quantity,
+          'Unit': ing.material?.unit || '',
         });
       }
     } else {
       // Include products with no recipe so user can easily add one
       rows.push({
-        'Product Code':    p.code || '',
-        'Product Name':    p.name,
+        'Product Code': p.code || '',
+        'Product Name': p.name,
         'Ingredient Name': '',
-        'Quantity':        '',
-        'Unit':            '',
+        'Quantity': '',
+        'Unit': '',
       });
     }
   }
@@ -480,8 +480,8 @@ const exportRecipeTemplate = asyncHandler(async (req, res) => {
 const importRecipesExcel = asyncHandler(async (req, res) => {
   if (!req.file) { res.status(400); throw new Error('No file uploaded'); }
 
-  const wb   = XLSX.read(req.file.buffer, { type: 'buffer' });
-  const ws   = wb.Sheets[wb.SheetNames[0]]; // always read first sheet
+  const wb = XLSX.read(req.file.buffer, { type: 'buffer' });
+  const ws = wb.Sheets[wb.SheetNames[0]]; // always read first sheet
   const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
 
   // Filter out blank / header rows
@@ -491,9 +491,9 @@ const importRecipesExcel = asyncHandler(async (req, res) => {
     return name || code;
   });
 
-  const total  = validRows.length;
-  let updated  = 0;
-  let skipped  = 0;
+  const total = validRows.length;
+  let updated = 0;
+  let skipped = 0;
   const errors = [];
 
   // Stream progress via SSE
@@ -507,7 +507,7 @@ const importRecipesExcel = asyncHandler(async (req, res) => {
 
   // Pre-load all active raw materials once (name → ObjectId map, case-insensitive)
   const allMaterials = await RawMaterial.find({ isActive: { $ne: false } }).select('name unit').lean();
-  const materialMap  = new Map(allMaterials.map((m) => [m.name.trim().toLowerCase(), m]));
+  const materialMap = new Map(allMaterials.map((m) => [m.name.trim().toLowerCase(), m]));
 
   // Group rows by product identifier (code takes precedence over name)
   // Map: productKey → { code, name, ingredientRows[] }
@@ -515,7 +515,7 @@ const importRecipesExcel = asyncHandler(async (req, res) => {
   for (const row of validRows) {
     const code = String(row['Product Code'] || '').trim();
     const name = String(row['Product Name'] || '').trim();
-    const key  = code || name.toLowerCase();
+    const key = code || name.toLowerCase();
     if (!productGroups.has(key)) {
       productGroups.set(key, { code, name, rows: [] });
     }
@@ -581,7 +581,7 @@ const importRecipesExcel = asyncHandler(async (req, res) => {
 
     processed += groupRows.length;
     send({
-      type:    'progress',
+      type: 'progress',
       current: processed,
       total,
       percent: Math.round((processed / total) * 100),

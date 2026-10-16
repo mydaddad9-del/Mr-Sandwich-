@@ -27,20 +27,18 @@ const MessageBubble = ({ msg }) => {
   return (
     <div className={`flex items-end gap-2 px-1 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
       {/* Avatar */}
-      <div className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full mb-0.5 ${
-        isUser
+      <div className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full mb-0.5 ${isUser
           ? 'bg-blue-600 text-white'
           : 'bg-gradient-to-br from-violet-500 to-purple-600 text-white'
-      }`}>
+        }`}>
         {isUser ? <UserIcon size={13} /> : <Sparkles size={13} />}
       </div>
 
       {/* Bubble */}
-      <div className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed ${
-        isUser
+      <div className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed ${isUser
           ? 'bg-blue-600 text-white rounded-br-sm'
           : 'bg-white border border-ink-100 text-ink-800 rounded-bl-sm shadow-sm'
-      }`}>
+        }`}>
         {/* Render markdown-like formatting */}
         {msg.content.split('\n').map((line, i) => {
           // Bold: **text**
@@ -93,7 +91,7 @@ const SuggestionChip = ({ text, onClick }) => (
 );
 
 // ── INITIAL GREETING ──────────────────────────────────────────────
-const GREETING = `Hi! I'm **MEGA** — your Five Stop AI Resource Assistant 🌟
+const GREETING = `Hi! I'm **MEGA** — your Baba Roti  CaféAI Resource Assistant 🌟
 
 I have live access to your entire stock system right now. Ask me anything like:
 • "What items are out of stock?"
@@ -106,20 +104,20 @@ What would you like to know?`;
 // MAIN COMPONENT
 // ════════════════════════════════════════════════════════════════
 export default function AiChat() {
-  const [open,        setOpen]        = useState(false);
-  const [minimized,   setMinimized]   = useState(false);
-  const [messages,    setMessages]    = useState([
+  const [open, setOpen] = useState(false);
+  const [minimized, setMinimized] = useState(false);
+  const [messages, setMessages] = useState([
     { role: 'assistant', content: GREETING, id: 'welcome' },
   ]);
-  const [input,       setInput]       = useState('');
-  const [loading,     setLoading]     = useState(false);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [suggestionPage, setSuggestionPage] = useState(0);
-  const [analyzed,    setAnalyzed]    = useState(null);
-  const [unread,      setUnread]      = useState(0);
+  const [analyzed, setAnalyzed] = useState(null);
+  const [unread, setUnread] = useState(0);
 
-  const bottomRef  = useRef(null);
-  const inputRef   = useRef(null);
+  const bottomRef = useRef(null);
+  const inputRef = useRef(null);
   const openedOnce = useRef(false);
 
   // Scroll to bottom on new messages
@@ -253,9 +251,8 @@ export default function AiChat() {
       {/* ── Chat panel ── */}
       {open && (
         <div
-          className={`fixed right-6 z-[999] flex flex-col rounded-3xl overflow-hidden shadow-2xl border border-white/20 transition-all duration-300 ${
-            minimized ? 'bottom-6 h-14 w-72' : 'bottom-6 w-[380px]'
-          }`}
+          className={`fixed right-6 z-[999] flex flex-col rounded-3xl overflow-hidden shadow-2xl border border-white/20 transition-all duration-300 ${minimized ? 'bottom-6 h-14 w-72' : 'bottom-6 w-[380px]'
+            }`}
           style={{
             height: minimized ? 56 : 560,
             animation: 'megaSlideUp 0.25s ease-out',
@@ -274,7 +271,7 @@ export default function AiChat() {
               </div>
               <div>
                 <p className="text-sm font-black text-white leading-tight">MEGA</p>
-                <p className="text-[10px] text-purple-200 leading-tight">Five Stop AI Assistant</p>
+                <p className="text-[10px] text-purple-200 leading-tight">Baba Roti  CaféAI Assistant</p>
               </div>
               {analyzed && (
                 <div className="ml-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold text-white">
@@ -311,11 +308,10 @@ export default function AiChat() {
             <>
               {/* Analysis bar */}
               {analyzed && analyzed.alerts?.some(a => a.level !== 'info') && (
-                <div className={`px-4 py-2 text-[11px] font-semibold flex items-center gap-2 flex-shrink-0 ${
-                  analyzed.alerts.some(a => a.level === 'critical')
+                <div className={`px-4 py-2 text-[11px] font-semibold flex items-center gap-2 flex-shrink-0 ${analyzed.alerts.some(a => a.level === 'critical')
                     ? 'bg-rose-50 text-rose-700 border-b border-rose-100'
                     : 'bg-amber-50 text-amber-700 border-b border-amber-100'
-                }`}>
+                  }`}>
                   <AlertTriangle size={11} className="flex-shrink-0" />
                   {analyzed.summary}
                 </div>

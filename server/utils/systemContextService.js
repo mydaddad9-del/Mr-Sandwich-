@@ -7,15 +7,15 @@
  * message — data is still effectively "live" for users.
  */
 
-const RawMaterial      = require('../models/RawMaterial');
+const RawMaterial = require('../models/RawMaterial');
 const StockTransaction = require('../models/StockTransaction');
-const Purchase         = require('../models/Purchase');
-const Supplier         = require('../models/Supplier');
-const User             = require('../models/User');
-const Consumption      = require('../models/Consumption');
-const StockRequest     = require('../models/StockRequest');
-const Employee         = require('../models/Employee');
-const Product          = require('../models/Product');
+const Purchase = require('../models/Purchase');
+const Supplier = require('../models/Supplier');
+const User = require('../models/User');
+const Consumption = require('../models/Consumption');
+const StockRequest = require('../models/StockRequest');
+const Employee = require('../models/Employee');
+const Product = require('../models/Product');
 
 // ── Simple in-memory cache (per role, 30s TTL) ────────────────────
 const _cache = {};
@@ -28,7 +28,7 @@ const monthRange = () => {
   const now = new Date();
   return {
     from: new Date(now.getFullYear(), now.getMonth(), 1),
-    to:   new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59),
+    to: new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59),
   };
 };
 
@@ -45,7 +45,7 @@ async function buildSystemContext(userRole = 'storekeeper') {
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
   // ── Fire ALL queries in parallel in one Promise.all ──────────────
-  const isAdmin   = userRole === 'admin';
+  const isAdmin = userRole === 'admin';
   const isManager = ['admin', 'manager'].includes(userRole);
 
   const [
@@ -148,13 +148,13 @@ async function buildSystemContext(userRole = 'storekeeper') {
   });
 
   // Transaction summary
-  const txnIn    = recentTxns.find(t => t._id === 'in');
-  const txnOut   = recentTxns.find(t => t._id === 'out');
+  const txnIn = recentTxns.find(t => t._id === 'in');
+  const txnOut = recentTxns.find(t => t._id === 'out');
   const txnCount = recentTxns.reduce((s, t) => s + t.count, 0);
   const txnSummary = {
-    totalIn:  txnIn?.total  || 0,
+    totalIn: txnIn?.total || 0,
     totalOut: txnOut?.total || 0,
-    count:    txnCount,
+    count: txnCount,
   };
 
   // Purchase summary
@@ -162,10 +162,10 @@ async function buildSystemContext(userRole = 'storekeeper') {
   let purchaseTotal = 0;
   monthPurchases.forEach(p => { purchaseMap[p._id] = p; purchaseTotal += p.total || 0; });
   const purchaseSummary = {
-    total:    purchaseTotal,
-    count:    monthPurchases.reduce((s, p) => s + p.count, 0),
-    draft:    purchaseMap['draft']?.count    || 0,
-    pending:  purchaseMap['checked']?.count  || 0,
+    total: purchaseTotal,
+    count: monthPurchases.reduce((s, p) => s + p.count, 0),
+    draft: purchaseMap['draft']?.count || 0,
+    pending: purchaseMap['checked']?.count || 0,
     approved: purchaseMap['approved']?.count || 0,
     received: purchaseMap['received']?.count || 0,
   };
@@ -187,14 +187,14 @@ async function buildSystemContext(userRole = 'storekeeper') {
     : null;
 
   // ── Assemble context string ───────────────────────────────────
-  const today     = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const today = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   const monthName = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
   let ctx = `
-=== FIVE STOP HOTEL — LIVE SYSTEM SNAPSHOT ===
+=== Baba Roti  CaféHOTEL — LIVE SYSTEM SNAPSHOT ===
 Date: ${today}
 User Role: ${userRole.toUpperCase()}
-Hotel: Five Stop Hotel (Nobir Trading Plc Stock Management System)
+Hotel: Baba Roti  CaféHotel (Baba Roti  Café Plc Stock Management System)
 
 --- STOCK OVERVIEW ---
 Total Active Materials: ${materialCount}

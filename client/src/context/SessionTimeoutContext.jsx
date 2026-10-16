@@ -132,7 +132,6 @@ export const SessionTimeoutProvider = ({ children }) => {
 
     events.forEach((ev) => window.addEventListener(ev, handleActivity, { passive: true }));
     window.addEventListener('storage', handleStorageChange);
-
     return () => {
       events.forEach((ev) => window.removeEventListener(ev, handleActivity));
       window.removeEventListener('storage', handleStorageChange);

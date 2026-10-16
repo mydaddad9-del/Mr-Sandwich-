@@ -15,10 +15,10 @@ async function reply(chatId, text) {
       headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
     };
     const req = https.request(options);
-    req.on('error', () => {});
+    req.on('error', () => { });
     req.write(body);
     req.end();
-  } catch {}
+  } catch { }
 }
 
 // ── POST /api/telegram/webhook ───────────────────────────────────
@@ -31,10 +31,10 @@ const handleWebhook = asyncHandler(async (req, res) => {
   const message = update?.message || update?.edited_message;
   if (!message) return;
 
-  const chatId   = message.chat?.id;
-  const from     = message.from;
-  const text     = (message.text || '').trim().toLowerCase();
-  const name     = [from?.first_name, from?.last_name].filter(Boolean).join(' ') || 'Unknown';
+  const chatId = message.chat?.id;
+  const from = message.from;
+  const text = (message.text || '').trim().toLowerCase();
+  const name = [from?.first_name, from?.last_name].filter(Boolean).join(' ') || 'Unknown';
   const username = from?.username || '';
 
   if (!chatId) return;
@@ -49,9 +49,9 @@ const handleWebhook = asyncHandler(async (req, res) => {
   if (text === '/start' || text.startsWith('/subscribe')) {
     if (alreadySubscribed) {
       await reply(chatId,
-`✅ <b>Already subscribed!</b>
+        `✅ <b>Already subscribed!</b>
 
-You are already receiving Five Stop Hotel notifications.
+You are already receiving Baba Roti  CaféHotel notifications.
 
 To unsubscribe, send /unsubscribe`
       );
@@ -69,7 +69,7 @@ To unsubscribe, send /unsubscribe`
     await settings.save();
 
     await reply(chatId,
-`🏨 <b>Five Stop Hotel</b>
+      `🏨 <b>Baba Roti  CaféHotel</b>
 ━━━━━━━━━━━━━━━━━━━━
 ✅ <b>Subscribed successfully!</b>
 
@@ -94,7 +94,7 @@ To stop notifications, send /unsubscribe
   // ── /unsubscribe ──────────────────────────────────────────────
   if (text.startsWith('/unsubscribe')) {
     if (!alreadySubscribed) {
-      await reply(chatId, '❌ You are not currently subscribed to Five Stop notifications.');
+      await reply(chatId, '❌ You are not currently subscribed to Baba Roti  Cafénotifications.');
       return;
     }
 
@@ -103,7 +103,7 @@ To stop notifications, send /unsubscribe
     await settings.save();
 
     await reply(chatId,
-`🏨 <b>Five Stop Hotel</b>
+      `🏨 <b>Baba Roti  CaféHotel</b>
 ━━━━━━━━━━━━━━━━━━━━
 🔕 <b>Unsubscribed</b>
 
@@ -118,7 +118,7 @@ Send /subscribe anytime to re-subscribe.
   if (text === '/status') {
     await reply(chatId,
       alreadySubscribed
-        ? `✅ You are <b>subscribed</b> to Five Stop Hotel notifications.\n\nSend /unsubscribe to stop.`
+        ? `✅ You are <b>subscribed</b> to Baba Roti  CaféHotel notifications.\n\nSend /unsubscribe to stop.`
         : `❌ You are <b>not subscribed</b>.\n\nSend /subscribe to start receiving notifications.`
     );
     return;
@@ -126,7 +126,7 @@ Send /subscribe anytime to re-subscribe.
 
   // ── Unknown command ───────────────────────────────────────────
   await reply(chatId,
-`🏨 <b>Five Stop Hotel Bot</b>
+    `🏨 <b>Baba Roti  CaféHotel Bot</b>
 
 Available commands:
 /subscribe   — Start receiving notifications
@@ -158,10 +158,10 @@ const addSubscriber = asyncHandler(async (req, res) => {
   }
 
   const newSub = {
-    chatId:       chatId ? String(chatId) : null,
-    name:         name.trim(),
-    username:     username ? username.trim().replace(/^@/, '') : '',
-    phone:        phone.trim(),
+    chatId: chatId ? String(chatId) : null,
+    name: name.trim(),
+    username: username ? username.trim().replace(/^@/, '') : '',
+    phone: phone.trim(),
     subscribedAt: new Date(),
     manuallyAdded: true,
   };

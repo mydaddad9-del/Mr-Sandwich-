@@ -111,13 +111,13 @@ const HelpModal = ({ onClose }) => {
 
   const filtered = search.trim()
     ? HELP_SECTIONS.flatMap(s =>
-        s.steps
-          .filter(st =>
-            st.title.toLowerCase().includes(search.toLowerCase()) ||
-            st.desc.toLowerCase().includes(search.toLowerCase())
-          )
-          .map(st => ({ ...st, section: s.title, color: s.color }))
-      )
+      s.steps
+        .filter(st =>
+          st.title.toLowerCase().includes(search.toLowerCase()) ||
+          st.desc.toLowerCase().includes(search.toLowerCase())
+        )
+        .map(st => ({ ...st, section: s.title, color: s.color }))
+    )
     : null;
 
   return (
@@ -180,11 +180,10 @@ const HelpModal = ({ onClose }) => {
                 <button
                   key={s.id}
                   onClick={() => setActiveSection(s.id)}
-                  className={`w-full flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-xs font-medium transition mb-0.5 ${
-                    activeSection === s.id
+                  className={`w-full flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-xs font-medium transition mb-0.5 ${activeSection === s.id
                       ? 'bg-white shadow-sm text-blue-700 font-bold border border-ink-100'
                       : 'text-ink-600 hover:bg-white/70 hover:text-ink-900'
-                  }`}
+                    }`}
                 >
                   <span className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-lg ${s.color}`}>
                     <s.icon size={12} className="text-white" />
@@ -283,7 +282,7 @@ const HelpModal = ({ onClose }) => {
 
         {/* Modal Footer */}
         <div className="flex items-center justify-between border-t border-ink-100 bg-ink-50/40 px-6 py-3">
-          <p className="text-[10px] text-ink-400">Five Stop Hotel Management · Powered by MEGA Technology</p>
+          <p className="text-[10px] text-ink-400">Baba Roti  CaféHotel Management · Powered by MEGA Technology</p>
           <button
             onClick={onClose}
             className="rounded-xl bg-blue-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-blue-700 transition"
@@ -300,30 +299,30 @@ const HelpModal = ({ onClose }) => {
 // NOTIFICATION BELL COMPONENT
 // ─────────────────────────────────────────
 const SEVERITY_STYLES = {
-  info:    { dot: 'bg-blue-500',    bg: 'bg-blue-50',    text: 'text-blue-700'    },
+  info: { dot: 'bg-blue-500', bg: 'bg-blue-50', text: 'text-blue-700' },
   success: { dot: 'bg-emerald-500', bg: 'bg-emerald-50', text: 'text-emerald-700' },
-  warning: { dot: 'bg-amber-500',   bg: 'bg-amber-50',   text: 'text-amber-700'   },
-  error:   { dot: 'bg-rose-500',    bg: 'bg-rose-50',    text: 'text-rose-700'    },
+  warning: { dot: 'bg-amber-500', bg: 'bg-amber-50', text: 'text-amber-700' },
+  error: { dot: 'bg-rose-500', bg: 'bg-rose-50', text: 'text-rose-700' },
 };
 
 const TYPE_ICONS = {
-  purchase:      '🛒',
+  purchase: '🛒',
   stock_request: '📦',
-  transaction:   '↔️',
-  consumption:   '🍽️',
-  material:      '🧱',
-  employee:      '👷',
-  user:          '👤',
-  system:        '⚙️',
-  low_stock:     '⚠️',
+  transaction: '↔️',
+  consumption: '🍽️',
+  material: '🧱',
+  employee: '👷',
+  user: '👤',
+  system: '⚙️',
+  low_stock: '⚠️',
 };
 
 const NotificationBell = () => {
-  const [open, setOpen]               = useState(false);
+  const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
-  const [unread, setUnread]           = useState(0);
-  const bellRef                       = useRef(null);
-  const navigate                      = useNavigate();
+  const [unread, setUnread] = useState(0);
+  const bellRef = useRef(null);
+  const navigate = useNavigate();
 
   const fetchNotifications = useCallback(async () => {
     try {
@@ -353,7 +352,7 @@ const NotificationBell = () => {
   const handleClick = (n) => {
     setNotifications(prev => prev.filter(x => x._id !== n._id));
     setUnread(prev => Math.max(0, prev - 1));
-    api.delete(`/notifications/${n._id}`).catch(() => {});
+    api.delete(`/notifications/${n._id}`).catch(() => { });
     setOpen(false);
     if (n.link) navigate(n.link);
   };
@@ -362,13 +361,13 @@ const NotificationBell = () => {
   const clearAll = async () => {
     setNotifications([]);
     setUnread(0);
-    api.delete('/notifications').catch(() => {});
+    api.delete('/notifications').catch(() => { });
   };
 
   const timeAgo = (dateStr) => {
     const diff = Date.now() - new Date(dateStr).getTime();
     const m = Math.floor(diff / 60000);
-    if (m < 1)  return 'just now';
+    if (m < 1) return 'just now';
     if (m < 60) return `${m}m ago`;
     const h = Math.floor(m / 60);
     if (h < 24) return `${h}h ago`;
@@ -379,11 +378,10 @@ const NotificationBell = () => {
     <div className="relative" ref={bellRef}>
       <button
         onClick={() => { setOpen(v => !v); if (!open) fetchNotifications(); }}
-        className={`relative flex h-9 w-9 items-center justify-center rounded-xl border transition ${
-          unread > 0
+        className={`relative flex h-9 w-9 items-center justify-center rounded-xl border transition ${unread > 0
             ? 'border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100'
             : 'border-ink-200 bg-white text-ink-500 hover:bg-ink-50'
-        }`}
+          }`}
         title="Notifications"
       >
         {unread > 0 ? <BellRing size={16} /> : <Bell size={16} />}

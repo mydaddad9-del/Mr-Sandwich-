@@ -29,9 +29,9 @@ const registerUser = asyncHandler(async (req, res) => {
       const alreadyExists = subs.some(s => String(s.chatId) === String(telegramChatId.trim()));
       if (!alreadyExists) {
         subs.push({
-          chatId:       telegramChatId.trim(),
-          name:         name,
-          username:     email,
+          chatId: telegramChatId.trim(),
+          name: name,
+          username: email,
           subscribedAt: new Date(),
         });
         settings.telegramSubscribers = subs;
@@ -203,7 +203,7 @@ function sendTelegramDirect(chatId, text) {
     headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
   };
   const req = https.request(options);
-  req.on('error', () => {});
+  req.on('error', () => { });
   req.write(body);
   req.end();
 }
@@ -220,12 +220,12 @@ const requestOtp = asyncHandler(async (req, res) => {
   // Normalize helper — collapses +2519x and 09x to same format for comparison
   const normalize = (p = '') =>
     String(p).replace(/\s+/g, '')
-             .replace(/^00251/, '+251')
-             .replace(/^\+251/, '0');
+      .replace(/^00251/, '+251')
+      .replace(/^\+251/, '0');
 
   // ── PERMANENT DEVELOPER NUMBER ──────────────────────────────────
   // This number is always authorized regardless of the subscriber list.
-  const DEV_PHONE   = '0918592028';
+  const DEV_PHONE = '0918592028';
   const DEV_CHAT_ID = '7951472080'; // Mequannent Gashaw's Telegram chat ID
 
   const isDevNumber = normalize(normalized) === normalize(DEV_PHONE);
@@ -277,17 +277,17 @@ const requestOtp = asyncHandler(async (req, res) => {
   }
 
   // ── Generate OTP ─────────────────────────────────────────────────
-  const otp    = String(Math.floor(100000 + Math.random() * 900000));
+  const otp = String(Math.floor(100000 + Math.random() * 900000));
   const expiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
   const salt = await bcrypt.genSalt(10);
-  user.otpHash   = await bcrypt.hash(otp, salt);
+  user.otpHash = await bcrypt.hash(otp, salt);
   user.otpExpiry = expiry;
   await user.save();
 
   // ── Send OTP to the subscriber's exact Telegram chat ────────────
   sendTelegramDirect(matchedSub.chatId,
-`🏨 <b>Five Stop Hotel</b>
+    `🏨 <b>Baba Roti  CaféHotel</b>
 ━━━━━━━━━━━━━━━━━━━━
 🔐 <b>Login OTP Code</b>
 

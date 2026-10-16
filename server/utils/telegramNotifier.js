@@ -1,5 +1,5 @@
 /**
- * Five Stop — Telegram Notification Service
+ * Baba Roti  Café— Telegram Notification Service
  * ─────────────────────────────────────────────────────────────────
  * Sends richly-formatted HTML messages to a Telegram bot/channel
  * whenever a meaningful CRUD event occurs in the system.
@@ -8,7 +8,7 @@
  * If either is missing the module silently no-ops (safe for dev).
  */
 
-const https   = require('https');
+const https = require('https');
 const Setting = require('../models/Setting');
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -17,7 +17,7 @@ const ENV_CHAT_IDS = (process.env.TELEGRAM_CHAT_ID || '')
   .split(',')
   .map(id => id.trim())
   .filter(id => id && id !== 'your_chat_id_here');
-const HOTEL = 'Five Stop Hotel';
+const HOTEL = 'Baba Roti  CaféHotel';
 
 // ── Low-level sender ─────────────────────────────────────────────
 async function getChatIds() {
@@ -34,7 +34,7 @@ async function getChatIds() {
 
 function sendToOne(chatId, text) {
   const body = JSON.stringify({
-    chat_id:    chatId,
+    chat_id: chatId,
     text,
     parse_mode: 'HTML',
     disable_web_page_preview: true,
@@ -42,9 +42,9 @@ function sendToOne(chatId, text) {
 
   const options = {
     hostname: 'api.telegram.org',
-    path:     `/bot${BOT_TOKEN}/sendMessage`,
-    method:   'POST',
-    headers:  { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
+    path: `/bot${BOT_TOKEN}/sendMessage`,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
   };
 
   const req = https.request(options, (res) => {
@@ -65,19 +65,19 @@ function sendTelegram(text) {
   getChatIds().then(ids => {
     if (!ids.length) return;
     ids.forEach(id => sendToOne(id, text));
-  }).catch(() => {});
+  }).catch(() => { });
 }
 
 // ── Timestamp helper ─────────────────────────────────────────────
 function now() {
   return new Date().toLocaleString('en-US', {
-    timeZone:    'Africa/Addis_Ababa',
-    weekday:     'short',
-    year:        'numeric',
-    month:       'short',
-    day:         'numeric',
-    hour:        '2-digit',
-    minute:      '2-digit',
+    timeZone: 'Africa/Addis_Ababa',
+    weekday: 'short',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   });
 }
 
@@ -95,7 +95,7 @@ function etb(n) {
 /** User logged in */
 function notifyLogin(user) {
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 🔐 <b>USER LOGIN</b>
 
@@ -110,7 +110,7 @@ function notifyLogin(user) {
 /** New staff account created */
 function notifyUserCreated(newUser, createdBy) {
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 👥 <b>NEW STAFF ACCOUNT</b>
 
@@ -126,23 +126,23 @@ function notifyUserCreated(newUser, createdBy) {
 // ── STOCK TRANSACTIONS ───────────────────────────────────────────
 
 const VOUCHER_EMOJI = {
-  cash_grv:       '💵',
-  credit_grv:     '🏦',
-  fresh_bazaar:   '🌿',
+  cash_grv: '💵',
+  credit_grv: '🏦',
+  fresh_bazaar: '🌿',
   pos_adjustment: '📈',
   neg_adjustment: '📉',
-  disposal:       '🗑️',
-  sales_import:   '📥',
+  disposal: '🗑️',
+  sales_import: '📥',
 };
 
 const VOUCHER_LABEL = {
-  cash_grv:       'Cash GRV',
-  credit_grv:     'Credit GRV',
-  fresh_bazaar:   'Fresh Bazaar',
+  cash_grv: 'Cash GRV',
+  credit_grv: 'Credit GRV',
+  fresh_bazaar: 'Fresh Bazaar',
   pos_adjustment: 'Positive Adjustment',
   neg_adjustment: 'Negative Adjustment',
-  disposal:       'Disposal',
-  sales_import:   'Sales Import',
+  disposal: 'Disposal',
+  sales_import: 'Sales Import',
 };
 
 /** New stock transaction created */
@@ -156,7 +156,7 @@ function notifyTransaction(txn, user) {
   ).join('\n');
 
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 ${emoji} <b>NEW ${label.toUpperCase()}</b>
 
@@ -178,16 +178,16 @@ ${items || '  —'}
 /** Transaction workflow advanced (check / approve / post / void) */
 function notifyTransactionAdvanced(txn, action, by) {
   const actionEmoji = {
-    check:   '✅',
+    check: '✅',
     approve: '🟣',
-    post:    '🟢',
-    void:    '🔴',
+    post: '🟢',
+    void: '🔴',
   };
   const emoji = actionEmoji[action] || '🔄';
   const label = VOUCHER_LABEL[txn.voucherType] || txn.voucherType;
 
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 ${emoji} <b>VOUCHER ${action.toUpperCase()}ED</b>
 
@@ -206,7 +206,7 @@ ${emoji} <b>VOUCHER ${action.toUpperCase()}ED</b>
 function notifyTransactionDeleted(txn, user) {
   const label = VOUCHER_LABEL[txn.voucherType] || txn.voucherType;
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 🗑️ <b>TRANSACTION DELETED</b>
 
@@ -225,7 +225,7 @@ function notifyTransactionDeleted(txn, user) {
 /** Raw material created */
 function notifyMaterialCreated(mat, user) {
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 🧱 <b>NEW RAW MATERIAL</b>
 
@@ -249,7 +249,7 @@ function notifyMaterialUpdated(mat, user, changes = []) {
     : '  • (no tracked fields changed)';
 
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 ✏️ <b>RAW MATERIAL UPDATED</b>
 
@@ -268,7 +268,7 @@ ${diffLines}
 /** Raw material deleted */
 function notifyMaterialDeleted(mat, user) {
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 🗑️ <b>RAW MATERIAL DELETED</b>
 
@@ -286,7 +286,7 @@ function notifyMaterialDeleted(mat, user) {
 
 function notifySupplierCreated(supplier, user) {
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 🚚 <b>NEW SUPPLIER</b>
 
@@ -305,7 +305,7 @@ function notifySupplierUpdated(supplier, user, changes = []) {
   if (!changes.length) return;
   const diffLines = changes.map(c => `  • <b>${c.label}:</b>  <s>${c.from}</s> → <b>${c.to}</b>`).join('\n');
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 ✏️ <b>SUPPLIER UPDATED</b>
 
@@ -322,7 +322,7 @@ ${diffLines}
 
 function notifySupplierDeleted(supplier, user) {
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 🗑️ <b>SUPPLIER DELETED</b>
 
@@ -339,7 +339,7 @@ function notifySupplierDeleted(supplier, user) {
 
 function notifyProductCreated(product, user) {
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 🍽️ <b>NEW PRODUCT</b>
 
@@ -359,7 +359,7 @@ function notifyProductUpdated(product, user, changes = []) {
   if (!changes.length) return; // Only notify if something actually changed
   const diffLines = changes.map(c => `  • <b>${c.label}:</b>  <s>${c.from}</s> → <b>${c.to}</b>`).join('\n');
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 ✏️ <b>PRODUCT UPDATED</b>
 
@@ -377,7 +377,7 @@ ${diffLines}
 
 function notifyProductDeleted(product, user) {
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 🗑️ <b>PRODUCT DELETED</b>
 
@@ -394,14 +394,14 @@ function notifyProductDeleted(product, user) {
 
 function notifySettingsChanged(changes, user) {
   const lines = Object.entries(changes)
-    .filter(([k]) => !['rolePermissions','navVisibility'].includes(k))
+    .filter(([k]) => !['rolePermissions', 'navVisibility'].includes(k))
     .map(([k, v]) => `  • <b>${k}:</b> ${v}`)
     .join('\n');
 
   const permChanged = 'rolePermissions' in changes || 'navVisibility' in changes;
 
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 ⚙️ <b>SYSTEM SETTINGS CHANGED</b>
 
@@ -417,7 +417,7 @@ ${permChanged ? '\n🔐 Role permissions or nav visibility were updated.' : ''}
 
 function notifyRestored(type, name, user) {
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 ♻️ <b>ITEM RESTORED</b>
 
@@ -432,7 +432,7 @@ function notifyRestored(type, name, user) {
 
 function notifyBinEmptied(user) {
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 🗑️ <b>RECYCLE BIN EMPTIED</b>
 
@@ -448,7 +448,7 @@ All deleted items permanently removed.
 
 function notifyInventoryCountSubmitted(count, user) {
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 📋 <b>INVENTORY COUNT SUBMITTED</b>
 
@@ -468,7 +468,7 @@ function notifyTransactionUpdated(txn, user) {
   const label = VOUCHER_LABEL[txn.voucherType] || txn.voucherType;
   const emoji = VOUCHER_EMOJI[txn.voucherType] || '📦';
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 ${emoji} <b>${label.toUpperCase()} EDITED</b>
 
@@ -486,7 +486,7 @@ ${emoji} <b>${label.toUpperCase()} EDITED</b>
 
 function notifyBulkDeleted(type, count, user) {
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 🗑️ <b>BULK DELETE</b>
 
@@ -504,7 +504,7 @@ function notifyBulkDeleted(type, count, user) {
 function notifyUserStatusChanged(user, status, changedBy) {
   const emoji = status === 'enabled' ? '✅' : '🔴';
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 ${emoji} <b>ACCOUNT ${status.toUpperCase()}</b>
 
@@ -520,7 +520,7 @@ ${emoji} <b>ACCOUNT ${status.toUpperCase()}</b>
 
 function notifyUserRoleChanged(user, oldRole, newRole, changedBy) {
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 🎭 <b>USER ROLE CHANGED</b>
 
@@ -536,7 +536,7 @@ function notifyUserRoleChanged(user, oldRole, newRole, changedBy) {
 
 function notifyUserDeleted(user, deletedBy) {
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 🗑️ <b>STAFF ACCOUNT DELETED</b>
 
@@ -553,7 +553,7 @@ function notifyUserDeleted(user, deletedBy) {
 // ── INVENTORY COUNT APPROVED ──────────────────────────────────────
 
 function notifyInventoryCountApproved(count, user) {
-  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const period = `${MONTHS[(count.periodMonth || 1) - 1]} ${count.periodYear || ''}`;
   const varLines = [
     count.positiveVariance ? `  📈 Positive: ${etb(count.positiveVariance)}` : null,
@@ -562,7 +562,7 @@ function notifyInventoryCountApproved(count, user) {
   ].filter(Boolean).join('\n');
 
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 ✅ <b>INVENTORY COUNT APPROVED</b>
 
@@ -582,10 +582,10 @@ ${varLines}
 // ── PURCHASES ─────────────────────────────────────────────────────
 
 const PURCHASE_ACTION_EMOJI = {
-  draft:     '📝',
-  checked:   '✅',
-  approved:  '🟣',
-  received:  '📦',
+  draft: '📝',
+  checked: '✅',
+  approved: '🟣',
+  received: '📦',
   cancelled: '🔴',
 };
 
@@ -594,7 +594,7 @@ function notifyPurchaseCreated(purchase, user) {
     `  • ${i.material?.name || '—'} × <b>${i.quantity}</b> ${i.material?.unit || ''} @ ${etb(i.unitCost)}`
   ).join('\n');
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 📝 <b>NEW PURCHASE ORDER (DRAFT)</b>
 
@@ -615,7 +615,7 @@ ${items || '  —'}
 function notifyPurchaseAdvanced(purchase, action, actor) {
   const emoji = PURCHASE_ACTION_EMOJI[purchase.status] || '🔄';
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 ${emoji} <b>PURCHASE ${action.toUpperCase()}ED</b>
 
@@ -632,7 +632,7 @@ ${action === 'receive' ? '\n📦 <b>Stock has been added to inventory.</b>' : ''
 
 function notifyPurchaseDeleted(purchase, user) {
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 🗑️ <b>PURCHASE ORDER DELETED</b>
 
@@ -651,7 +651,7 @@ function notifyPurchaseDeleted(purchase, user) {
 
 function notifyEmployeeCreated(emp, user) {
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 👷 <b>NEW EMPLOYEE ADDED</b>
 
@@ -669,7 +669,7 @@ function notifyEmployeeCreated(emp, user) {
 
 function notifyEmployeeUpdated(emp, user) {
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 ✏️ <b>EMPLOYEE UPDATED</b>
 
@@ -687,7 +687,7 @@ function notifyEmployeeUpdated(emp, user) {
 
 function notifyEmployeeDeleted(emp, user) {
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 🗑️ <b>EMPLOYEE REMOVED</b>
 
@@ -705,7 +705,7 @@ function notifyEmployeeDeleted(emp, user) {
 
 function notifyStockRequestRejected(req, user) {
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 ❌ <b>STOCK REQUEST REJECTED</b>
 
@@ -722,7 +722,7 @@ function notifyStockRequestRejected(req, user) {
 
 function notifyStockRequestCancelled(req, user) {
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 🚫 <b>STOCK REQUEST CANCELLED</b>
 
@@ -737,7 +737,7 @@ function notifyStockRequestCancelled(req, user) {
 
 function notifyStockRequestDeleted(req, user) {
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 🗑️ <b>STOCK REQUEST DELETED</b>
 
@@ -755,7 +755,7 @@ function notifyStockRequestDeleted(req, user) {
 
 function notifyConsumptionVoided(record, user) {
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 🔴 <b>CONSUMPTION VOIDED</b>
 
@@ -771,7 +771,7 @@ ${record.status === 'approved' ? '📦 <b>Stock has been reversed.</b>' : ''}
 
 function notifyConsumptionDeleted(record, user) {
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 🗑️ <b>CONSUMPTION DELETED</b>
 
@@ -788,7 +788,7 @@ function notifyConsumptionDeleted(record, user) {
 
 function notifyPermanentDeleted(type, name, user) {
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 💥 <b>PERMANENTLY DELETED</b>
 
@@ -806,7 +806,7 @@ function notifyPermanentDeleted(type, name, user) {
 
 function notifyPasswordChanged(user) {
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 🔑 <b>PASSWORD CHANGED</b>
 
@@ -827,7 +827,7 @@ function notifyStockRequestCreated(req, user) {
   ).join('\n');
   const emoji = req.priority === 'urgent' ? '🚨' : '📋';
   sendTelegram(
-`🏨 <b>Five Stop Hotel</b>
+    `🏨 <b>Baba Roti  CaféHotel</b>
 ━━━━━━━━━━━━━━━━━━━━
 ${emoji} <b>NEW STOCK REQUEST</b>
 
@@ -847,7 +847,7 @@ ${items || '  —'}
 
 function notifyStockRequestApproved(req, user) {
   sendTelegram(
-`🏨 <b>Five Stop Hotel</b>
+    `🏨 <b>Baba Roti  CaféHotel</b>
 ━━━━━━━━━━━━━━━━━━━━
 ✅ <b>STOCK REQUEST APPROVED</b>
 
@@ -867,7 +867,7 @@ function notifyStockIssued(req, user) {
     `  • ${i.material?.name || '—'} × <b>${i.issuedQty}</b> ${i.material?.unit || ''} — ${etb(i.totalCost)}`
   ).join('\n');
   sendTelegram(
-`🏨 <b>Five Stop Hotel</b>
+    `🏨 <b>Baba Roti  CaféHotel</b>
 ━━━━━━━━━━━━━━━━━━━━
 📤 <b>STOCK ISSUED</b>
 
@@ -887,21 +887,21 @@ ${items || '  —'}
 // ── CONSUMPTION ───────────────────────────────────────────────────
 
 const CATEGORY_EMOJI = {
-  staff_meal:          '🍽️',
+  staff_meal: '🍽️',
   guest_entertainment: '🎉',
-  owner_management:    '👔',
-  training_event:      '📚',
-  complimentary:       '🎁',
-  other:               '📝',
+  owner_management: '👔',
+  training_event: '📚',
+  complimentary: '🎁',
+  other: '📝',
 };
 
 const CATEGORY_LABELS_TG = {
-  staff_meal:          'Staff Meal',
+  staff_meal: 'Staff Meal',
   guest_entertainment: 'Guest Entertainment',
-  owner_management:    'Owner / Management',
-  training_event:      'Training & Events',
-  complimentary:       'Complimentary',
-  other:               'Other',
+  owner_management: 'Owner / Management',
+  training_event: 'Training & Events',
+  complimentary: 'Complimentary',
+  other: 'Other',
 };
 
 function notifyConsumptionCreated(record, user) {
@@ -912,7 +912,7 @@ function notifyConsumptionCreated(record, user) {
   ).join('\n');
 
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 ${emoji} <b>NEW CONSUMPTION RECORD</b>
 
@@ -936,7 +936,7 @@ function notifyConsumptionApproved(record, user) {
   const emoji = CATEGORY_EMOJI[record.category] || '🍽️';
   const label = CATEGORY_LABELS_TG[record.category] || record.category;
   sendTelegram(
-`🏨 <b>${HOTEL}</b>
+    `🏨 <b>${HOTEL}</b>
 ━━━━━━━━━━━━━━━━━━━━
 ✅ <b>CONSUMPTION APPROVED</b>
 

@@ -22,6 +22,9 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Vite temporary files
+*.timestamp-*.mjs
+
 # Uploads
 server/uploads/*
 !server/uploads/.gitkeep

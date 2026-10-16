@@ -23,7 +23,7 @@ const Products = () => {
   const [materials, setMaterials] = useState([]);
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(new Set());
-  const [page, setPage]         = useState(1);
+  const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [modalOpen, setModalOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -74,7 +74,7 @@ const Products = () => {
       return next;
     });
   };
-  
+
 
   // ── CRUD ──
   const openCreate = () => { setEditing(null); setForm(emptyForm); setFormError(''); setModalOpen(true); };
@@ -250,12 +250,12 @@ const Products = () => {
             } else if (msg.type === 'progress') {
               setImportProgress({
                 running: true,
-                percent:  msg.percent,
-                current:  msg.current,
-                total:    msg.total,
-                created:  msg.created,
-                updated:  msg.updated,
-                skipped:  msg.skipped,
+                percent: msg.percent,
+                current: msg.current,
+                total: msg.total,
+                created: msg.created,
+                updated: msg.updated,
+                skipped: msg.skipped,
               });
             } else if (msg.type === 'done') {
               setImportProgress(null);
@@ -339,7 +339,7 @@ const Products = () => {
                 running: true,
                 percent: msg.percent,
                 current: msg.current,
-                total:   msg.total,
+                total: msg.total,
                 updated: msg.updated,
                 skipped: msg.skipped,
               });
@@ -535,85 +535,85 @@ const Products = () => {
       {/* ── Table with inline checkboxes ── */}
       <div className="overflow-hidden rounded-xl border border-blue-200/70 bg-white shadow-soft">
         <div className="overflow-x-auto">
-        <table className="min-w-full text-sm" style={{ borderCollapse: 'collapse' }}>
-          <thead style={{ background: 'linear-gradient(90deg, #1e3a8a 0%, #1d4ed8 50%, #2563eb 100%)' }}>
-            <tr>
-              {canEdit && (
-                <th className="w-10 px-4 py-2.5" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>
-                  <input
-                    type="checkbox"
-                    checked={allChecked}
-                    ref={(el) => { if (el) el.indeterminate = someChecked && !allChecked; }}
-                    onChange={toggleAll}
-                    className="h-4 w-4 rounded border-white/40 accent-white cursor-pointer"
-                  />
-                </th>
-              )}
-              <th className="whitespace-nowrap px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>Code</th>
-              <th className="whitespace-nowrap px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>Product</th>
-              <th className="whitespace-nowrap px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>Category</th>
-              <th className="whitespace-nowrap px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>UOM</th>
-              <th className="whitespace-nowrap px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>Ingredients</th>
-              <th className="whitespace-nowrap px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>Selling Price</th>
-              {canEdit && <th className="px-4 py-2.5" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }} />}
-            </tr>
-          </thead>
-          <tbody style={{ borderTop: 'none' }}>
-            {products.length === 0 && (
+          <table className="min-w-full text-sm" style={{ borderCollapse: 'collapse' }}>
+            <thead style={{ background: 'linear-gradient(90deg, #1e3a8a 0%, #1d4ed8 50%, #2563eb 100%)' }}>
               <tr>
-                <td colSpan={canEdit ? 8 : 6} className="px-4 py-10 text-center text-ink-400">
-                  No products yet. Add your first product or import from Excel.
-                </td>
-              </tr>
-            )}
-            {pagedProducts.map((p) => (
-              <tr
-                key={p._id}
-                className={`hover:bg-ink-50/50 ${selected.has(p._id) ? 'bg-blue-50/60' : ''}`}
-              >
                 {canEdit && (
-                  <td className="px-4 py-3">
+                  <th className="w-10 px-4 py-2.5" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>
                     <input
                       type="checkbox"
-                      checked={selected.has(p._id)}
-                      onChange={() => toggleOne(p._id)}
-                      className="h-4 w-4 rounded border-ink-300 accent-blue-600 cursor-pointer"
+                      checked={allChecked}
+                      ref={(el) => { if (el) el.indeterminate = someChecked && !allChecked; }}
+                      onChange={toggleAll}
+                      className="h-4 w-4 rounded border-white/40 accent-white cursor-pointer"
                     />
-                  </td>
+                  </th>
                 )}
-                <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-ink-400">{p.code || '—'}</td>
-                <td className="whitespace-nowrap px-4 py-3">
-                  <button onClick={() => openDetail(p)} className="font-medium text-blue-700 hover:underline text-left">
-                    {p.name}
-                  </button>
-                </td>
-                <td className="whitespace-nowrap px-4 py-3 text-ink-700">
-                  {p.category}
-                  {p.parentCategory && <span className="ml-1 text-xs text-ink-400">/ {p.parentCategory}</span>}
-                </td>
-                <td className="whitespace-nowrap px-4 py-3 text-ink-500">{p.uom || 'Pcs'}</td>
-                <td className="whitespace-nowrap px-4 py-3 text-ink-500">
-                  {p.ingredients?.length ?? 0} item{p.ingredients?.length !== 1 ? 's' : ''}
-                </td>
-                <td className="whitespace-nowrap px-4 py-3 font-medium tabular">
-                  ETB {p.sellingPrice?.toFixed(2) ?? '0.00'}
-                </td>
-                {canEdit && (
-                  <td className="whitespace-nowrap px-4 py-3">
-                    <div className="flex gap-1">
-                      <button onClick={() => openEdit(p)} className="rounded-md p-1.5 text-ink-400 hover:bg-ink-100 hover:text-ink-700">
-                        <Pencil size={15} />
-                      </button>
-                      <button onClick={() => handleDelete(p._id)} className="rounded-md p-1.5 text-ink-400 hover:bg-red-50 hover:text-red-600">
-                        <Trash2 size={15} />
-                      </button>
-                    </div>
-                  </td>
-                )}
+                <th className="whitespace-nowrap px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>Code</th>
+                <th className="whitespace-nowrap px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>Product</th>
+                <th className="whitespace-nowrap px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>Category</th>
+                <th className="whitespace-nowrap px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>UOM</th>
+                <th className="whitespace-nowrap px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>Ingredients</th>
+                <th className="whitespace-nowrap px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>Selling Price</th>
+                {canEdit && <th className="px-4 py-2.5" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }} />}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody style={{ borderTop: 'none' }}>
+              {products.length === 0 && (
+                <tr>
+                  <td colSpan={canEdit ? 8 : 6} className="px-4 py-10 text-center text-ink-400">
+                    No products yet. Add your first product or import from Excel.
+                  </td>
+                </tr>
+              )}
+              {pagedProducts.map((p) => (
+                <tr
+                  key={p._id}
+                  className={`hover:bg-ink-50/50 ${selected.has(p._id) ? 'bg-blue-50/60' : ''}`}
+                >
+                  {canEdit && (
+                    <td className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={selected.has(p._id)}
+                        onChange={() => toggleOne(p._id)}
+                        className="h-4 w-4 rounded border-ink-300 accent-blue-600 cursor-pointer"
+                      />
+                    </td>
+                  )}
+                  <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-ink-400">{p.code || '—'}</td>
+                  <td className="whitespace-nowrap px-4 py-3">
+                    <button onClick={() => openDetail(p)} className="font-medium text-blue-700 hover:underline text-left">
+                      {p.name}
+                    </button>
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 text-ink-700">
+                    {p.category}
+                    {p.parentCategory && <span className="ml-1 text-xs text-ink-400">/ {p.parentCategory}</span>}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 text-ink-500">{p.uom || 'Pcs'}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-ink-500">
+                    {p.ingredients?.length ?? 0} item{p.ingredients?.length !== 1 ? 's' : ''}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 font-medium tabular">
+                    ETB {p.sellingPrice?.toFixed(2) ?? '0.00'}
+                  </td>
+                  {canEdit && (
+                    <td className="whitespace-nowrap px-4 py-3">
+                      <div className="flex gap-1">
+                        <button onClick={() => openEdit(p)} className="rounded-md p-1.5 text-ink-400 hover:bg-ink-100 hover:text-ink-700">
+                          <Pencil size={15} />
+                        </button>
+                        <button onClick={() => handleDelete(p._id)} className="rounded-md p-1.5 text-ink-400 hover:bg-red-50 hover:text-red-600">
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>{/* end overflow-x-auto */}
 
         {/* Pagination */}
@@ -659,7 +659,7 @@ const Products = () => {
             <div className="col-span-2">
               <label className="mb-1 block text-sm font-medium text-ink-600">Product name *</label>
               <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="e.g. Five Stop Burger"
+                placeholder="e.g. Baba Roti  CaféBurger"
                 className="w-full rounded-lg border border-ink-200 px-3 py-2 text-sm outline-none focus:border-blue-500" />
             </div>
             <div>
@@ -813,11 +813,11 @@ const Products = () => {
                   <table className="w-full text-xs">
                     <tbody>
                       {[
-                        { label: 'Raw Material Cost',                                   value: selectedProduct.costBreakdown.rawMaterialCost,    color: 'text-ink-700' },
-                        { label: `+ Contingency (${selectedProduct.costBreakdown.settings?.contingencyPercent}%)`, value: selectedProduct.costBreakdown.contingencyAmount,   color: 'text-amber-600' },
-                        { label: 'Total after Contingency',                              value: selectedProduct.costBreakdown.withContingency,    color: 'text-ink-700 font-semibold', divider: true },
-                        { label: `+ Overhead (${selectedProduct.costBreakdown.settings?.overheadPercent}%)`,       value: selectedProduct.costBreakdown.overheadAmount,      color: 'text-violet-600' },
-                        { label: 'Total Cost (G Total Cost)',                            value: selectedProduct.costBreakdown.totalCost,          color: 'text-ink-900 font-black', divider: true },
+                        { label: 'Raw Material Cost', value: selectedProduct.costBreakdown.rawMaterialCost, color: 'text-ink-700' },
+                        { label: `+ Contingency (${selectedProduct.costBreakdown.settings?.contingencyPercent}%)`, value: selectedProduct.costBreakdown.contingencyAmount, color: 'text-amber-600' },
+                        { label: 'Total after Contingency', value: selectedProduct.costBreakdown.withContingency, color: 'text-ink-700 font-semibold', divider: true },
+                        { label: `+ Overhead (${selectedProduct.costBreakdown.settings?.overheadPercent}%)`, value: selectedProduct.costBreakdown.overheadAmount, color: 'text-violet-600' },
+                        { label: 'Total Cost (G Total Cost)', value: selectedProduct.costBreakdown.totalCost, color: 'text-ink-900 font-black', divider: true },
                         { label: `Suggested Price @ ${selectedProduct.costBreakdown.settings?.defaultFoodCostPercent}% Food Cost`, value: selectedProduct.costBreakdown.suggestedSellingPrice, color: 'text-emerald-700 font-black' },
                       ].map(({ label, value, color, divider }) => (
                         <tr key={label} className={divider ? 'border-t border-emerald-200' : ''}>

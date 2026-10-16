@@ -14,29 +14,29 @@ import ExportDropdown from '../components/ui/ExportDropdown';
 
 // Route → API endpoint map (used by the load function)
 const TABS = [
-  { key: 'summary',           label: 'Overview',              endpoint: null },
-  { key: 'stock_balance',     label: 'Stock Balance Sheet',   endpoint: '/reports/stock-balance' },
-  { key: 'inventory_count',   label: 'Inventory Count',       endpoint: null },
-  { key: 'daily',             label: 'Daily Report',          endpoint: '/reports/daily' },
-  { key: 'cash_grv',          label: 'Cash GRV',              endpoint: '/reports/cash-grv' },
-  { key: 'credit_grv',        label: 'Credit GRV',            endpoint: '/reports/credit-grv' },
-  { key: 'fresh_bazaar',      label: 'Fresh Bazaar',          endpoint: '/reports/fresh-bazaar' },
-  { key: 'pos_adjustment',    label: '+ve Adjustment',        endpoint: '/reports/pos-adjustment' },
-  { key: 'disposal',          label: 'Goods Disposal',        endpoint: '/reports/disposal' },
-  { key: 'neg_adjustment',    label: '−ve Adjustment',        endpoint: '/reports/neg-adjustment' },
-  { key: 'stock',             label: 'Stock Levels',          endpoint: '/reports/stock-levels' },
-  { key: 'purchases',         label: 'Purchases',             endpoint: '/reports/purchases' },
+  { key: 'summary', label: 'Overview', endpoint: null },
+  { key: 'stock_balance', label: 'Stock Balance Sheet', endpoint: '/reports/stock-balance' },
+  { key: 'inventory_count', label: 'Inventory Count', endpoint: null },
+  { key: 'daily', label: 'Daily Report', endpoint: '/reports/daily' },
+  { key: 'cash_grv', label: 'Cash GRV', endpoint: '/reports/cash-grv' },
+  { key: 'credit_grv', label: 'Credit GRV', endpoint: '/reports/credit-grv' },
+  { key: 'fresh_bazaar', label: 'Fresh Bazaar', endpoint: '/reports/fresh-bazaar' },
+  { key: 'pos_adjustment', label: '+ve Adjustment', endpoint: '/reports/pos-adjustment' },
+  { key: 'disposal', label: 'Goods Disposal', endpoint: '/reports/disposal' },
+  { key: 'neg_adjustment', label: '−ve Adjustment', endpoint: '/reports/neg-adjustment' },
+  { key: 'stock', label: 'Stock Levels', endpoint: '/reports/stock-levels' },
+  { key: 'purchases', label: 'Purchases', endpoint: '/reports/purchases' },
 ];
 
 
 const VOUCHER_LABELS = {
-  cash_grv:       'Cash GRV',
-  credit_grv:     'Credit GRV',
-  disposal:       'Goods Disposal',
+  cash_grv: 'Cash GRV',
+  credit_grv: 'Credit GRV',
+  disposal: 'Goods Disposal',
   neg_adjustment: '−ve Adjustment',
   pos_adjustment: '+ve Adjustment',
-  fresh_bazaar:   'Fresh Bazaar',
-  sales_import:   'Sales Import',
+  fresh_bazaar: 'Fresh Bazaar',
+  sales_import: 'Sales Import',
 };
 
 const todayStr = () => new Date().toISOString().slice(0, 10);
@@ -69,7 +69,7 @@ const Stat = ({ label, value, sub, color = 'text-ink-900', badge = null }) => (
 // ── Voucher transactions table (shared by all voucher tabs) ───────────
 const VoucherTable = ({ data, showSupplier = false, showReason = false }) => {
   const cols = [
-    { key: 'date',      header: 'Date',       render: r => new Date(r.date).toLocaleString() },
+    { key: 'date', header: 'Date', render: r => new Date(r.date).toLocaleString() },
     { key: 'voucherNo', header: 'Voucher No', render: r => <span className="font-mono text-xs">{r.voucherNo || '—'}</span> },
     ...(showSupplier ? [{ key: 'supplier', header: 'Supplier', render: r => r.supplier?.name || '—' }] : []),
     ...(showReason ? [{ key: 'reason', header: 'Reason', render: r => r.reason || '—' }] : []),
@@ -92,8 +92,8 @@ const VoucherTable = ({ data, showSupplier = false, showReason = false }) => {
 const MaterialBreakdown = ({ data }) => (
   <DataTable
     columns={[
-      { key: 'name',      header: 'Material' },
-      { key: 'totalQty',  header: 'Total Qty', render: r => <span className="tabular">{r.totalQty?.toFixed(3)}</span> },
+      { key: 'name', header: 'Material' },
+      { key: 'totalQty', header: 'Total Qty', render: r => <span className="tabular">{r.totalQty?.toFixed(3)}</span> },
       { key: 'totalCost', header: 'Total Cost (ETB)', render: r => <span className="tabular font-medium">ETB {(r.totalCost || 0).toFixed(2)}</span> },
     ]}
     data={data}
@@ -105,36 +105,36 @@ const MaterialBreakdown = ({ data }) => (
 // InventoryCount standalone component
 // ════════════════════════════════════════════════════════════════════
 const MONTH_NAMES = [
-  'January','February','March','April','May','June',
-  'July','August','September','October','November','December'
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
 function InventoryCountPanel() {
   const now = new Date();
-  const [stores, setStores]                 = useState([]);
-  const [counts, setCounts]                 = useState([]);
-  const [loadingList, setLoadingList]       = useState(false);
-  const [filterYear, setFilterYear]         = useState(now.getFullYear());
-  const [filterMonth, setFilterMonth]       = useState(now.getMonth() + 1);
-  const [filterStore, setFilterStore]       = useState('all');
+  const [stores, setStores] = useState([]);
+  const [counts, setCounts] = useState([]);
+  const [loadingList, setLoadingList] = useState(false);
+  const [filterYear, setFilterYear] = useState(now.getFullYear());
+  const [filterMonth, setFilterMonth] = useState(now.getMonth() + 1);
+  const [filterStore, setFilterStore] = useState('all');
 
   // New count init form
-  const [showInitForm, setShowInitForm]     = useState(false);
-  const [initStore, setInitStore]           = useState('');
-  const [initYear, setInitYear]             = useState(now.getFullYear());
-  const [initMonth, setInitMonth]           = useState(now.getMonth() + 1);
-  const [initNotes, setInitNotes]           = useState('');
-  const [initLoading, setInitLoading]       = useState(false);
-  const [initError, setInitError]           = useState('');
+  const [showInitForm, setShowInitForm] = useState(false);
+  const [initStore, setInitStore] = useState('');
+  const [initYear, setInitYear] = useState(now.getFullYear());
+  const [initMonth, setInitMonth] = useState(now.getMonth() + 1);
+  const [initNotes, setInitNotes] = useState('');
+  const [initLoading, setInitLoading] = useState(false);
+  const [initError, setInitError] = useState('');
 
   // Active count editor
-  const [activeCount, setActiveCount]       = useState(null);
-  const [editorLoading, setEditorLoading]   = useState(false);
-  const [saving, setSaving]                 = useState(false);
-  const [saveError, setSaveError]           = useState('');
+  const [activeCount, setActiveCount] = useState(null);
+  const [editorLoading, setEditorLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
   const [expandedStores, setExpandedStores] = useState({});
-  const [showUncounted, setShowUncounted]   = useState(true);
-  const [searchQ, setSearchQ]               = useState('');
+  const [showUncounted, setShowUncounted] = useState(true);
+  const [searchQ, setSearchQ] = useState('');
 
   // local edits buffer: materialId → physicalCount value
   const [edits, setEdits] = useState({});
@@ -146,7 +146,7 @@ function InventoryCountPanel() {
         setStores(r.data.stores || []);
         if (r.data.stores?.length) setInitStore(r.data.stores[0]);
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   // ── Load count list ────────────────────────────────────────────────
@@ -157,7 +157,7 @@ function InventoryCountPanel() {
       if (filterStore !== 'all') params.store = filterStore;
       const r = await api.get('/inventory-count', { params });
       setCounts(r.data.counts || []);
-    } catch(e) {
+    } catch (e) {
       console.error(e);
     } finally {
       setLoadingList(false);
@@ -182,7 +182,7 @@ function InventoryCountPanel() {
       setInitNotes('');
       await loadList();
       openEditor(r.data.count._id);
-    } catch(e) {
+    } catch (e) {
       setInitError(e.response?.data?.message || 'Failed to initialize count');
     } finally {
       setInitLoading(false);
@@ -199,7 +199,7 @@ function InventoryCountPanel() {
       setActiveCount(r.data.count);
       // Auto-expand all stores
       setExpandedStores({ [r.data.count.storeLocation]: true });
-    } catch(e) {
+    } catch (e) {
       console.error(e);
     } finally {
       setEditorLoading(false);
@@ -220,7 +220,7 @@ function InventoryCountPanel() {
       const r = await api.patch(`/inventory-count/${activeCount._id}/lines`, { lines });
       setActiveCount(r.data.count);
       setEdits({});
-    } catch(e) {
+    } catch (e) {
       setSaveError(e.response?.data?.message || 'Save failed');
     } finally {
       setSaving(false);
@@ -236,7 +236,7 @@ function InventoryCountPanel() {
       const r = await api.post(`/inventory-count/${activeCount._id}/submit`);
       setActiveCount(r.data.count);
       await loadList();
-    } catch(e) {
+    } catch (e) {
       setSaveError(e.response?.data?.message || 'Submit failed');
     }
   };
@@ -247,7 +247,7 @@ function InventoryCountPanel() {
       const r = await api.post(`/inventory-count/${activeCount._id}/approve`);
       setActiveCount(r.data.count);
       await loadList();
-    } catch(e) {
+    } catch (e) {
       setSaveError(e.response?.data?.message || 'Approval failed');
     }
   };
@@ -258,14 +258,14 @@ function InventoryCountPanel() {
       await api.delete(`/inventory-count/${id}`);
       if (activeCount?._id === id) setActiveCount(null);
       await loadList();
-    } catch(e) {
+    } catch (e) {
       alert(e.response?.data?.message || 'Delete failed');
     }
   };
 
   const isEditable = activeCount && (activeCount.status === 'draft' || activeCount.status === 'submitted');
   const canApprove = activeCount?.status === 'submitted';
-  const isLocked   = activeCount && (activeCount.status === 'approved' || activeCount.status === 'closed');
+  const isLocked = activeCount && (activeCount.status === 'approved' || activeCount.status === 'closed');
 
   // ── Filter lines ──────────────────────────────────────────────────
   const filteredLines = useMemo(() => {
@@ -277,15 +277,15 @@ function InventoryCountPanel() {
     });
   }, [activeCount, searchQ, showUncounted]);
 
-  const counted   = activeCount?.lines.filter(l => l.isCounted).length || 0;
-  const total     = activeCount?.lines.length || 0;
-  const progress  = total > 0 ? Math.round((counted / total) * 100) : 0;
+  const counted = activeCount?.lines.filter(l => l.isCounted).length || 0;
+  const total = activeCount?.lines.length || 0;
+  const progress = total > 0 ? Math.round((counted / total) * 100) : 0;
 
   const statusColors = {
-    draft:     'bg-amber-100 text-amber-800',
+    draft: 'bg-amber-100 text-amber-800',
     submitted: 'bg-blue-100 text-blue-800',
-    approved:  'bg-emerald-100 text-emerald-800',
-    closed:    'bg-ink-100 text-ink-600',
+    approved: 'bg-emerald-100 text-emerald-800',
+    closed: 'bg-ink-100 text-ink-600',
   };
 
   // ════════════════════════════════════════════════════════════════
@@ -616,11 +616,10 @@ function InventoryCountPanel() {
             </div>
             <button
               onClick={() => setShowUncounted(v => !v)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition ${
-                showUncounted
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition ${showUncounted
                   ? 'bg-amber-50 border-amber-200 text-amber-800'
                   : 'bg-white border-ink-200 text-ink-600'
-              }`}
+                }`}
             >
               {showUncounted ? <Eye size={13} /> : <EyeOff size={13} />}
               {showUncounted ? 'Showing All' : 'Counted Only'}
@@ -683,9 +682,8 @@ function InventoryCountPanel() {
                       return (
                         <tr
                           key={line.material}
-                          className={`hover:bg-blue-50/40 transition-colors ${
-                            !line.isCounted && editVal === undefined ? 'bg-amber-50/30' : ''
-                          }`}
+                          className={`hover:bg-blue-50/40 transition-colors ${!line.isCounted && editVal === undefined ? 'bg-amber-50/30' : ''
+                            }`}
                         >
                           <td className="px-4 py-2.5 text-ink-400">{idx + 1}</td>
                           <td className="px-4 py-2.5">
@@ -718,9 +716,8 @@ function InventoryCountPanel() {
                           </td>
                           <td className="px-3 py-2.5 text-right tabular">
                             {variance !== null ? (
-                              <span className={`font-bold flex items-center justify-end gap-1 ${
-                                isPos ? 'text-emerald-600' : isNeg ? 'text-red-600' : 'text-ink-500'
-                              }`}>
+                              <span className={`font-bold flex items-center justify-end gap-1 ${isPos ? 'text-emerald-600' : isNeg ? 'text-red-600' : 'text-ink-500'
+                                }`}>
                                 {isPos && <TrendingUp size={11} />}
                                 {isNeg && <TrendingDown size={11} />}
                                 {!isPos && !isNeg && <Minus size={11} />}
@@ -794,10 +791,10 @@ function InventoryCountPanel() {
 
 // ── Main component ────────────────────────────────────────────────────
 export default function Reports({ defaultTab } = {}) {
-  const [tab, setTab]         = useState(defaultTab || 'stock_balance');
-  const [data, setData]       = useState(null);
+  const [tab, setTab] = useState(defaultTab || 'stock_balance');
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [hotelName, setHotelName] = useState('Five Stop');
+  const [hotelName, setHotelName] = useState('Baba Roti  Café');
 
   // Filter & Search states
   const currentYearMonthStr = () => {
@@ -805,25 +802,25 @@ export default function Reports({ defaultTab } = {}) {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
   };
 
-  const [date, setDate]                             = useState(todayStr());
-  const [selectedMonth, setSelectedMonth]           = useState(currentYearMonthStr());
-  const [from, setFrom]                             = useState(startOfMonthStr());
-  const [to, setTo]                                 = useState(todayStr());
-  const [activePreset, setActivePreset]             = useState('month');
-  const [selectedCategory, setSelectedCategory]     = useState('all');
-  const [selectedStatus, setSelectedStatus]         = useState('all');
-  const [stockSearch, setStockSearch]               = useState('');
+  const [date, setDate] = useState(todayStr());
+  const [selectedMonth, setSelectedMonth] = useState(currentYearMonthStr());
+  const [from, setFrom] = useState(startOfMonthStr());
+  const [to, setTo] = useState(todayStr());
+  const [activePreset, setActivePreset] = useState('month');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [stockSearch, setStockSearch] = useState('');
 
   // Stock Balance view mode: 'detail' (detailed table) vs 'monthly_summary' (12-month evolution)
-  const [balanceViewMode, setBalanceViewMode]       = useState('detail');
+  const [balanceViewMode, setBalanceViewMode] = useState('detail');
   const [monthlyClosingData, setMonthlyClosingData] = useState(null);
   const [monthlyClosingLoading, setMonthlyClosingLoading] = useState(false);
-  const [summaryYear, setSummaryYear]               = useState(new Date().getFullYear());
+  const [summaryYear, setSummaryYear] = useState(new Date().getFullYear());
 
   // Item Ledger (Bin Card) modal state
   const [selectedLedgerMaterial, setSelectedLedgerMaterial] = useState(null);
-  const [ledgerLoading, setLedgerLoading]                   = useState(false);
-  const [ledgerData, setLedgerData]                         = useState(null);
+  const [ledgerLoading, setLedgerLoading] = useState(false);
+  const [ledgerData, setLedgerData] = useState(null);
 
   // Sync tab when navigated via sidebar
   useEffect(() => {
@@ -841,7 +838,7 @@ export default function Reports({ defaultTab } = {}) {
   useEffect(() => {
     api.get('/settings').then(res => {
       if (res.data?.hotelName) setHotelName(res.data.hotelName);
-    }).catch(() => {});
+    }).catch(() => { });
   }, []);
 
   const currentTab = TABS.find(t => t.key === tab) || TABS[1];
@@ -852,7 +849,7 @@ export default function Reports({ defaultTab } = {}) {
       try {
         const params = {};
         if (from) params.from = from;
-        if (to)   params.to   = to;
+        if (to) params.to = to;
         const res = await api.get('/reports/summary', { params });
         setData(res.data);
       } finally { setLoading(false); }
@@ -869,10 +866,10 @@ export default function Reports({ defaultTab } = {}) {
         // current static stock levels
       } else if (tab === 'stock_balance') {
         if (from) params.from = from;
-        if (to)   params.to   = to;
+        if (to) params.to = to;
         if (selectedCategory && selectedCategory !== 'all') params.category = selectedCategory;
-        if (selectedStatus && selectedStatus !== 'all')     params.status   = selectedStatus;
-        if (stockSearch.trim())                             params.search   = stockSearch.trim();
+        if (selectedStatus && selectedStatus !== 'all') params.status = selectedStatus;
+        if (stockSearch.trim()) params.search = stockSearch.trim();
       } else {
         params = { from, to };
       }
@@ -980,58 +977,58 @@ export default function Reports({ defaultTab } = {}) {
     if (!data) return [];
     if (tab === 'stock_balance' && data.items) {
       return data.items.map(m => ({
-        'Item Code':        m.code || '—',
-        'Material Name':    m.name,
-        'Category':         m.category,
-        'Unit':             m.unit,
-        'Opening Qty':      m.openingStock,
+        'Item Code': m.code || '—',
+        'Material Name': m.name,
+        'Category': m.category,
+        'Unit': m.unit,
+        'Opening Qty': m.openingStock,
         'Opening Val (ETB)': m.openingValue.toFixed(2),
-        'Cash GRV In':      m.cashGrvQty,
-        'Credit GRV In':    m.creditGrvQty,
-        'Fresh Bazaar In':  m.freshBazaarQty,
-        '+ve Adj In':       m.posAdjQty,
-        'Total In Qty':     m.totalInQty,
-        'Total In (ETB)':   m.totalInCost.toFixed(2),
-        '−ve Adj Out':      m.negAdjQty,
-        'Disposal Out':     m.disposalQty,
-        'Sales Out':        m.salesImportQty,
-        'Total Out Qty':    m.totalOutQty,
-        'Total Out (ETB)':  m.totalOutCost.toFixed(2),
-        'Closing Balance':  m.closingStock,
-        'Unit Cost (ETB)':  m.unitCost.toFixed(2),
+        'Cash GRV In': m.cashGrvQty,
+        'Credit GRV In': m.creditGrvQty,
+        'Fresh Bazaar In': m.freshBazaarQty,
+        '+ve Adj In': m.posAdjQty,
+        'Total In Qty': m.totalInQty,
+        'Total In (ETB)': m.totalInCost.toFixed(2),
+        '−ve Adj Out': m.negAdjQty,
+        'Disposal Out': m.disposalQty,
+        'Sales Out': m.salesImportQty,
+        'Total Out Qty': m.totalOutQty,
+        'Total Out (ETB)': m.totalOutCost.toFixed(2),
+        'Closing Balance': m.closingStock,
+        'Unit Cost (ETB)': m.unitCost.toFixed(2),
         'Closing Val (ETB)': m.closingValue.toFixed(2),
-        'Status':           m.status.replace('_', ' ').toUpperCase(),
+        'Status': m.status.replace('_', ' ').toUpperCase(),
       }));
     }
     if (tab === 'stock' && data.materials) {
       return data.materials.map(m => ({
-        'Material':         m.name,
-        'Category':         m.category || '',
-        'In Stock':         `${m.currentStock} ${m.unit}`,
-        'Reorder At':       `${m.reorderLevel} ${m.unit}`,
-        'Unit Cost (ETB)':  Number(m.unitCost || 0).toFixed(2),
-        'Value (ETB)':      (m.currentStock * m.unitCost).toFixed(2),
-        'Status':           m.status,
+        'Material': m.name,
+        'Category': m.category || '',
+        'In Stock': `${m.currentStock} ${m.unit}`,
+        'Reorder At': `${m.reorderLevel} ${m.unit}`,
+        'Unit Cost (ETB)': Number(m.unitCost || 0).toFixed(2),
+        'Value (ETB)': (m.currentStock * m.unitCost).toFixed(2),
+        'Status': m.status,
       }));
     }
     if (tab === 'purchases' && data.purchases) {
       return data.purchases.map(p => ({
-        'Date':             new Date(p.purchaseDate).toLocaleDateString(),
-        'Supplier':         p.supplier?.name || '—',
-        'Items':            p.items?.length ?? 0,
-        'Total (ETB)':      Number(p.totalAmount || 0).toFixed(2),
-        'Status':           p.status,
+        'Date': new Date(p.purchaseDate).toLocaleDateString(),
+        'Supplier': p.supplier?.name || '—',
+        'Items': p.items?.length ?? 0,
+        'Total (ETB)': Number(p.totalAmount || 0).toFixed(2),
+        'Status': p.status,
       }));
     }
     const txns = data.transactions || [];
     return txns.map(t => ({
-      'Date':               new Date(t.date).toLocaleString(),
-      'Voucher':            t.voucherNo || '—',
-      'Type':               VOUCHER_LABELS[t.voucherType] || t.voucherType || '—',
-      'Material':           t.material?.name || t.items?.[0]?.material?.name || '—',
-      'Qty':                t.quantity ?? '',
-      'Total (ETB)':        Number(t.totalAmount || 0).toFixed(2),
-      'By':                 t.performedBy?.name || '—',
+      'Date': new Date(t.date).toLocaleString(),
+      'Voucher': t.voucherNo || '—',
+      'Type': VOUCHER_LABELS[t.voucherType] || t.voucherType || '—',
+      'Material': t.material?.name || t.items?.[0]?.material?.name || '—',
+      'Qty': t.quantity ?? '',
+      'Total (ETB)': Number(t.totalAmount || 0).toFixed(2),
+      'By': t.performedBy?.name || '—',
     }));
   }, [data, tab]);
 
@@ -1085,22 +1082,20 @@ export default function Reports({ defaultTab } = {}) {
               <button
                 type="button"
                 onClick={() => setBalanceViewMode('detail')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
-                  balanceViewMode === 'detail'
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${balanceViewMode === 'detail'
                     ? 'bg-white text-emerald-800 shadow-xs'
                     : 'text-ink-600 hover:text-ink-900'
-                }`}
+                  }`}
               >
                 <Scale size={14} /> Monthly Balance Sheet
               </button>
               <button
                 type="button"
                 onClick={() => { setBalanceViewMode('monthly_summary'); loadMonthlyClosing(summaryYear); }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
-                  balanceViewMode === 'monthly_summary'
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${balanceViewMode === 'monthly_summary'
                     ? 'bg-white text-blue-700 shadow-xs'
                     : 'text-ink-600 hover:text-ink-900'
-                }`}
+                  }`}
               >
                 <Calendar size={14} /> 12-Month Closing Evolution
               </button>
@@ -1175,45 +1170,40 @@ export default function Reports({ defaultTab } = {}) {
                 <button
                   type="button"
                   onClick={() => applyPreset('month')}
-                  className={`px-3 py-1.5 rounded-lg transition-all ${
-                    activePreset === 'month' ? 'bg-white text-emerald-700 shadow-xs font-bold' : 'text-ink-600 hover:text-ink-900'
-                  }`}
+                  className={`px-3 py-1.5 rounded-lg transition-all ${activePreset === 'month' ? 'bg-white text-emerald-700 shadow-xs font-bold' : 'text-ink-600 hover:text-ink-900'
+                    }`}
                 >
                   This Month
                 </button>
                 <button
                   type="button"
                   onClick={() => applyPreset('last_month')}
-                  className={`px-3 py-1.5 rounded-lg transition-all ${
-                    activePreset === 'last_month' ? 'bg-white text-emerald-700 shadow-xs font-bold' : 'text-ink-600 hover:text-ink-900'
-                  }`}
+                  className={`px-3 py-1.5 rounded-lg transition-all ${activePreset === 'last_month' ? 'bg-white text-emerald-700 shadow-xs font-bold' : 'text-ink-600 hover:text-ink-900'
+                    }`}
                 >
                   Last Month
                 </button>
                 <button
                   type="button"
                   onClick={() => applyPreset('week')}
-                  className={`px-3 py-1.5 rounded-lg transition-all ${
-                    activePreset === 'week' ? 'bg-white text-emerald-700 shadow-xs font-bold' : 'text-ink-600 hover:text-ink-900'
-                  }`}
+                  className={`px-3 py-1.5 rounded-lg transition-all ${activePreset === 'week' ? 'bg-white text-emerald-700 shadow-xs font-bold' : 'text-ink-600 hover:text-ink-900'
+                    }`}
                 >
                   This Week
                 </button>
                 <button
                   type="button"
                   onClick={() => applyPreset('today')}
-                  className={`px-3 py-1.5 rounded-lg transition-all ${
-                    activePreset === 'today' ? 'bg-white text-emerald-700 shadow-xs font-bold' : 'text-ink-600 hover:text-ink-900'
-                  }`}
+                  className={`px-3 py-1.5 rounded-lg transition-all ${activePreset === 'today' ? 'bg-white text-emerald-700 shadow-xs font-bold' : 'text-ink-600 hover:text-ink-900'
+                    }`}
                 >
                   Today
                 </button>
                 <button
                   type="button"
                   onClick={() => applyPreset('all')}
-                  className={`px-3 py-1.5 rounded-lg transition-all ${
-                    activePreset === 'all' ? 'bg-white text-emerald-700 shadow-xs font-bold' : 'text-ink-600 hover:text-ink-900'
-                  }`}
+                  className={`px-3 py-1.5 rounded-lg transition-all ${activePreset === 'all' ? 'bg-white text-emerald-700 shadow-xs font-bold' : 'text-ink-600 hover:text-ink-900'
+                    }`}
                 >
                   All Time
                 </button>
@@ -1744,11 +1734,10 @@ export default function Reports({ defaultTab } = {}) {
                     {monthlyClosingData.months?.map((m) => (
                       <tr
                         key={m.month}
-                        className={`transition-colors ${
-                          m.isCurrent
+                        className={`transition-colors ${m.isCurrent
                             ? 'bg-blue-50/40 font-semibold'
                             : 'hover:bg-ink-50/50'
-                        }`}
+                          }`}
                       >
                         <td className="px-4 py-3 whitespace-nowrap">
                           <div className="flex items-center gap-2">
@@ -1913,11 +1902,10 @@ export default function Reports({ defaultTab } = {}) {
                               {row.voucherNo}
                             </td>
                             <td className="px-3 py-2 whitespace-nowrap">
-                              <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                                ['cash_grv','credit_grv','fresh_bazaar','pos_adjustment'].includes(row.voucherType)
+                              <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold ${['cash_grv', 'credit_grv', 'fresh_bazaar', 'pos_adjustment'].includes(row.voucherType)
                                   ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                                   : 'bg-rose-50 text-rose-700 border border-rose-200'
-                              }`}>
+                                }`}>
                                 {VOUCHER_LABELS[row.voucherType] || row.voucherType}
                               </span>
                             </td>
@@ -1982,7 +1970,7 @@ export default function Reports({ defaultTab } = {}) {
       {!loading && tab === 'daily' && data && (
         <div className="space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <Stat label="Total stock IN"  value={data.stockIn}  color="text-emerald-700" />
+            <Stat label="Total stock IN" value={data.stockIn} color="text-emerald-700" />
             <Stat label="Total stock OUT" value={data.stockOut} color="text-red-700" />
             <Stat label="Purchases value" value={`ETB ${(data.purchaseTotal || 0).toFixed(2)}`} />
           </div>
@@ -2003,13 +1991,13 @@ export default function Reports({ defaultTab } = {}) {
           <p className="text-sm font-semibold text-ink-600">All movements on {data.date}</p>
           <DataTable
             columns={[
-              { key: 'date',       header: 'Time',     render: r => new Date(r.date).toLocaleTimeString() },
-              { key: 'voucherType',header: 'Voucher',  render: r => <span className="text-xs font-semibold">{VOUCHER_LABELS[r.voucherType] ?? r.voucherType ?? '—'}</span> },
-              { key: 'voucherNo',  header: 'Ref',      render: r => <span className="font-mono text-xs">{r.voucherNo || '—'}</span> },
-              { key: 'material',   header: 'Material', render: r => r.material?.name ?? r.items?.[0]?.material?.name ?? '—' },
-              { key: 'quantity',   header: 'Qty',      render: r => <span className="tabular">{r.quantity ?? ''} {r.material?.unit ?? ''}</span> },
-              { key: 'type',       header: 'Direction',render: r => <span className={r.type === 'in' ? 'text-emerald-700 font-medium' : 'text-red-700 font-medium'}>{r.type === 'in' ? '↑ IN' : '↓ OUT'}</span> },
-              { key: 'performedBy',header: 'By',       render: r => r.performedBy?.name || '—' },
+              { key: 'date', header: 'Time', render: r => new Date(r.date).toLocaleTimeString() },
+              { key: 'voucherType', header: 'Voucher', render: r => <span className="text-xs font-semibold">{VOUCHER_LABELS[r.voucherType] ?? r.voucherType ?? '—'}</span> },
+              { key: 'voucherNo', header: 'Ref', render: r => <span className="font-mono text-xs">{r.voucherNo || '—'}</span> },
+              { key: 'material', header: 'Material', render: r => r.material?.name ?? r.items?.[0]?.material?.name ?? '—' },
+              { key: 'quantity', header: 'Qty', render: r => <span className="tabular">{r.quantity ?? ''} {r.material?.unit ?? ''}</span> },
+              { key: 'type', header: 'Direction', render: r => <span className={r.type === 'in' ? 'text-emerald-700 font-medium' : 'text-red-700 font-medium'}>{r.type === 'in' ? '↑ IN' : '↓ OUT'}</span> },
+              { key: 'performedBy', header: 'By', render: r => r.performedBy?.name || '—' },
             ]}
             data={data.transactions}
             emptyMessage="No movements today."
@@ -2021,12 +2009,12 @@ export default function Reports({ defaultTab } = {}) {
           PER-VOUCHER TABS (cash_grv / credit_grv / fresh_bazaar /
                             pos_adjustment / disposal / neg_adjustment)
       ════════════════════════════════════════════════════════════════ */}
-      {!loading && ['cash_grv','credit_grv','fresh_bazaar','pos_adjustment','disposal','neg_adjustment'].includes(tab) && data && (
+      {!loading && ['cash_grv', 'credit_grv', 'fresh_bazaar', 'pos_adjustment', 'disposal', 'neg_adjustment'].includes(tab) && data && (
         <div className="space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <Stat label="Vouchers"     value={data.count} />
+            <Stat label="Vouchers" value={data.count} />
             <Stat label="Total Amount" value={`ETB ${(data.totalAmount || 0).toFixed(2)}`}
-              color={['disposal','neg_adjustment'].includes(tab) ? 'text-red-700' : 'text-emerald-700'} />
+              color={['disposal', 'neg_adjustment'].includes(tab) ? 'text-red-700' : 'text-emerald-700'} />
             <Stat label="Total Qty moved" value={(data.totalQty || 0).toFixed(3)} />
           </div>
 
@@ -2042,8 +2030,8 @@ export default function Reports({ defaultTab } = {}) {
           </p>
           <VoucherTable
             data={data.transactions}
-            showSupplier={['cash_grv','credit_grv'].includes(tab)}
-            showReason={['disposal','neg_adjustment','pos_adjustment'].includes(tab)}
+            showSupplier={['cash_grv', 'credit_grv'].includes(tab)}
+            showReason={['disposal', 'neg_adjustment', 'pos_adjustment'].includes(tab)}
           />
         </div>
       )}
@@ -2059,17 +2047,17 @@ export default function Reports({ defaultTab } = {}) {
           </div>
           <DataTable
             columns={[
-              { key: 'name',         header: 'Material' },
-              { key: 'category',     header: 'Category' },
-              { key: 'currentStock', header: 'In Stock',     render: r => <span className="tabular">{r.currentStock} {r.unit}</span> },
-              { key: 'reorderLevel', header: 'Reorder At',   render: r => <span className="tabular">{r.reorderLevel} {r.unit}</span> },
-              { key: 'unitCost',     header: 'Unit Cost',    render: r => <span className="tabular">ETB {(r.unitCost || 0).toFixed(2)}</span> },
-              { key: 'value',        header: 'Value (ETB)',  render: r => <span className="tabular font-medium">ETB {(r.currentStock * r.unitCost).toFixed(2)}</span> },
+              { key: 'name', header: 'Material' },
+              { key: 'category', header: 'Category' },
+              { key: 'currentStock', header: 'In Stock', render: r => <span className="tabular">{r.currentStock} {r.unit}</span> },
+              { key: 'reorderLevel', header: 'Reorder At', render: r => <span className="tabular">{r.reorderLevel} {r.unit}</span> },
+              { key: 'unitCost', header: 'Unit Cost', render: r => <span className="tabular">ETB {(r.unitCost || 0).toFixed(2)}</span> },
+              { key: 'value', header: 'Value (ETB)', render: r => <span className="tabular font-medium">ETB {(r.currentStock * r.unitCost).toFixed(2)}</span> },
               {
                 key: 'status', header: 'Status',
                 render: r => {
                   if (r.status === 'out_of_stock') return <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">Out of stock</span>;
-                  if (r.status === 'low_stock')    return <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">Low stock</span>;
+                  if (r.status === 'low_stock') return <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">Low stock</span>;
                   return <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700">In stock</span>;
                 },
               },
@@ -2086,15 +2074,15 @@ export default function Reports({ defaultTab } = {}) {
         <div className="space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Stat label="Total purchases" value={data.count} />
-            <Stat label="Total value"     value={`ETB ${(data.totalAmount || 0).toFixed(2)}`} color="text-blue-700" />
+            <Stat label="Total value" value={`ETB ${(data.totalAmount || 0).toFixed(2)}`} color="text-blue-700" />
           </div>
           <DataTable
             columns={[
-              { key: 'purchaseDate', header: 'Date',     render: r => new Date(r.purchaseDate).toLocaleDateString() },
-              { key: 'supplier',     header: 'Supplier', render: r => r.supplier?.name },
-              { key: 'items',        header: 'Items',    render: r => r.items?.length },
-              { key: 'totalAmount',  header: 'Total',    render: r => <span className="tabular">ETB {(r.totalAmount || 0).toFixed(2)}</span> },
-              { key: 'status',       header: 'Status',   render: r => <span className="capitalize">{r.status}</span> },
+              { key: 'purchaseDate', header: 'Date', render: r => new Date(r.purchaseDate).toLocaleDateString() },
+              { key: 'supplier', header: 'Supplier', render: r => r.supplier?.name },
+              { key: 'items', header: 'Items', render: r => r.items?.length },
+              { key: 'totalAmount', header: 'Total', render: r => <span className="tabular">ETB {(r.totalAmount || 0).toFixed(2)}</span> },
+              { key: 'status', header: 'Status', render: r => <span className="capitalize">{r.status}</span> },
             ]}
             data={data.purchases}
           />
