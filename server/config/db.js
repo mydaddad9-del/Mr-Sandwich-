@@ -18,9 +18,10 @@ const connectDB = async () => {
     process.env.DATABASE_URL;
 
   if (!uri) {
-    throw new Error(
-      'Database configuration missing: MONGO_URI environment variable is not set on the server.'
-    );
+    const msg = 'Database configuration missing: MONGO_URI environment variable is not set on the server.';
+    console.error(`[DB] ${msg}`);
+    global.mongoConnectionError = msg;
+    return;
   }
 
   const MAX_RETRIES   = 5;

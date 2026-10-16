@@ -12,7 +12,6 @@ const morgan = require('morgan');
 const connectDB = require('./config/db');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
-connectDB();
 // ── Auto-seed default accounts on startup ─────────────────────────────
 const autoSeed = async () => {
   try {
@@ -38,33 +37,42 @@ const autoSeed = async () => {
     console.error('[SEED] Auto-seed error:', err.message);
   }
 };
-autoSeed();
+
+connectDB()
+  .then(() => autoSeed())
+  .catch((err) => {
+    console.error('[DB] Startup connect error:', err.message);
+    global.mongoConnectionError = err.message;
+  });
 
 const app = express();
 app.use(cors({ origin: process.env.CLIENT_URL || '*' }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 if (process.env.NODE_ENV !== 'production') app.use(morgan('dev'));
-// Ensure DB is connected for serverless requests
-app.use(async (req, res, next) => {
-  try {
-    await connectDB();
-    next();
-  } catch (err) {
-    next(err);
-  }
-});
 
+// Always accessible health & diagnostics endpoint
 app.get('/api/health', (req, res) => {
   const states = ['disconnected', 'connected', 'connecting', 'disconnecting'];
   const mongoose = require('mongoose');
   res.json({
     status: 'ok',
     service: 'hotel-stock-server',
-    mongoUriSet: !!process.env.MONGO_URI,
+    mongoUriSet: !!(process.env.MONGO_URI || process.env.MONGODB_URI || process.env.DATABASE_URL),
     mongoState: states[mongoose.connection.readyState] || 'unknown',
     mongoError: global.mongoConnectionError || null,
   });
+});
+
+// Ensure DB is connected for API requests
+app.use(async (req, res, next) => {
+  if (req.path === '/api/health') return next();
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.use('/api/auth', require('./routes/authRoutes'));
