@@ -29,15 +29,14 @@ const connectDB = async () => {
   const attempt = async (retryCount = 0) => {
     try {
       const conn = await mongoose.connect(uri, {
-        serverSelectionTimeoutMS: 30000, // 30 s — generous for Atlas cold start
-        socketTimeoutMS:          60000, // 60 s socket idle timeout
-        connectTimeoutMS:         30000, // 30 s TCP connect timeout
-        heartbeatFrequencyMS:     10000, // check connection health every 10 s
-        family: 4,                       // force IPv4
+        serverSelectionTimeoutMS: 10000,
+        heartbeatFrequencyMS: 10000,
       });
+      global.mongoConnectionError = null;
       console.log(`[DB] MongoDB connected: ${conn.connection.host}`);
       connectionPromise = null; // reset so future calls can reconnect if needed
     } catch (error) {
+      global.mongoConnectionError = error.message;
       console.error(`[DB] Connection attempt ${retryCount + 1}/${MAX_RETRIES} failed: ${error.message}`);
 
       if (retryCount < MAX_RETRIES - 1) {

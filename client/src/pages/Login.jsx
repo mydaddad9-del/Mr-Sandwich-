@@ -781,9 +781,9 @@ export default function Login() {
 
           {/* top bar */}
           <div className="login-topbar">
-            <span className="login-wordmark" aria-label="Baba Roti  Café">
-              <span className="login-wordmark__five">Five</span>
-              <span className="login-wordmark__stop">Stop</span>
+            <span className="login-wordmark" aria-label="Baba Roti Café">
+              <span className="login-wordmark__five">Baba</span>
+              <span className="login-wordmark__stop">Roti</span>
             </span>
             <div className="login-status" aria-live="polite">
               <span className="login-status__dot" aria-hidden="true" />

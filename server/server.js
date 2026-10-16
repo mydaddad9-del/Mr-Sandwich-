@@ -55,7 +55,17 @@ app.use(async (req, res, next) => {
   }
 });
 
-app.get('/api/health', (req, res) => res.json({ status: 'ok', service: 'hotel-stock-server' }));
+app.get('/api/health', (req, res) => {
+  const states = ['disconnected', 'connected', 'connecting', 'disconnecting'];
+  const mongoose = require('mongoose');
+  res.json({
+    status: 'ok',
+    service: 'hotel-stock-server',
+    mongoUriSet: !!process.env.MONGO_URI,
+    mongoState: states[mongoose.connection.readyState] || 'unknown',
+    mongoError: global.mongoConnectionError || null,
+  });
+});
 
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
