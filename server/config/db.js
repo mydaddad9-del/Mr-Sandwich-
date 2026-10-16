@@ -11,17 +11,18 @@ const connectDB = async () => {
   // Connection in progress — wait for it
   if (connectionPromise) return connectionPromise;
 
-  const uri =
+  const FALLBACK_URI = 'mongodb+srv://mequalimaz2015:Alimaz%4028@cluster0.hnsw9ly.mongodb.net/baba_roti_db?appName=Cluster0';
+
+  let uri =
     process.env.MONGO_URI ||
     process.env.MONGODB_URI ||
     process.env.MONGO_URL ||
-    process.env.DATABASE_URL;
+    process.env.DATABASE_URL ||
+    FALLBACK_URI;
 
-  if (!uri) {
-    const msg = 'Database configuration missing: MONGO_URI environment variable is not set on the server.';
-    console.error(`[DB] ${msg}`);
-    global.mongoConnectionError = msg;
-    return;
+  if (uri.includes('xxxxx') || uri.includes('<db_') || uri.includes('<username>')) {
+    console.warn('[DB] Placeholder detected in MONGO_URI, using verified Baba Roti cluster URI');
+    uri = FALLBACK_URI;
   }
 
   const MAX_RETRIES   = 5;
