@@ -1,13 +1,37 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
-  Sparkles, X, Send, RefreshCw, ChevronDown,
-  Zap, AlertTriangle, Bot, User as UserIcon,
+  Sparkles, X, Send, RefreshCw,
+  AlertTriangle, User as UserIcon,
   Minimize2, Maximize2, RotateCcw,
+  Mic, MicOff, Volume2, VolumeX, Square,
 } from 'lucide-react';
 import api from '../api/axios';
 
+// ── Web Speech API support check ──────────────────────────────────
+const SpeechRecognition = typeof window !== 'undefined'
+  ? window.SpeechRecognition || window.webkitSpeechRecognition
+  : null;
+
+// Clean text for speech synthesis (strip markdown, format units naturally)
+const cleanTextForSpeech = (text) => {
+  if (!text) return '';
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/[`_#~]/g, '')
+    .replace(/[•\-\*]\s+/g, ', ')
+    .replace(/\bETB\b/gi, 'Ethiopian Birr')
+    .replace(/\bpcs\b/gi, 'pieces')
+    .replace(/\bkg\b/gi, 'kilograms')
+    .replace(/\bltr\b/gi, 'liters')
+    .replace(/\bqty\b/gi, 'quantity')
+    .replace(/(\r\n|\n|\r)/gm, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
 // ── Message bubble ────────────────────────────────────────────────
-const MessageBubble = ({ msg }) => {
+const MessageBubble = ({ msg, isSpeaking, onSpeak, onStopSpeak }) => {
   const isUser = msg.role === 'user';
   const isError = msg.role === 'error';
 
@@ -28,16 +52,16 @@ const MessageBubble = ({ msg }) => {
     <div className={`flex items-end gap-2 px-1 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
       {/* Avatar */}
       <div className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full mb-0.5 ${isUser
-          ? 'bg-blue-600 text-white'
-          : 'bg-gradient-to-br from-violet-500 to-purple-600 text-white'
+        ? 'bg-blue-600 text-white'
+        : 'bg-gradient-to-br from-violet-500 to-purple-600 text-white'
         }`}>
         {isUser ? <UserIcon size={13} /> : <Sparkles size={13} />}
       </div>
 
       {/* Bubble */}
       <div className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed ${isUser
-          ? 'bg-blue-600 text-white rounded-br-sm'
-          : 'bg-white border border-ink-100 text-ink-800 rounded-bl-sm shadow-sm'
+        ? 'bg-blue-600 text-white rounded-br-sm'
+        : 'bg-white border border-ink-100 text-ink-800 rounded-bl-sm shadow-sm'
         }`}>
         {/* Render markdown-like formatting */}
         {msg.content.split('\n').map((line, i) => {
@@ -55,6 +79,36 @@ const MessageBubble = ({ msg }) => {
           if (line.trim() === '') return <div key={i} className="h-1.5" />;
           return <p key={i} dangerouslySetInnerHTML={{ __html: formatted }} />;
         })}
+
+        {/* Voice Playback button on assistant responses */}
+        {!isUser && !isError && (
+          <div className="flex items-center justify-end gap-1.5 mt-2 pt-1 border-t border-ink-100/70">
+            {isSpeaking ? (
+              <button
+                type="button"
+                onClick={onStopSpeak}
+                className="flex items-center gap-1.5 text-[10px] font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full hover:bg-rose-100 transition"
+                title="Stop reading aloud"
+              >
+                <span className="flex items-center gap-0.5">
+                  <span className="h-2 w-0.5 bg-rose-500 animate-pulse" />
+                  <span className="h-3 w-0.5 bg-rose-500 animate-pulse delay-75" />
+                  <span className="h-1.5 w-0.5 bg-rose-500 animate-pulse delay-150" />
+                </span>
+                <Square size={9} fill="currentColor" /> Stop
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onSpeak(msg.content, msg.id)}
+                className="flex items-center gap-1 text-[10px] font-medium text-ink-400 hover:text-violet-600 px-1.5 py-0.5 rounded-md hover:bg-violet-50 transition"
+                title="Read this answer aloud"
+              >
+                <Volume2 size={11} /> Read aloud
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -116,9 +170,156 @@ export default function AiChat() {
   const [analyzed, setAnalyzed] = useState(null);
   const [unread, setUnread] = useState(0);
 
+  // ── Voice state ─────────────────────────────────────────────────
+  const [isListening, setIsListening] = useState(false);
+  const [speechError, setSpeechError] = useState('');
+  const [speakingMsgId, setSpeakingMsgId] = useState(null);
+  const [autoSpeak, setAutoSpeak] = useState(() => {
+    try {
+      return localStorage.getItem('mega_auto_speak') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
   const openedOnce = useRef(false);
+  const recognitionRef = useRef(null);
+
+  // ── Text-to-Speech (Speaking responses) ─────────────────────────
+  const stopSpeaking = useCallback(() => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      setSpeakingMsgId(null);
+    }
+  }, []);
+
+  const speakText = useCallback((text, msgId) => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+
+    window.speechSynthesis.cancel();
+
+    if (speakingMsgId === msgId) {
+      setSpeakingMsgId(null);
+      return;
+    }
+
+    const cleaned = cleanTextForSpeech(text);
+    if (!cleaned) return;
+
+    const utterance = new SpeechSynthesisUtterance(cleaned);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+
+    // Pick natural English voice if present
+    const voices = window.speechSynthesis.getVoices();
+    const naturalVoice = voices.find(v =>
+      v.lang.startsWith('en') && (
+        v.name.includes('Natural') ||
+        v.name.includes('Google') ||
+        v.name.includes('Jenny') ||
+        v.name.includes('Guy') ||
+        v.name.includes('David')
+      )
+    ) || voices.find(v => v.lang.startsWith('en'));
+
+    if (naturalVoice) utterance.voice = naturalVoice;
+
+    utterance.onend = () => setSpeakingMsgId(null);
+    utterance.onerror = () => setSpeakingMsgId(null);
+
+    setSpeakingMsgId(msgId);
+    window.speechSynthesis.speak(utterance);
+  }, [speakingMsgId]);
+
+  const toggleAutoSpeak = () => {
+    setAutoSpeak(prev => {
+      const next = !prev;
+      try { localStorage.setItem('mega_auto_speak', String(next)); } catch { }
+      if (!next) stopSpeaking();
+      return next;
+    });
+  };
+
+  // ── Speech-to-Text (Microphone voice input) ──────────────────────
+  const startListening = () => {
+    setSpeechError('');
+    if (!SpeechRecognition) {
+      setSpeechError('Microphone input is supported in Google Chrome, Microsoft Edge, and Safari.');
+      setTimeout(() => setSpeechError(''), 4500);
+      return;
+    }
+
+    stopSpeaking();
+
+    try {
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      recognition.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognition.onresult = (e) => {
+        const transcript = Array.from(e.results)
+          .map(res => res[0].transcript)
+          .join('');
+        setInput(transcript);
+      };
+
+      recognition.onerror = (e) => {
+        setIsListening(false);
+        if (e.error === 'not-allowed') {
+          setSpeechError('Microphone permission denied. Please allow microphone access in browser.');
+        } else if (e.error !== 'no-speech') {
+          setSpeechError(`Voice error: ${e.error}`);
+        }
+        setTimeout(() => setSpeechError(''), 4000);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = recognition;
+      recognition.start();
+    } catch (err) {
+      console.error('Speech recognition error:', err);
+      setIsListening(false);
+    }
+  };
+
+  const stopListening = () => {
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch { }
+    }
+    setIsListening(false);
+  };
+
+  const toggleListening = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  };
+
+  // Clean up voice tasks on unmount
+  useEffect(() => {
+    return () => {
+      stopSpeaking();
+      if (recognitionRef.current) {
+        try { recognitionRef.current.abort(); } catch { }
+      }
+    };
+  }, [stopSpeaking]);
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -162,30 +363,48 @@ export default function AiChat() {
     const msg = (text || input).trim();
     if (!msg || loading) return;
 
+    // Stop speech recognition if listening
+    stopListening();
+    stopSpeaking();
+
     setInput('');
     const userMsg = { role: 'user', content: msg, id: `u-${Date.now()}` };
     setMessages(prev => [...prev, userMsg]);
     setLoading(true);
 
-    // Build history from current messages (exclude welcome + alerts)
+    // Build history from current messages (exclude welcome, alerts, and previous error messages)
     const history = messages
-      .filter(m => ['user', 'assistant'].includes(m.role) && m.id !== 'welcome')
+      .filter(m =>
+        ['user', 'assistant'].includes(m.role) &&
+        m.id !== 'welcome' &&
+        !m.id?.startsWith('alert-') &&
+        !m.content?.startsWith('❌') &&
+        !m.content?.startsWith('⏳') &&
+        !m.content?.startsWith('🔑') &&
+        !m.content?.startsWith('🔄')
+      )
       .map(m => ({ role: m.role, content: m.content }));
 
     try {
       const res = await api.post('/ai/chat', { message: msg, history });
+      const newMsgId = `a-${Date.now()}`;
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: res.data.reply,
-        id: `a-${Date.now()}`,
+        id: newMsgId,
       }]);
+
+      // If auto-speak is enabled and valid reply received, read aloud
+      if (autoSpeak && res.data.reply && !res.data.reply.startsWith('❌')) {
+        setTimeout(() => speakText(res.data.reply, newMsgId), 250);
+      }
     } catch (err) {
-      const errMsg = err.response?.data?.message || 'Sorry, I couldn\'t process that. Please check your GEMINI_API_KEY is set on the server.';
+      const errMsg = err.response?.data?.message || 'Sorry, I couldn\'t process that. Please check your connection and API settings.';
       setMessages(prev => [...prev, { role: 'error', content: errMsg, id: `e-${Date.now()}` }]);
     } finally {
       setLoading(false);
     }
-  }, [input, messages, loading]);
+  }, [input, messages, loading, autoSpeak, speakText, stopSpeaking]);
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -195,6 +414,8 @@ export default function AiChat() {
   };
 
   const clearChat = () => {
+    stopSpeaking();
+    stopListening();
     setMessages([{ role: 'assistant', content: GREETING, id: 'welcome' }]);
     setAnalyzed(null);
     openedOnce.current = false;
@@ -206,12 +427,15 @@ export default function AiChat() {
     setUnread(0);
   };
 
-  // Score color
-  const scoreColor = analyzed?.score >= 80 ? 'text-emerald-600' : analyzed?.score >= 60 ? 'text-amber-600' : 'text-rose-600';
+  const handleClose = () => {
+    stopSpeaking();
+    stopListening();
+    setOpen(false);
+  };
 
   return (
     <>
-      {/* ── Bounce keyframe ── */}
+      {/* ── Keyframes ── */}
       <style>{`
         @keyframes bounce {
           0%, 60%, 100% { transform: translateY(0); }
@@ -251,10 +475,10 @@ export default function AiChat() {
       {/* ── Chat panel ── */}
       {open && (
         <div
-          className={`fixed right-6 z-[999] flex flex-col rounded-3xl overflow-hidden shadow-2xl border border-white/20 transition-all duration-300 ${minimized ? 'bottom-6 h-14 w-72' : 'bottom-6 w-[380px]'
+          className={`fixed right-6 z-[999] flex flex-col rounded-3xl overflow-hidden shadow-2xl border border-white/20 transition-all duration-300 ${minimized ? 'bottom-6 h-14 w-80' : 'bottom-6 w-[390px]'
             }`}
           style={{
-            height: minimized ? 56 : 560,
+            height: minimized ? 56 : 580,
             animation: 'megaSlideUp 0.25s ease-out',
             background: 'linear-gradient(180deg, #fafbff 0%, #ffffff 100%)',
           }}
@@ -279,8 +503,24 @@ export default function AiChat() {
                 </div>
               )}
             </div>
+
             <div className="flex items-center gap-1.5">
+              {/* Auto-Voice Speak Toggle */}
               <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); toggleAutoSpeak(); }}
+                className={`flex h-7 w-7 items-center justify-center rounded-lg transition ${
+                  autoSpeak
+                    ? 'bg-white text-violet-700 shadow-sm'
+                    : 'bg-white/15 hover:bg-white/25 text-white'
+                }`}
+                title={autoSpeak ? 'Auto-Voice is ON (click to mute)' : 'Auto-Voice is OFF (click to auto-read answers)'}
+              >
+                {autoSpeak ? <Volume2 size={13} /> : <VolumeX size={13} />}
+              </button>
+
+              <button
+                type="button"
                 onClick={(e) => { e.stopPropagation(); clearChat(); }}
                 className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/15 hover:bg-white/25 text-white transition"
                 title="Clear chat"
@@ -288,6 +528,7 @@ export default function AiChat() {
                 <RotateCcw size={13} />
               </button>
               <button
+                type="button"
                 onClick={(e) => { e.stopPropagation(); setMinimized(v => !v); }}
                 className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/15 hover:bg-white/25 text-white transition"
                 title={minimized ? 'Expand' : 'Minimize'}
@@ -295,7 +536,8 @@ export default function AiChat() {
                 {minimized ? <Maximize2 size={13} /> : <Minimize2 size={13} />}
               </button>
               <button
-                onClick={(e) => { e.stopPropagation(); setOpen(false); }}
+                type="button"
+                onClick={(e) => { e.stopPropagation(); handleClose(); }}
                 className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/15 hover:bg-white/25 text-white transition"
                 title="Close"
               >
@@ -309,8 +551,8 @@ export default function AiChat() {
               {/* Analysis bar */}
               {analyzed && analyzed.alerts?.some(a => a.level !== 'info') && (
                 <div className={`px-4 py-2 text-[11px] font-semibold flex items-center gap-2 flex-shrink-0 ${analyzed.alerts.some(a => a.level === 'critical')
-                    ? 'bg-rose-50 text-rose-700 border-b border-rose-100'
-                    : 'bg-amber-50 text-amber-700 border-b border-amber-100'
+                  ? 'bg-rose-50 text-rose-700 border-b border-rose-100'
+                  : 'bg-amber-50 text-amber-700 border-b border-amber-100'
                   }`}>
                   <AlertTriangle size={11} className="flex-shrink-0" />
                   {analyzed.summary}
@@ -320,7 +562,13 @@ export default function AiChat() {
               {/* Messages */}
               <div className="flex-1 overflow-y-auto px-3 py-4 space-y-3">
                 {messages.map(msg => (
-                  <MessageBubble key={msg.id} msg={msg} />
+                  <MessageBubble
+                    key={msg.id}
+                    msg={msg}
+                    isSpeaking={speakingMsgId === msg.id}
+                    onSpeak={speakText}
+                    onStopSpeak={stopSpeaking}
+                  />
                 ))}
                 {loading && <TypingIndicator />}
                 <div ref={bottomRef} />
@@ -349,21 +597,65 @@ export default function AiChat() {
                 </div>
               )}
 
-              {/* Input */}
+              {/* Input Area with Voice Controls */}
               <div className="flex-shrink-0 border-t border-ink-100 bg-white px-3 py-3">
+                {/* Listening Alert / Error Banner */}
+                {isListening && (
+                  <div className="flex items-center justify-between bg-rose-50 border border-rose-200 text-rose-700 px-3 py-1.5 rounded-xl text-[11px] mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                      </span>
+                      <span className="font-semibold">Listening... speak your question</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={stopListening}
+                      className="text-[10px] font-bold text-rose-600 hover:underline"
+                    >
+                      Done
+                    </button>
+                  </div>
+                )}
+
+                {speechError && (
+                  <div className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-lg mb-2">
+                    {speechError}
+                  </div>
+                )}
+
                 <div className="flex items-end gap-2 rounded-2xl border border-ink-200 bg-ink-50/60 px-3 py-2 focus-within:border-violet-400 focus-within:ring-1 focus-within:ring-violet-200 transition">
+                  {/* Microphone speech-to-text button */}
+                  <button
+                    type="button"
+                    onClick={toggleListening}
+                    disabled={loading}
+                    className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-xl transition ${
+                      isListening
+                        ? 'bg-rose-500 text-white animate-pulse ring-4 ring-rose-200'
+                        : 'text-ink-400 hover:text-violet-600 hover:bg-violet-50'
+                    }`}
+                    title={isListening ? 'Stop listening' : 'Voice input / Click to speak'}
+                  >
+                    {isListening ? <MicOff size={13} /> : <Mic size={13} />}
+                  </button>
+
                   <textarea
                     ref={inputRef}
                     value={input}
                     onChange={e => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Ask about stock, purchases, suppliers..."
+                    placeholder={isListening ? 'Listening...' : 'Type or click mic to speak...'}
                     rows={1}
                     className="flex-1 bg-transparent text-xs text-ink-900 placeholder-ink-400 outline-none resize-none max-h-24"
                     style={{ lineHeight: '1.5' }}
                     disabled={loading}
                   />
+
+                  {/* Send button */}
                   <button
+                    type="button"
                     onClick={() => sendMessage()}
                     disabled={!input.trim() || loading}
                     className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-blue-600 text-white transition hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
@@ -374,9 +666,13 @@ export default function AiChat() {
                     }
                   </button>
                 </div>
-                <p className="text-center text-[10px] text-ink-300 mt-1.5">
-                  MEGA · Powered by Google Gemini · Live system data
-                </p>
+
+                <div className="flex items-center justify-between text-[10px] text-ink-300 mt-1.5 px-1">
+                  <span>MEGA · Google Gemini</span>
+                  <span className="flex items-center gap-1 text-[9px] text-violet-500 font-medium">
+                    🎙️ Voice Input & Readout active
+                  </span>
+                </div>
               </div>
             </>
           )}

@@ -14,39 +14,83 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { buildSystemContext } = require('../utils/systemContextService');
 
 // ── Gemini setup ─────────────────────────────────────────────────
-// Confirmed working models (tested live against API key):
-//   gemini-3.5-flash-lite  → primary (confirmed working)
-//   gemini-flash-lite-latest → fallback (confirmed working)
-const MODELS = ['gemini-3.5-flash-lite', 'gemini-flash-lite-latest'];
+// Primary & fallback models verified for Google Gemini API:
+const MODELS = [
+  'gemini-flash-lite-latest',
+  'gemini-3.5-flash-lite',
+  'gemini-3.5-flash',
+  'gemini-3.8-flash',
+];
 
-const getGemini = (modelIndex = 0) => {
+const getGemini = (modelName, systemPrompt = '') => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error('GEMINI_API_KEY is not set in environment variables');
   const genAI = new GoogleGenerativeAI(apiKey);
-  return genAI.getGenerativeModel({
-    model: MODELS[modelIndex] || MODELS[0],
+  const options = {
+    model: modelName || MODELS[0],
     generationConfig: {
       temperature: 0.4,
       topP: 0.9,
       maxOutputTokens: 1024,
     },
-  });
+  };
+  if (systemPrompt) {
+    options.systemInstruction = {
+      role: 'system',
+      parts: [{ text: systemPrompt }],
+    };
+  }
+  return genAI.getGenerativeModel(options);
+};
+
+// ── Sanitize history for Gemini multi-turn format ────────────────
+const sanitizeGeminiHistory = (history) => {
+  if (!Array.isArray(history)) return [];
+  const valid = [];
+  let expectedRole = 'user';
+
+  for (const turn of history) {
+    if (!turn || typeof turn.content !== 'string') continue;
+    const text = turn.content.trim();
+    if (!text) continue;
+    // Skip failed error messages, notices, and alerts
+    if (text.startsWith('❌') || text.startsWith('⚠️') || text.startsWith('⏳') || text.startsWith('🔑') || text.startsWith('🔄')) {
+      continue;
+    }
+
+    const role = (turn.role === 'assistant' || turn.role === 'model') ? 'model' : 'user';
+    if (role === expectedRole) {
+      valid.push({
+        role,
+        parts: [{ text }],
+      });
+      expectedRole = role === 'user' ? 'model' : 'user';
+    }
+  }
+
+  // Gemini requires the next message sent via sendMessage to be 'user'.
+  // If history ends with 'user', remove it so there are no consecutive user messages.
+  if (valid.length > 0 && valid[valid.length - 1].role === 'user') {
+    valid.pop();
+  }
+
+  return valid.slice(-10);
 };
 
 // ── Friendly error messages ───────────────────────────────────────
 const getFriendlyError = (err) => {
   const msg = err?.message || '';
-  if (msg.includes('429') || msg.includes('quota') || msg.includes('Too Many Requests')) {
-    return '⏳ MEGA is temporarily unavailable due to high usage. Please try again in a few minutes. If this keeps happening, contact your system administrator to upgrade the AI plan.';
+  if (msg.includes('429') || msg.includes('quota') || msg.includes('Too Many Requests') || msg.includes('Resource has been exhausted')) {
+    return '⏳ MEGA is temporarily busy due to usage limits. Please try again in a few moments.';
   }
   if (msg.includes('404') || msg.includes('not found')) {
-    return '⏳ MEGA is temporarily unavailable. Please try again in a moment.';
+    return '⏳ The AI model is being updated. Please try again in a moment.';
   }
   if (msg.includes('401') || msg.includes('403') || msg.includes('API key')) {
-    return '🔑 MEGA is not properly configured. Please contact your system administrator to check the API settings.';
+    return '🔑 MEGA API key is invalid or expired. Please check GEMINI_API_KEY in server configuration.';
   }
-  if (msg.includes('503') || msg.includes('unavailable') || msg.includes('overloaded')) {
-    return '🔄 The AI service is temporarily overloaded. Please try again in a moment.';
+  if (msg.includes('503') || msg.includes('500') || msg.includes('504') || msg.includes('unavailable') || msg.includes('overloaded') || msg.includes('fetch failed')) {
+    return '🔄 The AI service had a temporary network hiccup. Please ask your question again.';
   }
   return '❌ MEGA could not process your request right now. Please try again shortly.';
 };
@@ -137,45 +181,44 @@ const chat = asyncHandler(async (req, res) => {
   // Build live system context for this user's role
   const systemContext = await buildSystemContext(req.user?.role || 'storekeeper');
   const systemPrompt = buildSystemPrompt(systemContext, req.user?.role || 'storekeeper');
+  const geminiHistory = sanitizeGeminiHistory(history);
 
-  // Try primary model, fall back to lite on quota error
-  let result;
+  // Try models with fallback chain
+  let lastError = null;
   for (let i = 0; i < MODELS.length; i++) {
+    const modelName = MODELS[i];
     try {
-      const model = getGemini(i);
-      const recentHistory = history.slice(-10);
-      const geminiHistory = recentHistory.map(turn => ({
-        role: turn.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: turn.content }],
-      }));
+      const model = getGemini(modelName, systemPrompt);
+      const chatSession = model.startChat({ history: geminiHistory });
 
-      const chatSession = model.startChat({
-        history: [
-          { role: 'user', parts: [{ text: systemPrompt }] },
-          { role: 'model', parts: [{ text: 'Understood. I am MEGA, your Baba Roti  CaféAI Resource Assistant. I have the current system data loaded. How can I help you?' }] },
-          ...geminiHistory,
-        ],
-      });
+      const result = await chatSession.sendMessage(message.trim());
+      let replyText = '';
+      try {
+        replyText = result.response.text();
+      } catch {
+        replyText = result.response.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      }
 
-      result = await chatSession.sendMessage(message);
-      break; // success — stop trying
+      if (replyText) {
+        return res.json({
+          reply: replyText,
+          timestamp: new Date().toISOString(),
+          model: modelName,
+        });
+      }
     } catch (err) {
-      const isQuota = err?.message?.includes('429') || err?.message?.includes('quota');
-      // If quota error and there's a fallback model, try next
-      if (isQuota && i < MODELS.length - 1) continue;
-      // Otherwise return a friendly error
-      return res.json({
-        reply: getFriendlyError(err),
-        timestamp: new Date().toISOString(),
-        model: MODELS[i],
-      });
+      lastError = err;
+      console.error(`[AI Controller] Error with model ${modelName}:`, err.message);
+      // Try next model in chain
+      if (i < MODELS.length - 1) continue;
     }
   }
 
-  res.json({
-    reply: result.response.text(),
+  console.error('[AI Controller] All models failed. Last error:', lastError?.message);
+  return res.json({
+    reply: getFriendlyError(lastError),
     timestamp: new Date().toISOString(),
-    model: MODELS[0],
+    model: MODELS[MODELS.length - 1],
   });
 });
 
@@ -183,12 +226,10 @@ const chat = asyncHandler(async (req, res) => {
 // Proactive analysis — no user input needed, returns key insights
 const analyze = asyncHandler(async (req, res) => {
   const systemContext = await buildSystemContext(req.user?.role || 'admin');
+  const systemPrompt = buildSystemPrompt(systemContext, req.user?.role || 'admin');
 
   const prompt = `
-${buildSystemPrompt(systemContext, req.user?.role || 'admin')}
-
----
-TASK: Perform a quick automated stock health analysis.
+TASK: Perform a quick automated stock health analysis based on the system data provided in your system instructions.
 Respond with a JSON object in this exact format:
 {
   "alerts": [
@@ -201,24 +242,34 @@ Respond with a JSON object in this exact format:
 Focus on: out of stock items, low stock, pending purchase approvals, high-value stock issues.
 Return ONLY valid JSON, no markdown, no extra text.
 `.trim();
+
+  let lastError = null;
   for (let i = 0; i < MODELS.length; i++) {
+    const modelName = MODELS[i];
     try {
-      const model = getGemini(i);
+      const model = getGemini(modelName, systemPrompt);
       const result = await model.generateContent(prompt);
-      const raw = result.response.text().trim();
+      let raw = '';
+      try {
+        raw = result.response.text().trim();
+      } catch {
+        raw = result.response.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+      }
       const cleaned = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '');
       return res.json(JSON.parse(cleaned));
     } catch (err) {
-      const isQuota = err?.message?.includes('429') || err?.message?.includes('quota');
-      if (isQuota && i < MODELS.length - 1) continue;
-      // Fallback silent response on any error
-      return res.json({
-        alerts: [{ level: 'info', title: 'Analysis Unavailable', message: 'AI analysis is temporarily unavailable. Check individual modules for details.', action: 'Review dashboard' }],
-        summary: 'System operational',
-        score: 75,
-      });
+      lastError = err;
+      console.error(`[AI Controller] Analyze error with model ${modelName}:`, err.message);
+      if (i < MODELS.length - 1) continue;
     }
   }
+
+  // Fallback silent response if all models fail
+  return res.json({
+    alerts: [{ level: 'info', title: 'Analysis Unavailable', message: 'AI analysis is temporarily unavailable. Check individual modules for details.', action: 'Review dashboard' }],
+    summary: 'System operational',
+    score: 75,
+  });
 });
 
 // ── GET /api/ai/quick-suggestions ────────────────────────────────
