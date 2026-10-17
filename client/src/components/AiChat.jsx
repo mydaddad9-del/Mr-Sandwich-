@@ -626,39 +626,40 @@ export default function AiChat() {
                 )}
 
                 <div className="flex items-end gap-2 rounded-2xl border border-ink-200 bg-ink-50/60 px-3 py-2 focus-within:border-violet-400 focus-within:ring-1 focus-within:ring-violet-200 transition">
-                  {/* Microphone speech-to-text button */}
-                  <button
-                    type="button"
-                    onClick={toggleListening}
-                    disabled={loading}
-                    className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-xl transition ${
-                      isListening
-                        ? 'bg-rose-500 text-white animate-pulse ring-4 ring-rose-200'
-                        : 'text-ink-400 hover:text-violet-600 hover:bg-violet-50'
-                    }`}
-                    title={isListening ? 'Stop listening' : 'Voice input / Click to speak'}
-                  >
-                    {isListening ? <MicOff size={13} /> : <Mic size={13} />}
-                  </button>
-
                   <textarea
                     ref={inputRef}
                     value={input}
                     onChange={e => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder={isListening ? 'Listening...' : 'Type or click mic to speak...'}
+                    placeholder={isListening ? 'Listening... Speak now' : 'Ask about stock, or click mic...'}
                     rows={1}
                     className="flex-1 bg-transparent text-xs text-ink-900 placeholder-ink-400 outline-none resize-none max-h-24"
                     style={{ lineHeight: '1.5' }}
                     disabled={loading}
                   />
 
+                  {/* Microphone speech-to-text button (positioned right next to Send button) */}
+                  <button
+                    type="button"
+                    onClick={toggleListening}
+                    disabled={loading}
+                    className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-xl transition shadow-xs ${
+                      isListening
+                        ? 'bg-rose-500 text-white animate-pulse ring-4 ring-rose-200'
+                        : 'bg-violet-100 text-violet-700 hover:bg-violet-200 active:scale-95'
+                    }`}
+                    title={isListening ? 'Stop listening' : 'Voice input / Click to speak'}
+                  >
+                    {isListening ? <MicOff size={13} /> : <Mic size={13} />}
+                  </button>
+
                   {/* Send button */}
                   <button
                     type="button"
                     onClick={() => sendMessage()}
                     disabled={!input.trim() || loading}
-                    className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-blue-600 text-white transition hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-blue-600 text-white transition hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-xs"
+                    title="Send message"
                   >
                     {loading
                       ? <RefreshCw size={12} className="animate-spin" />
