@@ -67,17 +67,21 @@ const TrailTimeline = ({ trail = [] }) => (
   </div>
 );
 
+// ── In-memory client cache for instant transitions ─────────────
+let cachedRequests = null;
+let cachedSummary = null;
+
 // ════════════════════════════════════════════════════════════════
 // MAIN PAGE
 // ════════════════════════════════════════════════════════════════
 export default function StockIssueRequest() {
   const { user, can } = useAuth();
 
-  // ── Data state ───────────────────────────────────────────────
-  const [requests,  setRequests]  = useState([]);
+  // ── Data state (instantly restored from cache if previously visited) ──
+  const [requests,  setRequests]  = useState(() => cachedRequests || []);
   const [materials, setMaterials] = useState([]);
-  const [summary,   setSummary]   = useState({});
-  const [loading,   setLoading]   = useState(true);
+  const [summary,   setSummary]   = useState(() => cachedSummary || {});
+  const [loading,   setLoading]   = useState(() => !cachedRequests);
   const [refreshing, setRefreshing] = useState(false);
 
   // ── Filters ──────────────────────────────────────────────────
@@ -111,18 +115,23 @@ export default function StockIssueRequest() {
   // ── Issue qty overrides ──────────────────────────────────────
   const [issueQtys, setIssueQtys] = useState({});
 
-  // ── Load data — split into fast (page load) + lazy (modal only) ────
+  // ── Load data — ultra fast with stale-while-revalidate ─────────
   const load = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
-    else setLoading(true);
+    else if (!cachedRequests) setLoading(true);
+
     try {
-      // Only load requests + summary on page load — fast
+      // Load requests + summary in parallel with fast projection
       const [reqRes, sumRes] = await Promise.all([
-        api.get('/stock-requests'),
+        api.get('/stock-requests?limit=100'),
         api.get('/stock-requests/summary'),
       ]);
-      setRequests(Array.isArray(reqRes.data) ? reqRes.data : []);
-      setSummary(sumRes.data || {});
+      const data = Array.isArray(reqRes.data) ? reqRes.data : [];
+      const sum  = sumRes.data || {};
+      cachedRequests = data;
+      cachedSummary  = sum;
+      setRequests(data);
+      setSummary(sum);
     } catch (err) {
       console.error('Failed to load stock requests', err);
     } finally {

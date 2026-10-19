@@ -120,6 +120,10 @@ const stockRequestSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+stockRequestSchema.index({ deletedAt: 1, createdAt: -1 });
+stockRequestSchema.index({ deletedAt: 1, status: 1 });
+stockRequestSchema.index({ deletedAt: 1, status: 1, issuedAt: -1 });
+stockRequestSchema.index({ deletedAt: 1, department: 1 });
 stockRequestSchema.index({ status: 1, date: -1 });
 stockRequestSchema.index({ department: 1, date: -1 });
 stockRequestSchema.index({ requestedBy: 1 });

@@ -6,6 +6,17 @@ const { invalidateDashboardCache } = require('./dashboardController');
 const tg                  = require('../utils/telegramNotifier');
 const notify              = require('../utils/notificationHelper');
 
+// ── In-memory fast cache for stock request summary (TTL 30s) ──────
+let summaryCache = null;
+let summaryCacheTime = 0;
+const SUMMARY_TTL = 30 * 1000;
+
+function invalidateStockRequestCache() {
+  summaryCache = null;
+  summaryCacheTime = 0;
+  invalidateDashboardCache();
+}
+
 // ── Auto voucher number ───────────────────────────────────────────
 const generateVoucherNo = async () => {
   const count = await StockRequest.countDocuments();
@@ -73,7 +84,7 @@ async function resolveItemCosts(items) {
 
 // ── GET /api/stock-requests ───────────────────────────────────────
 const getStockRequests = asyncHandler(async (req, res) => {
-  const { status, department, from, to, type } = req.query;
+  const { status, department, from, to, type, limit = 100 } = req.query;
   const filter = { deletedAt: null };
 
   if (status)     filter.status     = status;
@@ -85,14 +96,15 @@ const getStockRequests = asyncHandler(async (req, res) => {
     if (to)   filter.date.$lte = new Date(new Date(to).setHours(23, 59, 59, 999));
   }
 
+  const maxLimit = Math.min(Number(limit) || 100, 200);
+
+  // Fast lean projection — avoids heavy population of unused fields in list view
   const requests = await StockRequest.find(filter)
-    .populate('items.material', 'name unit unitCost currentStock')
-    .populate('requestedBy', 'name role')
-    .populate('approvedBy',  'name role')
-    .populate('issuedBy',    'name role')
-    .populate('rejectedBy',  'name role')
+    .select('voucherNo department requestType priority items.material items.requestedQty items.issuedQty totalCost requestedBy date createdAt status')
+    .populate('items.material', 'name')
+    .populate('requestedBy', 'name')
     .sort({ createdAt: -1 })
-    .limit(200)   // cap at 200 — prevents unbounded queries
+    .limit(maxLimit)
     .lean();
 
   res.json(requests);
@@ -423,31 +435,49 @@ const deleteStockRequest = asyncHandler(async (req, res) => {
 
 // ── GET /api/stock-requests/summary ──────────────────────────────
 const getStockRequestSummary = asyncHandler(async (req, res) => {
-  const [pending, approved, issued, rejected] = await Promise.all([
-    StockRequest.countDocuments({ status: 'pending',  deletedAt: null }),
-    StockRequest.countDocuments({ status: 'approved', deletedAt: null }),
-    StockRequest.countDocuments({ status: 'issued',   deletedAt: null }),
-    StockRequest.countDocuments({ status: 'rejected', deletedAt: null }),
+  const now = Date.now();
+  if (summaryCache && now - summaryCacheTime < SUMMARY_TTL) {
+    return res.json(summaryCache);
+  }
+
+  const dateNow = new Date();
+  const startOfMonth = new Date(dateNow.getFullYear(), dateNow.getMonth(), 1);
+
+  // Run in single-pass aggregation pipelines
+  const [statusAgg, monthCostAgg, byDept] = await Promise.all([
+    StockRequest.aggregate([
+      { $match: { deletedAt: null } },
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+    ]),
+    StockRequest.aggregate([
+      { $match: { status: 'issued', issuedAt: { $gte: startOfMonth }, deletedAt: null } },
+      { $group: { _id: null, monthCost: { $sum: '$totalCost' } } },
+    ]),
+    StockRequest.aggregate([
+      { $match: { status: 'issued', deletedAt: null } },
+      { $group: { _id: '$department', total: { $sum: '$totalCost' }, count: { $sum: 1 } } },
+      { $sort: { total: -1 } },
+    ]),
   ]);
 
-  // Total cost issued this month
-  const now   = new Date();
-  const from  = new Date(now.getFullYear(), now.getMonth(), 1);
-  const issued30 = await StockRequest.find({
-    status: 'issued',
-    issuedAt: { $gte: from },
-    deletedAt: null,
-  }).select('totalCost');
-  const monthCost = issued30.reduce((s, r) => s + (r.totalCost || 0), 0);
+  const countsMap = {};
+  statusAgg.forEach((item) => {
+    countsMap[item._id] = item.count;
+  });
 
-  // By department (issued)
-  const byDept = await StockRequest.aggregate([
-    { $match: { status: 'issued', deletedAt: null } },
-    { $group: { _id: '$department', total: { $sum: '$totalCost' }, count: { $sum: 1 } } },
-    { $sort: { total: -1 } },
-  ]);
+  const summary = {
+    pending: countsMap.pending || 0,
+    approved: countsMap.approved || 0,
+    issued: countsMap.issued || 0,
+    rejected: countsMap.rejected || 0,
+    monthCost: monthCostAgg[0]?.monthCost || 0,
+    byDepartment: byDept,
+  };
 
-  res.json({ pending, approved, issued, rejected, monthCost, byDepartment: byDept });
+  summaryCache = summary;
+  summaryCacheTime = now;
+
+  res.json(summary);
 });
 
 module.exports = {
