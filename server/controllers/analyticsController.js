@@ -3,6 +3,7 @@ const SalesRecord  = require('../models/SalesRecord');
 const RawMaterial  = require('../models/RawMaterial');
 const Product      = require('../models/Product');
 const StockTransaction = require('../models/StockTransaction');
+const Expense      = require('../models/Expense');
 
 // ── Date match helper ──────────────────────────────────────────────────
 const buildDateMatch = (from, to) => {
@@ -29,12 +30,33 @@ const getProfitLoss = asyncHandler(async (req, res) => {
   const { from, to } = req.query;
   const match = buildDateMatch(from, to);
 
-  const records = await SalesRecord.find(match).sort({ saleDate: -1 });
+  const expenseMatch = { isActive: { $ne: false } };
+  if (from || to) {
+    expenseMatch.date = {};
+    if (from) {
+      const dFrom = new Date(from);
+      dFrom.setHours(0, 0, 0, 0);
+      expenseMatch.date.$gte = dFrom;
+    }
+    if (to) {
+      const dTo = new Date(to);
+      dTo.setHours(23, 59, 59, 999);
+      expenseMatch.date.$lte = dTo;
+    }
+  }
+
+  const [records, expenses] = await Promise.all([
+    SalesRecord.find(match).sort({ saleDate: -1 }),
+    Expense.find(expenseMatch).lean(),
+  ]);
 
   const totalRevenue   = records.reduce((s, r) => s + (r.totalRevenue  || 0), 0);
   const totalCOGS      = records.reduce((s, r) => s + (r.totalCOGS     || 0), 0);
   const grossProfit    = totalRevenue - totalCOGS;
+  const totalOverheadExpenses = expenses.reduce((s, e) => s + (e.amount || 0), 0);
+  const netProfit      = grossProfit - totalOverheadExpenses;
   const profitMargin   = totalRevenue > 0 ? (grossProfit / totalRevenue) * 100 : 0;
+  const netMargin      = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
   const foodCostPct    = totalRevenue > 0 ? (totalCOGS / totalRevenue) * 100 : 0;
   
   let totalItemsSold = 0;
@@ -121,6 +143,9 @@ const getProfitLoss = asyncHandler(async (req, res) => {
       totalCOGS,
       grossProfit,
       profitMargin,
+      totalOverheadExpenses,
+      netProfit,
+      netMargin,
       foodCostPct,
       totalItemsSold,
       recordCount: records.length,

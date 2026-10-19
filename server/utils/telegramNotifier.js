@@ -952,6 +952,41 @@ ${emoji} <b>Category:</b>    ${label}
   );
 }
 
+function notifyExpenseCreated(expense, user) {
+  sendTelegram(
+    `🏨 <b>${HOTEL}</b>
+━━━━━━━━━━━━━━━━━━━━
+💸 <b>NEW OVERHEAD EXPENSE RECORDED</b>
+
+📝 <b>Item:</b>        ${expense.title}
+🗂 <b>Category:</b>    ${expense.category}
+💰 <b>Amount:</b>      ${etb(expense.amount)}
+💳 <b>Payment:</b>     ${expense.paymentMethod || 'Cash'}
+🏢 <b>Paid To:</b>     ${expense.paidTo || '—'}
+🧾 <b>Ref/Bill #:</b>   ${expense.referenceNo || '—'}
+${expense.notes ? `💬 <b>Notes:</b>      ${expense.notes}\n` : ''}
+👤 <b>Recorded by:</b> ${user?.name || '—'}
+🕐 <b>Time:</b>        ${now()}
+━━━━━━━━━━━━━━━━━━━━`
+  );
+}
+
+function notifyExpenseDeleted(expense, user) {
+  sendTelegram(
+    `🏨 <b>${HOTEL}</b>
+━━━━━━━━━━━━━━━━━━━━
+🗑 <b>EXPENSE MOVED TO RECYCLE BIN</b>
+
+📝 <b>Item:</b>        ${expense.title}
+🗂 <b>Category:</b>    ${expense.category}
+💰 <b>Amount:</b>      ${etb(expense.amount)}
+
+👤 <b>Deleted by:</b>  ${user?.name || '—'}
+🕐 <b>Time:</b>        ${now()}
+━━━━━━━━━━━━━━━━━━━━`
+  );
+}
+
 // ─────────────────────────────────────────────────────────────────
 module.exports = {
   notifyLogin,
@@ -997,4 +1032,7 @@ module.exports = {
   notifyConsumptionDeleted,
   notifyPermanentDeleted,
   notifyPasswordChanged,
+  notifyExpenseCreated,
+  notifyExpenseDeleted,
 };
+

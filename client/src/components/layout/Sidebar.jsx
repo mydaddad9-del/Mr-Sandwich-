@@ -7,7 +7,7 @@ import {
   ShoppingBag, CreditCard, Leaf, TrendingUp, Flame, TrendingDown,
   BarChart2, Calendar, PackageOpen, Settings as SettingsIcon, UploadCloud,
   Scale, ClipboardList, Trash2, Coffee, UserCog, Sparkles,
-  SendToBack, X, Rocket, ClipboardCheck, ArrowRightLeft, History,
+  SendToBack, X, Rocket, ClipboardCheck, ArrowRightLeft, History, Receipt,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -357,6 +357,9 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
               </CollapsibleNav>
             )
           )}
+
+          {/* Overhead Expenses */}
+          {canSeeNav('expenses') && navLink('/expenses', Receipt, 'Overhead Expenses')}
 
           <SectionLabel collapsed={collapsed}>Admin</SectionLabel>
           {canSeeNav('staffAccounts') && navLink('/users', Users, 'Staff Accounts')}

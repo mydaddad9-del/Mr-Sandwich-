@@ -3,6 +3,7 @@ const RawMaterial       = require('../models/RawMaterial');
 const Supplier          = require('../models/Supplier');
 const Product           = require('../models/Product');
 const StockTransaction  = require('../models/StockTransaction');
+const Expense           = require('../models/Expense');
 const { invalidateDashboardCache } = require('./dashboardController');
 const { VOUCHER_DIRECTION } = require('../models/StockTransaction');
 const tg = require('../utils/telegramNotifier');
@@ -10,7 +11,7 @@ const notify = require('../utils/notificationHelper');
 // GET /api/recycle-bin
 // Returns all soft-deleted items across all collections
 const getRecycleBin = asyncHandler(async (req, res) => {
-  const [materials, suppliers, products, transactions] = await Promise.all([
+  const [materials, suppliers, products, transactions, expenses] = await Promise.all([
     RawMaterial.find({ isActive: false, deletedAt: { $ne: null } }).lean().catch(() => []),
     Supplier.find({ isActive: false, deletedAt: { $ne: null } }).lean().catch(() => []),
     Product.find({ isActive: false, deletedAt: { $ne: null } }).populate('ingredients.material','name unit').lean().catch(() => []),
@@ -19,12 +20,16 @@ const getRecycleBin = asyncHandler(async (req, res) => {
       .populate('performedBy', 'name')
       .populate('items.material', 'name unit')
       .lean().catch(() => []),
+    Expense.find({ isActive: false, deletedAt: { $ne: null } })
+      .populate('recordedBy', 'name')
+      .lean().catch(() => []),
   ]);
   const items = [
     ...materials.map(m => ({ ...m, _type: 'material', _typeLabel: 'Raw Material' })),
     ...suppliers.map(s => ({ ...s, _type: 'supplier', _typeLabel: 'Supplier' })),
     ...products.map(p => ({ ...p, _type: 'product', _typeLabel: 'Product' })),
     ...transactions.map(t => ({ ...t, _type: 'transaction', _typeLabel: 'Transaction' })),
+    ...expenses.map(e => ({ ...e, _type: 'expense', _typeLabel: 'Overhead Expense', name: `${e.title} (${e.amount} ETB)` })),
   ].sort((a, b) => new Date(b.deletedAt) - new Date(a.deletedAt));
   res.json(items);
 });
@@ -79,6 +84,14 @@ const restoreItem = asyncHandler(async (req, res) => {
     invalidateDashboardCache();
     return res.json({ message: 'Transaction restored and stock re-applied.' });
   }
+  if (type === 'expense') {
+    const doc = await Expense.findById(id);
+    if (!doc) { res.status(404); throw new Error('Item not found'); }
+    doc.isActive = true; doc.deletedAt = null; doc.deletedBy = null; doc.deletedFrom = null;
+    await doc.save();
+    tg.notifyRestored('Overhead Expense', `${doc.title} (${doc.amount} ETB)`, req.user);
+    return res.json({ message: 'Expense record restored.' });
+  }
   res.status(400); throw new Error(`Unknown type: ${type}`);
 });
 // DELETE /api/recycle-bin/:type/:id  (permanent delete)
@@ -90,6 +103,7 @@ const permanentDelete = asyncHandler(async (req, res) => {
     supplier:    Supplier,
     product:     Product,
     transaction: StockTransaction,
+    expense:     Expense,
   };
   const Model = modelMap[type];
   if (!Model) { res.status(400); throw new Error(`Unknown type: ${type}`); }
@@ -97,7 +111,7 @@ const permanentDelete = asyncHandler(async (req, res) => {
   if (!doc) { res.status(404); throw new Error('Item not found'); }
   await doc.deleteOne();
   if (type === 'material' || type === 'product' || type === 'transaction') invalidateDashboardCache();
-  const name = doc.name || doc.voucherNo || doc.firstName || String(id);
+  const name = doc.title || doc.name || doc.voucherNo || doc.firstName || String(id);
   tg.notifyPermanentDeleted(type, name, req.user);
   notify.push({ type: 'system', title: 'Item Permanently Deleted', message: `${req.user?.name || 'Admin'} permanently deleted ${type}: ${name}`, icon: '💥', link: '/recycle-bin', severity: 'error', userId: req.user?._id });
   res.json({ message: 'Permanently deleted.' });
@@ -110,6 +124,7 @@ const emptyRecycleBin = asyncHandler(async (req, res) => {
     Supplier.deleteMany({ isActive: false, deletedAt: { $ne: null } }),
     Product.deleteMany({ isActive: false, deletedAt: { $ne: null } }),
     StockTransaction.deleteMany({ deletedAt: { $ne: null } }),
+    Expense.deleteMany({ isActive: false, deletedAt: { $ne: null } }),
   ]);
   invalidateDashboardCache();
   tg.notifyBinEmptied(req.user);

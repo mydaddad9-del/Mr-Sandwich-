@@ -18,6 +18,7 @@ import Analytics from './pages/Analytics';
 import RecycleBin from './pages/RecycleBin';
 import Consumption from './pages/Consumption';
 import Employees from './pages/Employees';
+import Expenses from './pages/Expenses';
 import ErrorBoundary from './components/ErrorBoundary';
 import { SessionTimeoutProvider } from './context/SessionTimeoutContext';
 import SessionTimeoutModal from './components/common/SessionTimeoutModal';
@@ -124,6 +125,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Employees />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/expenses"
+              element={
+                <ProtectedRoute>
+                  <Expenses />
                 </ProtectedRoute>
               }
             />

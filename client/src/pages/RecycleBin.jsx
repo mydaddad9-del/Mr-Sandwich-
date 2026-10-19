@@ -1,17 +1,18 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   Trash2, RotateCcw, AlertTriangle, RefreshCw,
-  Boxes, Truck, UtensilsCrossed, ArrowLeftRight, X, Trash,
+  Boxes, Truck, UtensilsCrossed, ArrowLeftRight, X, Trash, Receipt,
 } from 'lucide-react';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 
 /* ── type config ─────────────────────────────────────────────────── */
 const TYPE_META = {
-  material:    { label: 'Raw Material',  icon: Boxes,           color: 'bg-amber-50 text-amber-700 border-amber-200'  },
-  supplier:    { label: 'Supplier',      icon: Truck,           color: 'bg-sky-50 text-sky-700 border-sky-200'         },
-  product:     { label: 'Product',       icon: UtensilsCrossed, color: 'bg-violet-50 text-violet-700 border-violet-200'},
-  transaction: { label: 'Transaction',   icon: ArrowLeftRight,  color: 'bg-rose-50 text-rose-700 border-rose-200'      },
+  material:    { label: 'Raw Material',     icon: Boxes,           color: 'bg-amber-50 text-amber-700 border-amber-200'  },
+  supplier:    { label: 'Supplier',         icon: Truck,           color: 'bg-sky-50 text-sky-700 border-sky-200'         },
+  product:     { label: 'Product',          icon: UtensilsCrossed, color: 'bg-violet-50 text-violet-700 border-violet-200'},
+  transaction: { label: 'Transaction',      icon: ArrowLeftRight,  color: 'bg-rose-50 text-rose-700 border-rose-200'      },
+  expense:     { label: 'Overhead Expense', icon: Receipt,         color: 'bg-emerald-50 text-emerald-700 border-emerald-200'},
 };
 
 const fmtDate = (d) => d ? new Date(d).toLocaleString() : '—';

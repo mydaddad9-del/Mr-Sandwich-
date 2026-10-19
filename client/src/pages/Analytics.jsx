@@ -462,7 +462,7 @@ export default function Analytics() {
       {activeTab === 'pl' && (
         <div className="space-y-6">
           {/* KPI Summary Cards */}
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-4">
             <div className="rounded-2xl border border-blue-100 bg-gradient-to-b from-blue-50/60 to-white p-4 shadow-sm">
               <p className="text-[11px] font-bold uppercase tracking-wider text-blue-600">Total Revenue</p>
               <p className="mt-1 text-xl font-extrabold text-ink-900">
@@ -492,7 +492,31 @@ export default function Analytics() {
               <p className="mt-1 text-xl font-extrabold text-indigo-700">
                 {pct(plData?.summary?.profitMargin)}
               </p>
-              <p className="mt-1 text-[11px] text-ink-400">Profitability ratio</p>
+              <p className="mt-1 text-[11px] text-ink-400">Gross profitability</p>
+            </div>
+
+            {/* Row 2: Overheads & Bottom Line */}
+            <div className="rounded-2xl border border-rose-100 bg-gradient-to-b from-rose-50/60 to-white p-4 shadow-sm">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-rose-600">Overhead Expenses</p>
+              <p className="mt-1 text-xl font-extrabold text-rose-700">
+                ETB {fmt(plData?.summary?.totalOverheadExpenses)}
+              </p>
+              <p className="mt-1 text-[11px] text-ink-400">Utilities, Rent &amp; Overheads</p>
+            </div>
+
+            <div className="rounded-2xl border border-teal-100 bg-gradient-to-b from-teal-50/60 to-white p-4 shadow-sm">
+              <div className="flex items-center justify-between">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-teal-700">Net Profit</p>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${
+                  (plData?.summary?.netProfit || 0) >= 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-700'
+                }`}>
+                  {pct(plData?.summary?.netMargin)}
+                </span>
+              </div>
+              <p className={`mt-1 text-xl font-extrabold ${(plData?.summary?.netProfit || 0) >= 0 ? 'text-teal-800' : 'text-red-600'}`}>
+                ETB {fmt(plData?.summary?.netProfit)}
+              </p>
+              <p className="mt-1 text-[11px] text-ink-400">Gross Profit minus Overheads</p>
             </div>
 
             <div className="rounded-2xl border border-violet-100 bg-gradient-to-b from-violet-50/60 to-white p-4 shadow-sm">

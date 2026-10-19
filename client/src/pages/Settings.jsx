@@ -47,6 +47,7 @@ const NAV_ITEMS = [
   { key: 'suppliers', label: 'Suppliers' },
   { key: 'consumption', label: 'Consumption' },
   { key: 'reports', label: 'Reports' },
+  { key: 'expenses', label: 'Overhead Expenses' },
   { key: 'analytics', label: 'Analytics & P&L' },
   { key: 'staffAccounts', label: 'Staff Accounts' },
 ];

@@ -8,6 +8,7 @@ const DEFAULT_NAV_VISIBILITY = {
   suppliers: { storekeeper: false, manager: true, admin: true },
   consumption: { storekeeper: true, manager: true, admin: true },
   reports: { storekeeper: false, manager: true, admin: true },
+  expenses: { storekeeper: true, manager: true, admin: true },
   analytics: { storekeeper: false, manager: true, admin: true },
   staffAccounts: { storekeeper: false, manager: false, admin: true },
 };
