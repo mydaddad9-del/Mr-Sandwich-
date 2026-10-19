@@ -9,6 +9,7 @@ const {
   submitCount,
   approveCount,
   deleteCount,
+  syncCount,
 } = require('../controllers/inventoryCountController');
 const { protect, authorizePermission } = require('../middleware/authMiddleware');
 
@@ -19,6 +20,7 @@ router.get  ('/',                listCounts);
 router.get  ('/:id',             getCount);
 router.post ('/initialize',      initializeCount);
 router.patch('/:id/lines',       updateLines);
+router.post ('/:id/sync',        syncCount);
 router.post ('/:id/submit',      submitCount);
 router.post ('/:id/approve',     approveCount);
 router.delete('/:id',            deleteCount);

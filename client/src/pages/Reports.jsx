@@ -131,6 +131,7 @@ function InventoryCountPanel() {
   const [activeCount, setActiveCount] = useState(null);
   const [editorLoading, setEditorLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [expandedStores, setExpandedStores] = useState({});
   const [showUncounted, setShowUncounted] = useState(true);
@@ -224,6 +225,21 @@ function InventoryCountPanel() {
       setSaveError(e.response?.data?.message || 'Save failed');
     } finally {
       setSaving(false);
+    }
+  };
+
+  // ── Sync with live stock & vouchers ───────────────────────────────
+  const handleSync = async () => {
+    if (!activeCount) return;
+    setSyncing(true);
+    setSaveError('');
+    try {
+      const r = await api.post(`/inventory-count/${activeCount._id}/sync`);
+      setActiveCount(r.data.count);
+    } catch (e) {
+      setSaveError(e.response?.data?.message || 'Sync failed');
+    } finally {
+      setSyncing(false);
     }
   };
 
@@ -534,6 +550,17 @@ function InventoryCountPanel() {
             </div>
 
             <div className="flex items-center gap-2">
+              {isEditable && (
+                <button
+                  onClick={handleSync}
+                  disabled={syncing}
+                  title="Recalculate balances and average unit costs from current system stock and vouchers"
+                  className="flex items-center gap-1.5 bg-ink-100 hover:bg-ink-200 text-ink-700 px-3 py-1.5 rounded-xl text-xs font-semibold border border-ink-200 transition disabled:opacity-60"
+                >
+                  <RefreshCw size={13} className={syncing ? 'animate-spin text-blue-600' : ''} />
+                  {syncing ? 'Syncing…' : 'Sync Stock'}
+                </button>
+              )}
               {isEditable && Object.keys(edits).length > 0 && (
                 <button
                   onClick={saveEdits}
