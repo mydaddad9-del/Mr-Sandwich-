@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Eye, EyeOff, Phone, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
+import { BabaRotiIcon } from '../components/ui/BabaRotiLogo';
 
 /* ─── role quick-fill data ─────────────────────────────────────── */
 const ROLES = [
@@ -752,16 +753,18 @@ export default function Login() {
         <section className="login-hero" aria-label="Application branding">
           <CurvedLines />
 
-          {/* starburst logo */}
+          {/* Baba Roti Café Official Emblem */}
           <div style={{ position: 'relative', zIndex: 1 }}>
-            <Starburst />
+            <div className="rounded-2xl p-1.5 shadow-2xl ring-2 ring-white/20 inline-block bg-white/5 backdrop-blur-md">
+              <BabaRotiIcon size={68} />
+            </div>
           </div>
 
           {/* headline + body */}
           <div className="login-hero__content">
             <h1 className="login-hero__heading">
               Hello<br />
-              Baba Roti  Café!&nbsp;
+              Baba Roti Café!&nbsp;
               <span className="login-hero__wave" role="img" aria-label="waving hand">👋</span>
             </h1>
             <p className="login-hero__desc">
@@ -772,7 +775,7 @@ export default function Login() {
 
           {/* left footer */}
           <footer className="login-hero__footer">
-            © 2026 Baba Roti  CaféHotel &amp; Resort Management SC. All rights reserved.
+            © 2026 Baba Roti Café Hotel &amp; Resort Management SC. All rights reserved.
           </footer>
         </section>
 
@@ -781,10 +784,14 @@ export default function Login() {
 
           {/* top bar */}
           <div className="login-topbar">
-            <span className="login-wordmark" aria-label="Baba Roti Café">
-              <span className="login-wordmark__five">Baba</span>
-              <span className="login-wordmark__stop">Roti</span>
-            </span>
+            <div className="flex items-center gap-2.5">
+              <BabaRotiIcon size={26} />
+              <span className="login-wordmark flex items-center gap-1" aria-label="Baba Roti Café">
+                <span className="login-wordmark__five">Baba </span>
+                <span className="login-wordmark__stop">Roti</span>
+                <span className="ml-1 rounded bg-amber-400 px-1.5 py-0.5 text-[9px] font-black uppercase text-slate-950">Café</span>
+              </span>
+            </div>
             <div className="login-status" aria-live="polite">
               <span className="login-status__dot" aria-hidden="true" />
               System online

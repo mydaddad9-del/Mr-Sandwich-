@@ -10,6 +10,7 @@ import {
   SendToBack, X, Rocket, ClipboardCheck, ArrowRightLeft, History, Receipt,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import BabaRotiLogo from '../ui/BabaRotiLogo';
 
 const STOCK_ITEMS = [
   { to: '/transactions', label: 'All Movements', icon: ArrowLeftRight, end: true },
@@ -306,24 +307,18 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
         </div>
 
         {/* ── Logo ── */}
-        <NavLink to="/" onClick={onClose}
-          className={`relative flex items-center gap-3 py-5 hover:opacity-90 transition-opacity ${collapsed ? 'justify-center px-2' : 'px-5'}`}>
-          <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl overflow-hidden shadow-lg"
-            style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #1e40af 100%)' }}>
-            <div className="absolute inset-0 opacity-20"
-              style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 60%)' }} />
-            <svg viewBox="0 0 40 40" width="32" height="32" fill="none">
-              <text x="50%" y="56%" dominantBaseline="middle" textAnchor="middle"
-                fill="white" fontSize="14" fontWeight="800" letterSpacing="-0.5">5S</text>
-            </svg>
-            <Sparkles size={8} className="absolute top-1 right-1 text-yellow-300 opacity-80" />
-          </div>
-          {!collapsed && (
-            <div>
-              <p className="text-[15px] font-extrabold leading-none text-white tracking-tight">Baba Roti  Café</p>
-              <p className="text-[10px] text-blue-300/70 mt-0.5 tracking-wide font-medium">Hotel Management</p>
-            </div>
-          )}
+        <NavLink
+          to="/"
+          onClick={onClose}
+          className={`relative flex items-center py-4 transition-all hover:opacity-95 ${
+            collapsed ? 'justify-center px-2' : 'px-4'
+          }`}
+        >
+          <BabaRotiLogo
+            collapsed={collapsed}
+            size={collapsed ? 36 : 40}
+            subtitle="Café & Bakery"
+          />
         </NavLink>
 
         {/* ── Nav ── */}
