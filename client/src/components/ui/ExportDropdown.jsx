@@ -12,6 +12,8 @@ export default function ExportDropdown({
   showImport = false,
   onImport = null,
   importLabel = 'Import',
+  align = 'right',
+  buttonClassName = '',
 }) {
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
@@ -72,7 +74,7 @@ export default function ExportDropdown({
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-ink-200 bg-white px-3 py-2 text-xs font-semibold text-ink-700 shadow-xs hover:border-ink-300 hover:bg-ink-50 transition"
+          className={buttonClassName || "inline-flex items-center gap-1.5 rounded-lg border border-ink-200 bg-white px-3 py-2 text-xs font-semibold text-ink-700 shadow-xs hover:border-ink-300 hover:bg-ink-50 transition cursor-pointer"}
           title="Export Data as Excel, PDF, or CSV"
         >
           <Download size={14} className="text-blue-600" />
@@ -81,8 +83,11 @@ export default function ExportDropdown({
         </button>
 
         {open && (
-          <div className="absolute right-0 z-30 mt-1.5 w-52 origin-top-right rounded-xl border border-ink-100 bg-white p-1.5 shadow-lg ring-1 ring-black/5 animate-in fade-in zoom-in-95 duration-100">
-            <div className="px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-ink-400 border-b border-ink-50">
+          <div
+            className={`absolute ${align === 'left' ? 'left-0 origin-top-left' : 'right-0 origin-top-right'} z-50 mt-1.5 w-56 rounded-2xl border border-ink-200 bg-white p-2 shadow-2xl ring-1 ring-black/5 animate-in fade-in zoom-in-95 duration-100`}
+            style={{ backgroundColor: '#ffffff' }}
+          >
+            <div className="px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-ink-400 border-b border-ink-100 mb-1">
               Export Formats
             </div>
 

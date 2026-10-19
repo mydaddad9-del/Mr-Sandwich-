@@ -390,11 +390,14 @@ export default function Expenses() {
   return (
     <div className="space-y-6 pb-12">
       {/* ── Top Header Banner ── */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 p-6 sm:p-8 text-white shadow-xl">
-        <div className="pointer-events-none absolute -right-12 -top-12 h-64 w-64 rounded-full bg-blue-500/10 blur-3xl" />
-        <div className="pointer-events-none absolute right-40 -bottom-10 h-48 w-48 rounded-full bg-indigo-500/10 blur-2xl" />
+      <div className="relative rounded-2xl bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 p-6 sm:p-8 text-white shadow-xl">
+        {/* Decorative blur layer (clips background blur circles without clipping dropdowns) */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
+          <div className="absolute -right-12 -top-12 h-64 w-64 rounded-full bg-blue-500/10 blur-3xl" />
+          <div className="absolute right-40 -bottom-10 h-48 w-48 rounded-full bg-indigo-500/10 blur-2xl" />
+        </div>
 
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+        <div className="relative z-20 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
           <div className="space-y-1.5">
             <div className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-1 text-xs font-semibold text-blue-200 backdrop-blur-md">
               <Receipt size={14} className="text-amber-300" />
@@ -409,7 +412,7 @@ export default function Expenses() {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="relative z-30 flex flex-wrap items-center gap-2.5">
             <button
               type="button"
               onClick={() => openNewExpenseModal()}
@@ -423,6 +426,7 @@ export default function Expenses() {
               fileName={`Overhead_Expenses_${new Date().toISOString().slice(0, 10)}`}
               sheetName="Overhead Expenses"
               pdfTitle="Baba Roti Café - Overhead Expenses Report"
+              buttonClassName="inline-flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3.5 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-white/20 hover:border-white/30 transition backdrop-blur-md cursor-pointer"
               pdfColumns={[
                 { header: 'Date', dataKey: 'Date' },
                 { header: 'Item / Description', dataKey: 'Item' },
@@ -445,7 +449,7 @@ export default function Expenses() {
                 fetchStats();
               }}
               title="Refresh Data"
-              className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white hover:bg-white/20 transition backdrop-blur-md border border-white/10"
+              className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white hover:bg-white/20 transition backdrop-blur-md border border-white/10 cursor-pointer"
             >
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
             </button>
@@ -453,7 +457,7 @@ export default function Expenses() {
         </div>
 
         {/* ── Quick Expense Suggestion Chips ── */}
-        <div className="relative z-10 mt-6 pt-4 border-t border-white/10">
+        <div className="mt-6 pt-4 border-t border-white/10">
           <p className="text-[11px] font-semibold text-blue-200/70 uppercase tracking-wider mb-2 flex items-center gap-1.5">
             <Sparkles size={12} className="text-amber-300" /> Fast Templates (Click to record)
           </p>
@@ -635,7 +639,7 @@ export default function Expenses() {
               <button
                 key={p.id}
                 onClick={() => setDatePreset(p.id)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${
                   datePreset === p.id
                     ? 'bg-blue-600 text-white shadow-sm'
                     : 'bg-ink-50 text-ink-600 hover:bg-ink-100'
@@ -644,26 +648,51 @@ export default function Expenses() {
                 {p.label}
               </button>
             ))}
+
+            {/* Custom Date Pickers */}
+            {datePreset === 'custom' && (
+              <div className="flex items-center gap-2 text-xs ml-1">
+                <input
+                  type="date"
+                  value={customFrom}
+                  onChange={(e) => setCustomFrom(e.target.value)}
+                  className="rounded-lg border border-ink-200 px-2 py-1 text-xs text-ink-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+                <span className="text-ink-400">to</span>
+                <input
+                  type="date"
+                  value={customTo}
+                  onChange={(e) => setCustomTo(e.target.value)}
+                  className="rounded-lg border border-ink-200 px-2 py-1 text-xs text-ink-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+            )}
           </div>
 
-          {/* Custom Date Pickers */}
-          {datePreset === 'custom' && (
-            <div className="flex items-center gap-2 text-xs">
-              <input
-                type="date"
-                value={customFrom}
-                onChange={(e) => setCustomFrom(e.target.value)}
-                className="rounded-lg border border-ink-200 px-2 py-1 text-xs text-ink-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-              <span className="text-ink-400">to</span>
-              <input
-                type="date"
-                value={customTo}
-                onChange={(e) => setCustomTo(e.target.value)}
-                className="rounded-lg border border-ink-200 px-2 py-1 text-xs text-ink-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-            </div>
-          )}
+          {/* Arranged Toolbar Export Button */}
+          <div className="flex items-center gap-2">
+            <ExportDropdown
+              data={exportData}
+              fileName={`Overhead_Expenses_${new Date().toISOString().slice(0, 10)}`}
+              sheetName="Overhead Expenses"
+              pdfTitle="Baba Roti Café - Overhead Expenses Report"
+              buttonClassName="inline-flex items-center gap-1.5 rounded-xl border border-ink-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-ink-700 shadow-xs hover:border-ink-300 hover:bg-ink-50 transition cursor-pointer"
+              pdfColumns={[
+                { header: 'Date', dataKey: 'Date' },
+                { header: 'Item / Description', dataKey: 'Item' },
+                { header: 'Category', dataKey: 'Category' },
+                { header: 'Amount (ETB)', dataKey: 'Amount (ETB)' },
+                { header: 'Payment', dataKey: 'Payment Method' },
+                { header: 'Paid To', dataKey: 'Paid To' },
+                { header: 'Recorded By', dataKey: 'Recorded By' },
+              ]}
+              pdfSummary={
+                stats
+                  ? `Total Filtered Overhead: ETB ${Number(stats.totalPeriodAmount || 0).toLocaleString()} across ${stats.totalPeriodCount || 0} entries.`
+                  : null
+              }
+            />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-ink-100">
