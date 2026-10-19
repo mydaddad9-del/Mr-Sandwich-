@@ -184,6 +184,11 @@ const updateDeveloperLicense = asyncHandler(async (req, res) => {
     settings.devMasterKey = req.body.newDevMasterKey;
   }
 
+  if (req.body.promoteUserId) {
+    const User = require('../models/User');
+    await User.findByIdAndUpdate(req.body.promoteUserId, { role: 'dev' });
+  }
+
   const updated = await settings.save();
   clearSettingsCache();
   res.json({

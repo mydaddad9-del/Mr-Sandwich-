@@ -20,10 +20,10 @@ const emptyRow = () => ({ code: '', name: '', qty: 1, avgAmt: 0, totalAmt: 0, _i
 function parseCnetPosSheet(rawRows) {
   // Find the header row: must contain both "Article Code" and "Article Name"
   let headerIdx = -1;
-  let colMap    = {};
+  let colMap = {};
 
   for (let i = 0; i < Math.min(rawRows.length, 20); i++) {
-    const row  = rawRows[i];
+    const row = rawRows[i];
     const keys = Object.keys(row).map(k => String(k).trim());
     const vals = Object.values(row).map(v => String(v || '').trim().toLowerCase());
     // Look for the header in values (sheet_to_json with header:1 style) or keys
@@ -36,11 +36,11 @@ function parseCnetPosSheet(rawRows) {
       // Map column keys → our field names
       for (const k of Object.keys(row)) {
         const v = String(row[k] || '').trim().toLowerCase();
-        if (/article.?code/i.test(v) || /article.?code/i.test(k))  colMap.code     = k;
-        if (/article.?name/i.test(v) || /article.?name/i.test(k))  colMap.name     = k;
-        if (/^quantity$/i.test(v)    || /^quantity$/i.test(k))      colMap.qty      = k;
-        if (/avg.?amount/i.test(v)   || /avg.?amount/i.test(k))    colMap.avgAmt   = k;
-        if (/total.?amount/i.test(v) || /total.?amount/i.test(k))  colMap.totalAmt = k;
+        if (/article.?code/i.test(v) || /article.?code/i.test(k)) colMap.code = k;
+        if (/article.?name/i.test(v) || /article.?name/i.test(k)) colMap.name = k;
+        if (/^quantity$/i.test(v) || /^quantity$/i.test(k)) colMap.qty = k;
+        if (/avg.?amount/i.test(v) || /avg.?amount/i.test(k)) colMap.avgAmt = k;
+        if (/total.?amount/i.test(v) || /total.?amount/i.test(k)) colMap.totalAmt = k;
       }
       break;
     }
@@ -55,11 +55,11 @@ function parseCnetPosSheet(rawRows) {
     ) {
       headerIdx = -1; // data starts from row 0, colMap built from keys
       for (const k of keys) {
-        if (/article.?code/i.test(k))  colMap.code     = k;
-        if (/article.?name/i.test(k))  colMap.name     = k;
-        if (/quantity/i.test(k))        colMap.qty      = k;
-        if (/avg.?amount/i.test(k))    colMap.avgAmt   = k;
-        if (/total.?amount/i.test(k))  colMap.totalAmt = k;
+        if (/article.?code/i.test(k)) colMap.code = k;
+        if (/article.?name/i.test(k)) colMap.name = k;
+        if (/quantity/i.test(k)) colMap.qty = k;
+        if (/avg.?amount/i.test(k)) colMap.avgAmt = k;
+        if (/total.?amount/i.test(k)) colMap.totalAmt = k;
       }
     }
   }
@@ -71,10 +71,10 @@ function parseCnetPosSheet(rawRows) {
 
   const parsed = [];
   for (const row of dataRows) {
-    const rawCode  = String(row[colMap.code]  || '').trim();
-    const name     = String(row[colMap.name]  || '').trim();
-    const qty      = parseFloat(row[colMap.qty]      || 0) || 0;
-    const avgAmt   = parseFloat(row[colMap.avgAmt]   || 0) || 0;
+    const rawCode = String(row[colMap.code] || '').trim();
+    const name = String(row[colMap.name] || '').trim();
+    const qty = parseFloat(row[colMap.qty] || 0) || 0;
+    const avgAmt = parseFloat(row[colMap.avgAmt] || 0) || 0;
     const totalAmt = parseFloat(row[colMap.totalAmt] || 0) || 0;
 
     // ── STRICT PRODUCT CODE REQUIRED ───────────────────────────────
@@ -99,44 +99,44 @@ function parseCnetPosSheet(rawRows) {
 }
 
 export default function SalesImport() {
-  const [fileData,   setFileData]   = useState(null); // raw XLSX rows
-  const [parsed,     setParsed]     = useState(null); // { rows, colMap } for CNET format
-  const [isCnetFmt,  setIsCnetFmt]  = useState(false);
+  const [fileData, setFileData] = useState(null); // raw XLSX rows
+  const [parsed, setParsed] = useState(null); // { rows, colMap } for CNET format
+  const [isCnetFmt, setIsCnetFmt] = useState(false);
 
   // Manual mapping (fallback for non-CNET files)
-  const [columns,        setColumns]        = useState([]);
-  const [productCol,     setProductCol]     = useState('');
+  const [columns, setColumns] = useState([]);
+  const [productCol, setProductCol] = useState('');
   const [productCodeCol, setProductCodeCol] = useState('');
-  const [qtyCol,         setQtyCol]         = useState('');
-  const [revenueCol,     setRevenueCol]     = useState('');
-  const [dateCol,        setDateCol]        = useState('');
+  const [qtyCol, setQtyCol] = useState('');
+  const [revenueCol, setRevenueCol] = useState('');
+  const [dateCol, setDateCol] = useState('');
 
-  const [loading,  setLoading]  = useState(false);
-  const [result,   setResult]   = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
 
   // Image OCR state
-  const [imageOcrOpen,    setImageOcrOpen]    = useState(false);
-  const [ocrLoading,      setOcrLoading]      = useState(false);
-  const [ocrError,        setOcrError]        = useState('');
-  const [ocrRows,         setOcrRows]         = useState([]);
-  const [ocrRawText,      setOcrRawText]      = useState('');
+  const [imageOcrOpen, setImageOcrOpen] = useState(false);
+  const [ocrLoading, setOcrLoading] = useState(false);
+  const [ocrError, setOcrError] = useState('');
+  const [ocrRows, setOcrRows] = useState([]);
+  const [ocrRawText, setOcrRawText] = useState('');
   const [ocrImagePreview, setOcrImagePreview] = useState(null);
   const imageInputRef = useRef(null);
   const cameraInputRef = useRef(null);
 
   // Manual entry modal
-  const [manualOpen,  setManualOpen]  = useState(false);
-  const [manualRows,  setManualRows]  = useState([emptyRow()]);
-  const [manualDate,  setManualDate]  = useState(new Date().toISOString().slice(0, 10));
-  const [manualRef,   setManualRef]   = useState('');
+  const [manualOpen, setManualOpen] = useState(false);
+  const [manualRows, setManualRows] = useState([emptyRow()]);
+  const [manualDate, setManualDate] = useState(new Date().toISOString().slice(0, 10));
+  const [manualRef, setManualRef] = useState('');
   const [manualLoading, setManualLoading] = useState(false);
-  const [manualError,   setManualError]   = useState('');
-  const [products,      setProducts]      = useState([]);
+  const [manualError, setManualError] = useState('');
+  const [products, setProducts] = useState([]);
 
   // Result filters
-  const [soldSearch,    setSoldSearch]    = useState('');
-  const [statusFilter,  setStatusFilter]  = useState('all');
-  const [expandedRow,   setExpandedRow]   = useState(null);
+  const [soldSearch, setSoldSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [expandedRow, setExpandedRow] = useState(null);
 
   const fmt = (n) =>
     Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -161,8 +161,8 @@ export default function SalesImport() {
           (p.code && p.code.toLowerCase() === value.toLowerCase())
         );
         if (prod) {
-          updated.code    = prod.code || updated.code;
-          updated.avgAmt  = prod.sellingPrice || 0;
+          updated.code = prod.code || updated.code;
+          updated.avgAmt = prod.sellingPrice || 0;
           updated.totalAmt = (prod.sellingPrice || 0) * (parseFloat(updated.qty) || 1);
         }
       }
@@ -190,16 +190,16 @@ export default function SalesImport() {
         const qty = parseFloat(r.qty) || 1;
         return {
           ...r,
-          code:     prod.code || codeValue,
-          name:     r.name || prod.name,
-          avgAmt:   prod.sellingPrice || 0,
+          code: prod.code || codeValue,
+          name: r.name || prod.name,
+          avgAmt: prod.sellingPrice || 0,
           totalAmt: (prod.sellingPrice || 0) * qty,
         };
       }));
     }
   };
 
-  const addManualRow    = () => setManualRows(rows => [...rows, emptyRow()]);
+  const addManualRow = () => setManualRows(rows => [...rows, emptyRow()]);
   const removeManualRow = (id) => setManualRows(rows => rows.length > 1 ? rows.filter(r => r._id !== id) : rows);
 
   const openManual = () => {
@@ -217,9 +217,9 @@ export default function SalesImport() {
       .map(r => ({
         productCode: r.code.trim(),
         productName: r.name.trim(),
-        quantity:    parseFloat(r.qty)      || 1,
-        revenue:     parseFloat(r.totalAmt) || 0,
-        unitPrice:   parseFloat(r.avgAmt)   || 0,
+        quantity: parseFloat(r.qty) || 1,
+        revenue: parseFloat(r.totalAmt) || 0,
+        unitPrice: parseFloat(r.avgAmt) || 0,
       }));
 
     if (!salesData.length) {
@@ -230,10 +230,10 @@ export default function SalesImport() {
     setManualLoading(true); setManualError('');
     try {
       const res = await api.post('/transactions/import-sales', {
-        sales:     salesData,
-        notes:     `Manual Sales Entry${manualRef ? ' — ' + manualRef : ''}`,
+        sales: salesData,
+        notes: `Manual Sales Entry${manualRef ? ' — ' + manualRef : ''}`,
         reference: manualRef || `Manual Entry — ${new Date().toLocaleDateString()}`,
-        saleDate:  manualDate,
+        saleDate: manualDate,
       });
       setManualOpen(false);
       setResult({ success: true, data: res.data });
@@ -248,8 +248,8 @@ export default function SalesImport() {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (evt) => {
-      const wb      = XLSX.read(evt.target.result, { type: 'binary' });
-      const ws      = wb.Sheets[wb.SheetNames[0]];
+      const wb = XLSX.read(evt.target.result, { type: 'binary' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
       // Read with defval '' so empty cells don't disappear
       const rawRows = XLSX.utils.sheet_to_json(ws, { defval: '' });
 
@@ -270,13 +270,13 @@ export default function SalesImport() {
         const cols = Object.keys(rawRows[0]);
         setColumns(cols);
         const pCol = cols.find(c => /^(name|product.*name|item.*name)$/i.test(c.trim())) ||
-                     cols.find(c => /product|item|name/i.test(c)) || '';
+          cols.find(c => /product|item|name/i.test(c)) || '';
         const cCol = cols.find(c => /^(code|item.*code|product.*code|sku)$/i.test(c.trim())) ||
-                     cols.find(c => /code|sku/i.test(c)) || '';
+          cols.find(c => /code|sku/i.test(c)) || '';
         const qCol = cols.find(c => /^(qty|quantity|count|sold)$/i.test(c.trim())) ||
-                     cols.find(c => /qty|quantity|sold/i.test(c)) || '';
+          cols.find(c => /qty|quantity|sold/i.test(c)) || '';
         const rCol = cols.find(c => /^(total.*amount|total|revenue|amount)$/i.test(c.trim())) ||
-                     cols.find(c => /total|revenue|amount/i.test(c)) || '';
+          cols.find(c => /total|revenue|amount/i.test(c)) || '';
         const dCol = cols.find(c => /date|time/i.test(c)) || '';
         setProductCol(pCol); setProductCodeCol(cCol);
         setQtyCol(qCol); setRevenueCol(rCol); setDateCol(dCol);
@@ -284,32 +284,30 @@ export default function SalesImport() {
     };
     reader.readAsBinaryString(file);
   };
-
   /* ── Submit CNET format ── */
   const handleCnetSubmit = async () => {
     if (!parsed?.rows?.length) return;
-
     const salesData = parsed.rows.map(r => ({
       productCode: r.code,
       productName: r.name,
-      quantity:    r.qty,
-      revenue:     r.totalAmt,   // Total Amount = total revenue for this line
-      unitPrice:   r.avgAmt,     // Avg Amount   = avg selling price per unit (incl. tax)
+      quantity: r.qty,
+      revenue: r.totalAmt,   // Total Amount = total revenue for this line
+      unitPrice: r.avgAmt,     // Avg Amount   = avg selling price per unit (incl. tax)
     })).filter(s => s.productCode || s.productName);
 
     setLoading(true); setResult(null);
     try {
       const res = await api.post('/transactions/import-sales', {
-        sales:     salesData,
-        notes:     'Imported via POS Sales Report (CNET format)',
+        sales: salesData,
+        notes: 'Imported via POS Sales Report (CNET format)',
         reference: `POS Import — ${new Date().toLocaleDateString()}`,
       });
       setResult({ success: true, data: res.data });
       setFileData(null); setParsed(null);
     } catch (err) {
       setResult({
-        success:   false,
-        message:   err.response?.data?.message || 'Failed to import sales.',
+        success: false,
+        message: err.response?.data?.message || 'Failed to import sales.',
         unmatched: err.response?.data?.unmatchedProducts || [],
       });
     } finally { setLoading(false); }
@@ -321,48 +319,47 @@ export default function SalesImport() {
       return alert('Please select at least the Product Name or Product Code column.');
     }
     const salesData = fileData.map(row => ({
-      productName: productCol     ? String(row[productCol]     || '').trim() : '',
+      productName: productCol ? String(row[productCol] || '').trim() : '',
       productCode: productCodeCol ? String(row[productCodeCol] || '').trim() : '',
-      quantity:    qtyCol     ? (Number(row[qtyCol])     || 1) : 1,
-      revenue:     revenueCol ? (Number(row[revenueCol]) || 0) : 0,
-      unitPrice:   revenueCol ? (Number(row[revenueCol]) || 0) : 0,
-      saleDate:    dateCol ? row[dateCol] : null,
+      quantity: qtyCol ? (Number(row[qtyCol]) || 1) : 1,
+      revenue: revenueCol ? (Number(row[revenueCol]) || 0) : 0,
+      unitPrice: revenueCol ? (Number(row[revenueCol]) || 0) : 0,
+      saleDate: dateCol ? row[dateCol] : null,
     })).filter(s => s.productName || s.productCode);
 
     setLoading(true); setResult(null);
     try {
       const res = await api.post('/transactions/import-sales', {
-        sales:     salesData,
-        notes:     'Imported via POS/Excel Report',
+        sales: salesData,
+        notes: 'Imported via POS/Excel Report',
         reference: `POS Import — ${new Date().toLocaleDateString()}`,
       });
       setResult({ success: true, data: res.data });
       setFileData(null);
     } catch (err) {
       setResult({
-        success:   false,
-        message:   err.response?.data?.message || 'Failed to import sales.',
+        success: false,
+        message: err.response?.data?.message || 'Failed to import sales.',
         unmatched: err.response?.data?.unmatchedProducts || [],
       });
     } finally { setLoading(false); }
   };
-
   /* ── Export result to Excel ── */
   const handleExportSoldExcel = () => {
     if (!result?.data?.items) return;
     const exportRows = result.data.items.map((item, idx) => ({
-      '#':                   idx + 1,
-      'Product Code':        item.productCode || '—',
-      'Product Name':        item.productName,
-      'Category':            item.category || 'General',
-      'Quantity Sold':       item.quantitySold,
-      'Unit Price (ETB)':    item.sellingPrice.toFixed(2),
+      '#': idx + 1,
+      'Product Code': item.productCode || '—',
+      'Product Name': item.productName,
+      'Category': item.category || 'General',
+      'Quantity Sold': item.quantitySold,
+      'Unit Price (ETB)': item.sellingPrice.toFixed(2),
       'Total Revenue (ETB)': item.revenue.toFixed(2),
-      'COGS (ETB)':          item.cogs.toFixed(2),
-      'Gross Profit (ETB)':  item.grossProfit.toFixed(2),
-      'Match Status':        item.matchStatus === 'recipe_deducted' ? 'Recipe Deducted' :
-                             item.matchStatus === 'direct_material' ? 'Direct Stock Deducted' :
-                             item.matchStatus === 'no_recipe'       ? 'Sold (No Recipe)' : 'Unmatched',
+      'COGS (ETB)': item.cogs.toFixed(2),
+      'Gross Profit (ETB)': item.grossProfit.toFixed(2),
+      'Match Status': item.matchStatus === 'recipe_deducted' ? 'Recipe Deducted' :
+        item.matchStatus === 'direct_material' ? 'Direct Stock Deducted' :
+          item.matchStatus === 'no_recipe' ? 'Sold (No Recipe)' : 'Unmatched',
       'Ingredients Deducted': item.ingredientsUsed?.length
         ? item.ingredientsUsed.map(i => `${i.materialName} (${i.quantityUsed} ${i.unit})`).join(', ')
         : 'None',
@@ -407,14 +404,14 @@ export default function SalesImport() {
     const b64Reader = new FileReader();
     b64Reader.onload = async (ev) => {
       const dataUrl = ev.target.result; // data:image/jpeg;base64,....
-      const base64  = dataUrl.split(',')[1];
-      const mime    = file.type || 'image/jpeg';
+      const base64 = dataUrl.split(',')[1];
+      const mime = file.type || 'image/jpeg';
 
       setOcrLoading(true); setImageOcrOpen(true);
       try {
         const res = await api.post('/transactions/parse-image-sales', {
           imageBase64: base64,
-          mimeType:    mime,
+          mimeType: mime,
         });
         setOcrRows(res.data.rows || []);
         setOcrRawText(res.data.rawText || '');
@@ -425,13 +422,12 @@ export default function SalesImport() {
         setOcrError(err.response?.data?.message || 'OCR failed. Please try a clearer image.');
       } finally {
         setOcrLoading(false);
-        if (imageInputRef.current)  imageInputRef.current.value  = '';
+        if (imageInputRef.current) imageInputRef.current.value = '';
         if (cameraInputRef.current) cameraInputRef.current.value = '';
       }
     };
     b64Reader.readAsDataURL(file);
   };
-
   /* ── Update OCR row ── */
   const updateOcrRow = (idx, field, value) => {
     setOcrRows(rows => rows.map((r, i) => {
@@ -452,9 +448,9 @@ export default function SalesImport() {
       .map(r => ({
         productCode: r.code,
         productName: r.name,
-        quantity:    parseFloat(r.qty)      || 1,
-        revenue:     parseFloat(r.totalAmt) || 0,
-        unitPrice:   parseFloat(r.avgAmt)   || 0,
+        quantity: parseFloat(r.qty) || 1,
+        revenue: parseFloat(r.totalAmt) || 0,
+        unitPrice: parseFloat(r.avgAmt) || 0,
       }));
 
     if (!salesData.length) { setOcrError('No valid rows to import.'); return; }
@@ -462,8 +458,8 @@ export default function SalesImport() {
     setLoading(true); setResult(null); setOcrError('');
     try {
       const res = await api.post('/transactions/import-sales', {
-        sales:     salesData,
-        notes:     'Imported via POS Photo / Image OCR',
+        sales: salesData,
+        notes: 'Imported via POS Photo / Image OCR',
         reference: `POS Image Import — ${new Date().toLocaleDateString()}`,
       });
       setResult({ success: true, data: res.data });
@@ -667,11 +663,11 @@ export default function SalesImport() {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {[
-                { label: 'Product Name Column', required: true,  val: productCol,     set: setProductCol },
+                { label: 'Product Name Column', required: true, val: productCol, set: setProductCol },
                 { label: 'Product Code Column', required: false, val: productCodeCol, set: setProductCodeCol },
-                { label: 'Quantity Sold',        required: false, val: qtyCol,         set: setQtyCol },
-                { label: 'Revenue / Amount',     required: false, val: revenueCol,     set: setRevenueCol },
-                { label: 'Sale Date',            required: false, val: dateCol,        set: setDateCol },
+                { label: 'Quantity Sold', required: false, val: qtyCol, set: setQtyCol },
+                { label: 'Revenue / Amount', required: false, val: revenueCol, set: setRevenueCol },
+                { label: 'Sale Date', required: false, val: dateCol, set: setDateCol },
               ].map(({ label, required, val, set }) => (
                 <div key={label}>
                   <label className="block text-xs font-bold text-ink-700 mb-1">
@@ -750,10 +746,10 @@ export default function SalesImport() {
             {result.data.summary && (
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {[
-                  { label: 'Total POS Revenue',      val: `ETB ${fmt(result.data.summary.totalRevenue)}`,  sub: `${result.data.summary.totalSoldProducts || result.data.items?.length || 0} items sold`, cls: 'text-blue-700' },
-                  { label: 'Total COGS',              val: `ETB ${fmt(result.data.summary.totalCOGS)}`,    sub: 'Deducted from stock',       cls: 'text-orange-700' },
-                  { label: 'Gross Profit',            val: `ETB ${fmt(result.data.summary.grossProfit)}`,  sub: 'Revenue − COGS',            cls: result.data.summary.grossProfit >= 0 ? 'text-emerald-700' : 'text-red-700' },
-                  { label: 'Gross Profit Margin',     val: result.data.summary.profitMargin,               sub: 'Efficiency percentage',     cls: 'text-violet-700' },
+                  { label: 'Total POS Revenue', val: `ETB ${fmt(result.data.summary.totalRevenue)}`, sub: `${result.data.summary.totalSoldProducts || result.data.items?.length || 0} items sold`, cls: 'text-blue-700' },
+                  { label: 'Total COGS', val: `ETB ${fmt(result.data.summary.totalCOGS)}`, sub: 'Deducted from stock', cls: 'text-orange-700' },
+                  { label: 'Gross Profit', val: `ETB ${fmt(result.data.summary.grossProfit)}`, sub: 'Revenue − COGS', cls: result.data.summary.grossProfit >= 0 ? 'text-emerald-700' : 'text-red-700' },
+                  { label: 'Gross Profit Margin', val: result.data.summary.profitMargin, sub: 'Efficiency percentage', cls: 'text-violet-700' },
                 ].map(({ label, val, sub, cls }) => (
                   <div key={label} className="rounded-xl border border-ink-100 bg-white p-4 shadow-xs">
                     <p className="text-xs font-medium text-ink-500">{label}</p>
