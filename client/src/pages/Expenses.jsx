@@ -97,6 +97,30 @@ const CATEGORY_CONFIG = {
   },
 };
 
+const DEFAULT_EXPENSE_CATEGORIES = [
+  'Utilities (Power, Water, Gas)',
+  'Rent & Facility',
+  'Cleaning & Sanitation (Soap, Detergents)',
+  'Maintenance, Electrical & Repairs (Bulbs, Wiring)',
+  'Small Tools & Equipment',
+  'Kitchen & Dining Supplies (Non-stock)',
+  'Transportation & Logistics',
+  'Communication & Internet',
+  'Wages & Daily Casual Labor',
+  'Marketing, Printing & Signage',
+  'Government, Taxes & Licenses',
+  'Miscellaneous Overhead',
+];
+
+const DEFAULT_PAYMENT_METHODS = [
+  'Cash',
+  'Telebirr',
+  'Bank Transfer / CBE',
+  'Credit / Payable',
+  'Check',
+  'Other',
+];
+
 const QUICK_EXPENSE_TEMPLATES = [
   { title: 'Electricity / Power Bill', category: 'Utilities (Power, Water, Gas)' },
   { title: 'Water Utility Bill', category: 'Utilities (Power, Water, Gas)' },
@@ -129,8 +153,8 @@ export default function Expenses() {
   // Data states
   const [expenses, setExpenses] = useState([]);
   const [stats, setStats] = useState(null);
-  const [categoriesList, setCategoriesList] = useState([]);
-  const [paymentMethodsList, setPaymentMethodsList] = useState([]);
+  const [categoriesList, setCategoriesList] = useState(DEFAULT_EXPENSE_CATEGORIES);
+  const [paymentMethodsList, setPaymentMethodsList] = useState(DEFAULT_PAYMENT_METHODS);
   const [loading, setLoading] = useState(true);
   const [statsLoading, setStatsLoading] = useState(true);
 
@@ -198,10 +222,10 @@ export default function Expenses() {
     const fetchMeta = async () => {
       try {
         const res = await api.get('/expenses/meta');
-        if (res.data?.categories) setCategoriesList(res.data.categories);
-        if (res.data?.paymentMethods) setPaymentMethodsList(res.data.paymentMethods);
+        if (res.data?.categories?.length) setCategoriesList(res.data.categories);
+        if (res.data?.paymentMethods?.length) setPaymentMethodsList(res.data.paymentMethods);
       } catch (err) {
-        console.warn('Could not load expense metadata', err);
+        console.warn('Could not load expense metadata, using fallback defaults', err);
       }
     };
     fetchMeta();
@@ -386,12 +410,13 @@ export default function Expenses() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
-            <Button
+            <button
+              type="button"
               onClick={() => openNewExpenseModal()}
-              className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold shadow-lg shadow-blue-500/25 px-4 py-2.5 rounded-xl border border-white/20 transition-all hover:scale-[1.02]"
+              className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 active:scale-95 text-white font-semibold shadow-lg shadow-blue-500/25 px-4 py-2.5 rounded-xl border border-white/20 transition-all cursor-pointer hover:scale-[1.02]"
             >
               <PlusCircle size={16} /> Record Expense
-            </Button>
+            </button>
 
             <ExportDropdown
               data={exportData}
@@ -717,12 +742,13 @@ export default function Expenses() {
             <p className="text-xs text-ink-400 max-w-sm mt-1">
               No overhead expenses match your current date and category filters. Click "Record Expense" to add one.
             </p>
-            <Button
+            <button
+              type="button"
               onClick={() => openNewExpenseModal()}
-              className="mt-4 bg-blue-600 hover:bg-blue-700 text-white text-xs px-3.5 py-2 rounded-xl"
+              className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-semibold px-4 py-2.5 shadow-md shadow-blue-500/20 transition-all cursor-pointer"
             >
-              <PlusCircle size={14} /> Record First Expense
-            </Button>
+              <PlusCircle size={15} /> Record First Expense
+            </button>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -858,6 +884,7 @@ export default function Expenses() {
       {modalOpen && (
         <Modal
           open={modalOpen}
+          isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
           title={editingExpense ? 'Edit Overhead Expense' : 'Record Overhead Expense'}
         >
@@ -1065,6 +1092,7 @@ export default function Expenses() {
       {voucherModalOpen && activeVoucher && (
         <Modal
           open={voucherModalOpen}
+          isOpen={voucherModalOpen}
           onClose={() => setVoucherModalOpen(false)}
           title="Payment Voucher"
         >
