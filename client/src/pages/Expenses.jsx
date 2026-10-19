@@ -138,9 +138,110 @@ const formatETB = (n) =>
     maximumFractionDigits: 2,
   })}`;
 
+// ── Print Voucher (iframe injection – no popup needed) ────────────────────────
+function printVoucher(voucher, formatETB) {
+  const date = voucher.date ? new Date(voucher.date).toLocaleDateString() : '—';
+  const createdAt = voucher.createdAt ? new Date(voucher.createdAt).toLocaleString() : '—';
+  const voucherId = 'EXP-' + (voucher._id?.slice(-6).toUpperCase() || '------');
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Payment Voucher – ${voucherId}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #fff; color: #111827; padding: 28px; }
+    .voucher { max-width: 580px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; }
+    .v-header { background: #1e3a8a; color: #fff; padding: 18px 22px; display: flex; justify-content: space-between; align-items: flex-start; }
+    .v-header h1 { font-size: 19px; font-weight: 800; }
+    .v-header .sub { font-size: 11px; opacity: 0.75; margin-top: 2px; }
+    .v-header .badge { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; background: rgba(255,255,255,.15); padding: 3px 8px; border-radius: 5px; margin-top: 6px; display: inline-block; }
+    .v-right { text-align: right; }
+    .v-right .id { font-size: 13px; font-weight: 700; font-family: monospace; }
+    .v-right .dt { font-size: 11px; opacity: .75; margin-top: 3px; }
+    .v-body { padding: 22px; }
+    .amt-box { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 9px; padding: 16px; text-align: center; margin-bottom: 18px; }
+    .amt-box .lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #1d4ed8; }
+    .amt-box .amt { font-size: 28px; font-weight: 900; font-family: monospace; color: #1e3a8a; margin-top: 3px; }
+    .amt-box .via { font-size: 12px; color: #1d4ed8; font-weight: 600; margin-top: 3px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; padding: 14px 0; margin-bottom: 14px; }
+    .field .lbl { font-size: 10px; color: #6b7280; }
+    .field .val { font-size: 12px; font-weight: 700; color: #111827; margin-top: 2px; }
+    .notes-lbl { font-size: 10px; color: #6b7280; margin-bottom: 4px; }
+    .notes-box { background: #f8fafc; border-radius: 7px; padding: 9px 11px; font-size: 12px; color: #374151; }
+    .receipt-img { max-height: 180px; max-width: 100%; border-radius: 7px; border: 1px solid #e2e8f0; margin-top: 7px; }
+    .footer { border-top: 1px solid #e2e8f0; padding: 12px 22px; background: #f8fafc; font-size: 10px; color: #9ca3af; text-align: center; }
+    @media print {
+      body { padding: 0; }
+      .voucher { border: none; border-radius: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="voucher">
+    <div class="v-header">
+      <div>
+        <h1>Baba Roti Café</h1>
+        <p class="sub">Hotel Management &amp; Stock Control</p>
+        <span class="badge">Overhead Expense Voucher</span>
+      </div>
+      <div class="v-right">
+        <div style="font-size:9px;opacity:.7;font-weight:600;text-transform:uppercase;letter-spacing:.08em">Voucher ID</div>
+        <div class="id">${voucherId}</div>
+        <div class="dt">${date}</div>
+      </div>
+    </div>
+    <div class="v-body">
+      <div class="amt-box">
+        <div class="lbl">Amount Paid</div>
+        <div class="amt">${formatETB(voucher.amount)}</div>
+        <div class="via">via ${voucher.paymentMethod || 'Cash'}</div>
+      </div>
+      <div class="grid">
+        <div class="field"><div class="lbl">Expense Item</div><div class="val">${voucher.title || '—'}</div></div>
+        <div class="field"><div class="lbl">Category</div><div class="val">${voucher.category || '—'}</div></div>
+        <div class="field"><div class="lbl">Paid To / Payee</div><div class="val">${voucher.paidTo || '—'}</div></div>
+        <div class="field"><div class="lbl">Invoice / Ref #</div><div class="val">${voucher.referenceNo || '—'}</div></div>
+        <div class="field"><div class="lbl">Recorded By</div><div class="val">${voucher.recordedBy?.name || 'Staff'}</div></div>
+        <div class="field"><div class="lbl">Recorded At</div><div class="val">${createdAt}</div></div>
+      </div>
+      ${voucher.notes ? `<div class="notes-lbl">Notes / Purpose</div><div class="notes-box">${voucher.notes}</div>` : ''}
+      ${voucher.receiptUrl ? `<div style="margin-top:14px"><div class="notes-lbl">Attached Receipt</div><img src="${voucher.receiptUrl}" alt="Receipt" class="receipt-img"/></div>` : ''}
+    </div>
+    <div class="footer">Baba Roti Café &middot; ${voucherId} &middot; Printed ${new Date().toLocaleString()}</div>
+  </div>
+</body>
+</html>`;
+
+  // Remove any stale print iframe
+  const old = document.getElementById('__voucher_print_frame__');
+  if (old) old.remove();
+
+  // Create hidden iframe, inject content, then print it
+  const iframe = document.createElement('iframe');
+  iframe.id = '__voucher_print_frame__';
+  iframe.style.cssText = 'position:fixed;top:0;left:0;width:0;height:0;border:none;opacity:0;pointer-events:none;z-index:-9999';
+  document.body.appendChild(iframe);
+
+  iframe.contentDocument.open();
+  iframe.contentDocument.write(html);
+  iframe.contentDocument.close();
+
+  // Give the iframe a moment to render then print
+  iframe.onload = () => {
+    setTimeout(() => {
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+      setTimeout(() => iframe.remove(), 1000);
+    }, 250);
+  };
+}
+
 export default function Expenses() {
-  const { user, hasRole } = useAuth();
-  const canDelete = hasRole('admin') || hasRole('manager');
+  const { user, hasRole, canCrud } = useAuth();
+  const canEdit = canCrud ? canCrud('expenses', 'edit') : (hasRole('admin') || hasRole('manager'));
+  const canDelete = canCrud ? canCrud('expenses', 'delete') : (hasRole('admin') || hasRole('manager'));
 
   // Filter states
   const [datePreset, setDatePreset] = useState('month'); // 'all' | 'today' | 'week' | 'month' | 'last_month' | 'custom'
@@ -413,13 +514,15 @@ export default function Expenses() {
           </div>
 
           <div className="relative z-30 flex flex-wrap items-center gap-2.5">
-            <button
-              type="button"
-              onClick={() => openNewExpenseModal()}
-              className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 active:scale-95 text-white font-semibold shadow-lg shadow-blue-500/25 px-4 py-2.5 rounded-xl border border-white/20 transition-all cursor-pointer hover:scale-[1.02]"
-            >
-              <PlusCircle size={16} /> Record Expense
-            </button>
+            {canEdit && (
+              <button
+                type="button"
+                onClick={() => openNewExpenseModal()}
+                className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 active:scale-95 text-white font-semibold shadow-lg shadow-blue-500/25 px-4 py-2.5 rounded-xl border border-white/20 transition-all cursor-pointer hover:scale-[1.02]"
+              >
+                <PlusCircle size={16} /> Record Expense
+              </button>
+            )}
 
             <ExportDropdown
               data={exportData}
@@ -879,13 +982,15 @@ export default function Expenses() {
                             <Eye size={13} />
                           </button>
 
-                          <button
-                            onClick={() => openEditModal(exp)}
-                            title="Edit Expense"
-                            className="flex h-7 w-7 items-center justify-center rounded-lg text-ink-500 hover:bg-amber-50 hover:text-amber-600 transition"
-                          >
-                            <Edit2 size={13} />
-                          </button>
+                          {canEdit && (
+                            <button
+                              onClick={() => openEditModal(exp)}
+                              title="Edit Expense"
+                              className="flex h-7 w-7 items-center justify-center rounded-lg text-ink-500 hover:bg-amber-50 hover:text-amber-600 transition"
+                            >
+                              <Edit2 size={13} />
+                            </button>
+                          )}
 
                           {canDelete && (
                             <button
@@ -1233,7 +1338,7 @@ export default function Expenses() {
                 Close
               </Button>
               <Button
-                onClick={() => window.print()}
+                onClick={() => printVoucher(activeVoucher, formatETB)}
                 className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs px-3.5 py-2 rounded-xl"
               >
                 <Printer size={14} /> Print Voucher

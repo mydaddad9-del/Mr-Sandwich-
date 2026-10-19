@@ -9,6 +9,7 @@ import Modal from '../components/ui/Modal';
 import WorkflowBadge from '../components/ui/WorkflowBadge';
 import ExportDropdown from '../components/ui/ExportDropdown';
 import Pagination from '../components/ui/Pagination';
+import { useAuth } from '../context/AuthContext';
 
 const DEPARTMENTS = [
   'Kitchen', 'Food & Beverage', 'Front Office', 'Housekeeping',
@@ -31,6 +32,10 @@ const emptyForm = {
 const fmt = (d) => d ? new Date(d).toLocaleDateString('en-US', { dateStyle: 'medium' }) : '—';
 
 export default function Employees() {
+  const { hasRole, canCrud } = useAuth();
+  const canEdit = canCrud ? canCrud('employees', 'edit') : hasRole('admin', 'manager');
+  const canDelete = canCrud ? canCrud('employees', 'delete') : hasRole('admin');
+
   const [employees, setEmployees] = useState([]);
   const [loading,   setLoading]   = useState(false);
   const [loadErr,   setLoadErr]   = useState('');
@@ -183,10 +188,12 @@ export default function Employees() {
               { header: 'Status',     accessor: 'Status', align: 'center' },
             ]}
           />
-          <button onClick={openCreate}
-            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition">
-            <Plus size={16} /> Add Employee
-          </button>
+          {canEdit && (
+            <button onClick={openCreate}
+              className="inline-flex items-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition">
+              <Plus size={16} /> Add Employee
+            </button>
+          )}
         </div>
       </div>
 
@@ -301,14 +308,18 @@ export default function Employees() {
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <div className="flex items-center gap-1">
-                        <button onClick={() => openEdit(emp)}
-                          className="inline-flex items-center gap-1 rounded-lg bg-amber-500 hover:bg-amber-600 px-2 py-1 text-xs font-semibold text-white transition">
-                          <Pencil size={11} /> Edit
-                        </button>
-                        <button onClick={() => setDeleteId(emp._id)}
-                          className="rounded-md p-1.5 text-ink-400 hover:bg-red-50 hover:text-red-600 transition">
-                          <Trash2 size={13} />
-                        </button>
+                        {canEdit && (
+                          <button onClick={() => openEdit(emp)}
+                            className="inline-flex items-center gap-1 rounded-lg bg-amber-500 hover:bg-amber-600 px-2 py-1 text-xs font-semibold text-white transition">
+                            <Pencil size={11} /> Edit
+                          </button>
+                        )}
+                        {canDelete && (
+                          <button onClick={() => setDeleteId(emp._id)}
+                            className="rounded-md p-1.5 text-ink-400 hover:bg-red-50 hover:text-red-600 transition" title="Delete">
+                            <Trash2 size={13} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

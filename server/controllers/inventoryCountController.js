@@ -65,7 +65,7 @@ async function getPeriodMovement(materialId, periodStart, periodEnd) {
 
   for (const tx of txns) {
     const vt = tx.voucherType || (tx.type === 'in' ? 'pos_adjustment' : 'neg_adjustment');
-    const isOut = ['disposal', 'neg_adjustment', 'sales_import'].includes(vt) || tx.type === 'out';
+    const isOut = ['disposal', 'neg_adjustment', 'sales_import', 'pos_sale', 'manual_sale'].includes(vt) || tx.type === 'out';
 
     let qty = 0;
     if (tx.items && tx.items.length > 0) {
@@ -107,7 +107,7 @@ async function getMaterialBalances(material, periodStart, periodEnd) {
 
     for (const tx of postTxns) {
       const vt = tx.voucherType || (tx.type === 'in' ? 'pos_adjustment' : 'neg_adjustment');
-      const isOut = ['disposal', 'neg_adjustment', 'sales_import'].includes(vt) || tx.type === 'out';
+      const isOut = ['disposal', 'neg_adjustment', 'sales_import', 'pos_sale', 'manual_sale'].includes(vt) || tx.type === 'out';
 
       let qty = 0;
       if (tx.items && tx.items.length > 0) {

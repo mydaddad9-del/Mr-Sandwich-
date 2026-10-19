@@ -8,6 +8,7 @@ import {
   BarChart2, Calendar, PackageOpen, Settings as SettingsIcon, UploadCloud,
   Scale, ClipboardList, Trash2, Coffee, UserCog, Sparkles,
   SendToBack, X, Rocket, ClipboardCheck, ArrowRightLeft, History, Receipt,
+  MonitorSmartphone, ClipboardPen, BadgeDollarSign, Layers3,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import BabaRotiLogo from '../ui/BabaRotiLogo';
@@ -221,12 +222,14 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
   const onInventory = ['/materials', '/products', '/suppliers', '/consumption'].some(p => location.pathname.startsWith(p));
   const onFinance = location.pathname.startsWith('/expenses') || location.pathname.startsWith('/analytics');
   const onStaff = location.pathname.startsWith('/users') || location.pathname.startsWith('/employees');
+  const onSubsystem = ['/pos', '/captain-order', '/cash-sales'].some(p => location.pathname.startsWith(p));
 
   const [stockOpen, setStockOpen] = useState(onTransactions);
   const [reportOpen, setReportOpen] = useState(onReports);
   const [inventoryOpen, setInventoryOpen] = useState(onInventory);
   const [financeOpen, setFinanceOpen] = useState(onFinance);
   const [staffOpen, setStaffOpen] = useState(onStaff);
+  const [subsystemOpen, setSubsystemOpen] = useState(onSubsystem);
 
   useEffect(() => {
     if (onTransactions) setStockOpen(true);
@@ -234,6 +237,7 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
     if (onInventory) setInventoryOpen(true);
     if (onFinance) setFinanceOpen(true);
     if (onStaff) setStaffOpen(true);
+    if (onSubsystem) setSubsystemOpen(true);
   }, [location.pathname]);
 
   const linkCls = (isActive) =>
@@ -327,6 +331,39 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
 
           <SectionLabel collapsed={collapsed}>Main</SectionLabel>
           {canSeeNav('dashboard') && navLink('/', LayoutDashboard, 'Dashboard', true)}
+
+          {/* ── Subsystem (POS + Captain Order + Cash Sales) ── */}
+          {(canSeeNav('pos') || canSeeNav('captainOrder') || canSeeNav('cashSales')) && (
+            collapsed ? (
+              <NavLink to="/pos" onClick={onClose} title="Subsystem"
+                className={({ isActive }) => linkCls(isActive || onSubsystem)}>
+                {({ isActive }) => (
+                  <span className={iconSpan(isActive || onSubsystem)}>
+                    <Layers3 size={15} strokeWidth={2} />
+                  </span>
+                )}
+              </NavLink>
+            ) : (
+              <CollapsibleNav
+                label="Subsystem"
+                icon={Layers3}
+                isActive={onSubsystem}
+                open={subsystemOpen}
+                onToggle={() => setSubsystemOpen(o => !o)}
+                collapsed={collapsed}
+              >
+                {canSeeNav('captainOrder') && (
+                  <SubLink to="/captain-order" label="Captain Order" icon={ClipboardPen} onClick={onClose} />
+                )}
+                {canSeeNav('cashSales') && (
+                  <SubLink to="/cash-sales" label="Cash Sales" icon={BadgeDollarSign} onClick={onClose} />
+                )}
+                {canSeeNav('pos') && (
+                  <SubLink to="/pos" label="POS Ordering" icon={MonitorSmartphone} onClick={onClose} />
+                )}
+              </CollapsibleNav>
+            )
+          )}
 
           {/* ── Inventory & Items Group ── */}
           {(canSeeNav('rawMaterials') || canSeeNav('products') || canSeeNav('suppliers') || canSeeNav('consumption')) && (

@@ -14,8 +14,14 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new Error('A user with this email already exists');
   }
 
+  let assignedRole = role || 'storekeeper';
+  if (assignedRole === 'dev' && req.user?.role !== 'dev') {
+    res.status(403);
+    throw new Error('Only a System Owner / Developer can create accounts with the dev role.');
+  }
+
   const user = await User.create({
-    name, email, password, role,
+    name, email, password, role: assignedRole,
     phone: phone || '',
     telegramChatId: telegramChatId || '',
   });

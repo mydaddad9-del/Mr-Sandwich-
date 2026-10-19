@@ -19,6 +19,9 @@ import RecycleBin from './pages/RecycleBin';
 import Consumption from './pages/Consumption';
 import Employees from './pages/Employees';
 import Expenses from './pages/Expenses';
+import POS from './pages/POS';
+import CaptainOrder from './pages/CaptainOrder';
+import CashSales from './pages/CashSales';
 import ErrorBoundary from './components/ErrorBoundary';
 import { SessionTimeoutProvider } from './context/SessionTimeoutContext';
 import SessionTimeoutModal from './components/common/SessionTimeoutModal';
@@ -39,6 +42,9 @@ function App() {
             }
           >
             <Route path="/" element={<Dashboard />} />
+            <Route path="/pos" element={<ProtectedRoute module="subsystem"><POS /></ProtectedRoute>} />
+            <Route path="/captain-order" element={<ProtectedRoute module="subsystem"><CaptainOrder /></ProtectedRoute>} />
+            <Route path="/cash-sales" element={<ProtectedRoute module="subsystem"><CashSales /></ProtectedRoute>} />
             <Route path="/materials" element={<RawMaterials />} />
             <Route path="/products" element={<Products />} />
             <Route path="/analytics" element={<ProtectedRoute capability="viewReports"><Analytics /></ProtectedRoute>} />

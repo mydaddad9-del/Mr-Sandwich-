@@ -95,6 +95,8 @@ app.use('/api/employees', require('./routes/employeeRoutes'));
 app.use('/api/stock-requests', require('./routes/stockRequestRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/expenses', require('./routes/expenseRoutes'));
+app.use('/api/pos', require('./routes/posRoutes'));
+app.use('/api/captain-orders', require('./routes/captainOrderRoutes'));
 app.use('/api/ai', require('./routes/aiRoutes'));
 
 // Serve Frontend in production (for Aletcloud, Render, etc.)

@@ -21,6 +21,9 @@ const VOUCHERS = [
   { key: 'pos_adjustment', label: '+ve Adjustment',  fullLabel: 'Positive Stock Adjustment',      icon: TrendingUp,   badgeCls: 'bg-violet-100 text-violet-700',   activeCls: 'bg-violet-600',  direction: 'in',  needsSupplier: false, needsCost: false, description: 'Correct stock upward after physical count' },
   { key: 'disposal',       label: 'Disposal',        fullLabel: 'Goods Disposal Voucher',         icon: Flame,        badgeCls: 'bg-orange-100 text-orange-700',   activeCls: 'bg-orange-600',  direction: 'out', needsSupplier: false, needsCost: false, description: 'Write off damaged / expired goods' },
   { key: 'neg_adjustment', label: '−ve Adjustment',  fullLabel: 'Negative Stock Adjustment',      icon: TrendingDown, badgeCls: 'bg-red-100 text-red-700',         activeCls: 'bg-red-600',     direction: 'out', needsSupplier: false, needsCost: false, description: 'Correct stock downward after physical count' },
+  { key: 'sales_import',   label: 'Imported Sale',   fullLabel: 'Imported Sales Deduction',       icon: ShoppingBag,  badgeCls: 'bg-rose-100 text-rose-700',       activeCls: 'bg-rose-600',    direction: 'out', needsSupplier: false, needsCost: false, description: 'Sales imported from external POS' },
+  { key: 'pos_sale',       label: 'Baba Roti POS',   fullLabel: 'Baba Roti POS Sale',             icon: ShoppingBag,  badgeCls: 'bg-cyan-100 text-cyan-800',       activeCls: 'bg-cyan-600',    direction: 'out', needsSupplier: false, needsCost: false, description: 'Direct sales from Baba Roti POS' },
+  { key: 'manual_sale',    label: 'Manual Sale',     fullLabel: 'Manual Sales Record',            icon: ShoppingBag,  badgeCls: 'bg-purple-100 text-purple-700',   activeCls: 'bg-purple-600',  direction: 'out', needsSupplier: false, needsCost: false, description: 'Manually entered sale deduction' },
 ];
 const voucherByKey = Object.fromEntries(VOUCHERS.map(v => [v.key, v]));
 const emptyItem = () => ({ material: '', quantity: '', unitCost: '' });
@@ -28,9 +31,9 @@ const emptyForm = key => ({ voucherType: key, voucherNo: '', supplier: '', reaso
 
 // ── Component ─────────────────────────────────────────────────────────
 export default function StockTransactions({ defaultVoucher } = {}) {
-  const { can, hasRole } = useAuth();
-  const canEdit   = can('recordGoods');
-  const canDelete = can('voidTransactions');
+  const { can, hasRole, canCrud } = useAuth();
+  const canEdit   = canCrud ? canCrud('stockMovements', 'edit') : can('recordGoods');
+  const canDelete = canCrud ? canCrud('stockMovements', 'delete') : can('voidTransactions');
   const isAdmin   = hasRole('admin');
 
   // filterType comes from sidebar navigation (defaultVoucher) or stays null (All)

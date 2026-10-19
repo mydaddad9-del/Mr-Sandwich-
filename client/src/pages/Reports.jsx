@@ -36,7 +36,9 @@ const VOUCHER_LABELS = {
   neg_adjustment: '−ve Adjustment',
   pos_adjustment: '+ve Adjustment',
   fresh_bazaar: 'Fresh Bazaar',
-  sales_import: 'Sales Import',
+  sales_import: 'Imported POS Sale',
+  pos_sale: 'Baba Roti POS Sale',
+  manual_sale: 'Manual Sale',
 };
 
 const todayStr = () => new Date().toISOString().slice(0, 10);
@@ -1018,7 +1020,9 @@ export default function Reports({ defaultTab } = {}) {
         'Total In (ETB)': m.totalInCost.toFixed(2),
         '−ve Adj Out': m.negAdjQty,
         'Disposal Out': m.disposalQty,
-        'Sales Out': m.salesImportQty,
+        'POS Sales Out': m.posSaleQty,
+        'Import Sales Out': m.salesImportQty,
+        'Manual Sales Out': m.manualSaleQty,
         'Total Out Qty': m.totalOutQty,
         'Total Out (ETB)': m.totalOutCost.toFixed(2),
         'Closing Balance': m.closingStock,
@@ -1481,7 +1485,7 @@ export default function Reports({ defaultTab } = {}) {
                   <th colSpan={5} className="px-3 py-2 text-center border-r border-ink-200 bg-emerald-100/80 uppercase tracking-wider text-[11px] text-emerald-900">
                     Receipts / Inwards (+)
                   </th>
-                  <th colSpan={4} className="px-3 py-2 text-center border-r border-ink-200 bg-rose-100/80 uppercase tracking-wider text-[11px] text-rose-900">
+                  <th colSpan={6} className="px-3 py-2 text-center border-r border-ink-200 bg-rose-100/80 uppercase tracking-wider text-[11px] text-rose-900">
                     Issues / Outwards (−)
                   </th>
                   <th colSpan={4} className="px-3 py-2 text-center border-r border-ink-200 bg-blue-100/80 uppercase tracking-wider text-[11px] text-blue-900">
@@ -1511,7 +1515,9 @@ export default function Reports({ defaultTab } = {}) {
                   {/* Outwards */}
                   <th className="px-2.5 py-2 text-right bg-rose-50/50">−ve Adj</th>
                   <th className="px-2.5 py-2 text-right bg-rose-50/50">Disposal</th>
-                  <th className="px-2.5 py-2 text-right bg-rose-50/50">Sales</th>
+                  <th className="px-2.5 py-2 text-right bg-rose-50/50 text-cyan-800 font-bold" title="Baba Roti POS Direct Sales">POS Sales</th>
+                  <th className="px-2.5 py-2 text-right bg-rose-50/50 text-purple-800 font-bold" title="External POS Imported Sales">Import Sales</th>
+                  <th className="px-2.5 py-2 text-right bg-rose-50/50 text-indigo-800 font-bold" title="Manual Registered Sales">Manual Sales</th>
                   <th className="px-3 py-2 text-right border-r border-ink-200 bg-rose-100/70 font-bold text-rose-900">Total Out</th>
 
                   {/* Closing */}
@@ -1528,7 +1534,7 @@ export default function Reports({ defaultTab } = {}) {
               <tbody className="divide-y divide-ink-100">
                 {(!data.items || data.items.length === 0) && (
                   <tr>
-                    <td colSpan={19} className="px-4 py-12 text-center text-ink-400">
+                    <td colSpan={21} className="px-4 py-12 text-center text-ink-400">
                       No stock items matched the selected filters.
                     </td>
                   </tr>
@@ -1582,8 +1588,14 @@ export default function Reports({ defaultTab } = {}) {
                     <td className="px-2.5 py-2 text-right tabular text-orange-600 bg-rose-50/20">
                       {item.disposalQty > 0 ? `−${item.disposalQty}` : '—'}
                     </td>
-                    <td className="px-2.5 py-2 text-right tabular text-purple-600 bg-rose-50/20">
+                    <td className="px-2.5 py-2 text-right tabular text-cyan-700 bg-rose-50/20 font-medium" title="Baba Roti POS Direct Sales">
+                      {item.posSaleQty > 0 ? `−${item.posSaleQty}` : '—'}
+                    </td>
+                    <td className="px-2.5 py-2 text-right tabular text-purple-600 bg-rose-50/20 font-medium" title="External POS Imported Sales">
                       {item.salesImportQty > 0 ? `−${item.salesImportQty}` : '—'}
+                    </td>
+                    <td className="px-2.5 py-2 text-right tabular text-indigo-600 bg-rose-50/20 font-medium" title="Manual Registered Sales">
+                      {item.manualSaleQty > 0 ? `−${item.manualSaleQty}` : '—'}
                     </td>
                     <td className="px-3 py-2 text-right tabular border-r border-ink-200 font-bold text-rose-800 bg-rose-100/50">
                       {item.totalOutQty > 0 ? `−${item.totalOutQty.toLocaleString()}` : '0'}
@@ -1651,7 +1663,7 @@ export default function Reports({ defaultTab } = {}) {
                       +{(data.totals?.inwardValue || 0).toFixed(2)}
                     </td>
 
-                    <td colSpan={3} className="px-2 py-2.5 text-center text-rose-800 text-[10.5px]">
+                    <td colSpan={5} className="px-2 py-2.5 text-center text-rose-800 text-[10.5px]">
                       Outward Total
                     </td>
                     <td className="px-3 py-2.5 text-right tabular text-rose-950 font-extrabold border-r border-ink-200 bg-rose-100">
@@ -1929,10 +1941,17 @@ export default function Reports({ defaultTab } = {}) {
                               {row.voucherNo}
                             </td>
                             <td className="px-3 py-2 whitespace-nowrap">
-                              <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold ${['cash_grv', 'credit_grv', 'fresh_bazaar', 'pos_adjustment'].includes(row.voucherType)
+                              <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                                row.voucherType === 'pos_sale'
+                                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                                  : row.voucherType === 'manual_sale'
+                                  ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                                  : row.voucherType === 'sales_import'
+                                  ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                                  : ['cash_grv', 'credit_grv', 'fresh_bazaar', 'pos_adjustment'].includes(row.voucherType)
                                   ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                                   : 'bg-rose-50 text-rose-700 border border-rose-200'
-                                }`}>
+                              }`}>
                                 {VOUCHER_LABELS[row.voucherType] || row.voucherType}
                               </span>
                             </td>

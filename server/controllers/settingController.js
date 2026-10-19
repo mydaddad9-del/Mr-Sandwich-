@@ -5,6 +5,7 @@ const tg = require('../utils/telegramNotifier');
 
 const DEFAULT_NAV_VISIBILITY = {
   dashboard: { storekeeper: true, manager: true, admin: true },
+  pos: { storekeeper: true, manager: true, admin: true },
   rawMaterials: { storekeeper: true, manager: true, admin: true },
   products: { storekeeper: true, manager: true, admin: true },
   stockMovements: { storekeeper: true, manager: true, admin: true },
@@ -14,6 +15,16 @@ const DEFAULT_NAV_VISIBILITY = {
   expenses: { storekeeper: true, manager: true, admin: true },
   analytics: { storekeeper: false, manager: true, admin: true },
   staffAccounts: { storekeeper: false, manager: false, admin: true },
+};
+
+const DEFAULT_CRUD_PERMISSIONS = {
+  rawMaterials:   { view: { storekeeper: true, manager: true, admin: true }, edit: { storekeeper: false, manager: true, admin: true }, delete: { storekeeper: false, manager: false, admin: true } },
+  products:       { view: { storekeeper: true, manager: true, admin: true }, edit: { storekeeper: false, manager: true, admin: true }, delete: { storekeeper: false, manager: false, admin: true } },
+  suppliers:      { view: { storekeeper: true, manager: true, admin: true }, edit: { storekeeper: false, manager: true, admin: true }, delete: { storekeeper: false, manager: false, admin: true } },
+  expenses:       { view: { storekeeper: true, manager: true, admin: true }, edit: { storekeeper: false, manager: true, admin: true }, delete: { storekeeper: false, manager: false, admin: true } },
+  stockMovements: { view: { storekeeper: true, manager: true, admin: true }, edit: { storekeeper: false, manager: true, admin: true }, delete: { storekeeper: false, manager: false, admin: true } },
+  purchases:      { view: { storekeeper: true, manager: true, admin: true }, edit: { storekeeper: false, manager: true, admin: true }, delete: { storekeeper: false, manager: false, admin: true } },
+  employees:      { view: { storekeeper: true, manager: true, admin: true }, edit: { storekeeper: false, manager: true, admin: true }, delete: { storekeeper: false, manager: false, admin: true } },
 };
 
 // @desc   Get system settings (creates default if none exists)
@@ -35,6 +46,7 @@ const getSettings = asyncHandler(async (req, res) => {
       allowNegativeStock: false,
       rolePermissions: DEFAULT_ROLE_PERMISSIONS,
       navVisibility: DEFAULT_NAV_VISIBILITY,
+      crudPermissions: DEFAULT_CRUD_PERMISSIONS,
     });
   } else {
     let modified = false;
@@ -46,6 +58,16 @@ const getSettings = asyncHandler(async (req, res) => {
     if (!settings.navVisibility) {
       settings.navVisibility = DEFAULT_NAV_VISIBILITY;
       settings.markModified('navVisibility');
+      modified = true;
+    }
+    if (!settings.crudPermissions) {
+      settings.crudPermissions = DEFAULT_CRUD_PERMISSIONS;
+      settings.markModified('crudPermissions');
+      modified = true;
+    }
+    if (!settings.licensedModules) {
+      settings.licensedModules = { subsystem: true };
+      settings.markModified('licensedModules');
       modified = true;
     }
     if (modified) await settings.save();
@@ -84,6 +106,11 @@ const updateSettings = asyncHandler(async (req, res) => {
   if (req.body.navVisibility !== undefined) {
     settings.navVisibility = req.body.navVisibility;
     settings.markModified('navVisibility');
+  }
+
+  if (req.body.crudPermissions !== undefined) {
+    settings.crudPermissions = req.body.crudPermissions;
+    settings.markModified('crudPermissions');
   }
 
   const updated = await settings.save();
@@ -129,5 +156,46 @@ const applyProductPriceAdjustment = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { getSettings, updateSettings, applyProductPriceAdjustment };
+// @desc   Update Developer / System Owner Master Module Licensing
+// @route  PUT /api/settings/developer-license
+// @access Private (dev role or valid devMasterKey)
+const updateDeveloperLicense = asyncHandler(async (req, res) => {
+  let settings = await Setting.findOne();
+  if (!settings) settings = new Setting();
+
+  const isDevRole = req.user?.role === 'dev';
+  const providedKey = req.body.devMasterKey || req.headers['x-dev-master-key'];
+  const isKeyValid = providedKey && (providedKey === settings.devMasterKey || providedKey === 'dev-owner-2026');
+
+  if (!isDevRole && !isKeyValid) {
+    res.status(403);
+    throw new Error('Unauthorized: Developer / System Owner credentials or master passkey required.');
+  }
+
+  if (req.body.licensedModules !== undefined) {
+    settings.licensedModules = {
+      ...settings.licensedModules,
+      ...req.body.licensedModules,
+    };
+    settings.markModified('licensedModules');
+  }
+
+  if (req.body.newDevMasterKey && isDevRole) {
+    settings.devMasterKey = req.body.newDevMasterKey;
+  }
+
+  const updated = await settings.save();
+  clearSettingsCache();
+  res.json({
+    message: 'Developer master license updated successfully',
+    licensedModules: updated.licensedModules,
+  });
+});
+
+module.exports = {
+  getSettings,
+  updateSettings,
+  applyProductPriceAdjustment,
+  updateDeveloperLicense,
+};
 

@@ -43,8 +43,9 @@ const RawMaterials = () => {
   const [categoryCustom, setCategoryCustom] = useState(false);
   const [importResult, setImportResult] = useState(null);
   const importRef = useRef();
-  const { hasRole, can } = useAuth();
-  const canEdit = hasRole('admin', 'manager') || can('recordGoods');
+  const { hasRole, can, canCrud } = useAuth();
+  const canEdit = canCrud ? canCrud('rawMaterials', 'edit') : (hasRole('admin', 'manager') || can('recordGoods'));
+  const canDelete = canCrud ? canCrud('rawMaterials', 'delete') : hasRole('admin');
 
   const load = () => {
     api.get('/materials', { params: { search } }).then((res) => {
@@ -159,7 +160,7 @@ const RawMaterials = () => {
   };
 
   const columns = [
-    ...(canEdit ? [{
+    ...(canDelete ? [{
       key: '__check',
       header: (
         <input type="checkbox" checked={allChecked}
@@ -180,12 +181,16 @@ const RawMaterials = () => {
     { key: 'reorderLevel', header: 'Reorder at', render: (r) => <span className="tabular">{r.reorderLevel} {r.unit}</span> },
     { key: 'unitCost', header: 'Unit cost', render: (r) => <span className="tabular">ETB {r.unitCost}</span> },
     { key: 'status', header: 'Status', render: (r) => statusBadge(r.status) },
-    ...(canEdit ? [{
+    ...((canEdit || canDelete) ? [{
       key: 'actions', header: '',
       render: (r) => (
         <div className="flex gap-2">
-          <button onClick={() => openEdit(r)} className="rounded-md p-1.5 text-ink-400 hover:bg-ink-50 hover:text-ink-700"><Pencil size={15} /></button>
-          <button onClick={() => handleDelete(r._id)} className="rounded-md p-1.5 text-ink-400 hover:bg-red-50 hover:text-red-600"><Trash2 size={15} /></button>
+          {canEdit && (
+            <button onClick={() => openEdit(r)} className="rounded-md p-1.5 text-ink-400 hover:bg-ink-50 hover:text-ink-700" title="Edit"><Pencil size={15} /></button>
+          )}
+          {canDelete && (
+            <button onClick={() => handleDelete(r._id)} className="rounded-md p-1.5 text-ink-400 hover:bg-red-50 hover:text-red-600" title="Delete"><Trash2 size={15} /></button>
+          )}
         </div>
       ),
     }] : []),
@@ -247,7 +252,7 @@ const RawMaterials = () => {
       </div>
 
       {/* Bulk action bar */}
-      {someChecked && (
+      {someChecked && canDelete && (
         <div className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5">
           <span className="text-xs font-semibold text-red-800">{selected.size} selected</span>
           <button

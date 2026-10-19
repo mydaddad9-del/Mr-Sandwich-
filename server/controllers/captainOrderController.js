@@ -1,0 +1,233 @@
+const asyncHandler = require("express-async-handler");
+const CaptainOrder = require("../models/CaptainOrder");
+const Product = require("../models/Product");
+const Setting = require("../models/Setting");
+
+function determineStation(category = "", parentCategory = "", name = "") {
+  const text = `${category} ${parentCategory} ${name}`.toLowerCase();
+  const baristaKeywords = [
+    "beverage","drink","coffee","tea","latte","espresso","cappuccino",
+    "juice","smoothie","water","soda","cocktail","mocktail","beer",
+    "wine","shake","cold drink","bar","macchiato",
+  ];
+  return baristaKeywords.some((k) => text.includes(k)) ? "barista" : "kitchen";
+}
+
+async function generateCaptainOrderNo() {
+  const now = new Date();
+  const y = String(now.getFullYear()).slice(-2);
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  const prefix = `CAP-${y}${m}${d}`;
+  const last = await CaptainOrder.findOne({ orderNo: new RegExp(`^${prefix}`) })
+    .sort({ createdAt: -1 }).lean();
+  const seq = last && last.dailySequence ? last.dailySequence + 1 : 1;
+  return { orderNo: `${prefix}-${String(seq).padStart(3, "0")}`, dailySequence: seq };
+}
+
+// @route POST /api/captain-orders
+const createCaptainOrder = asyncHandler(async (req, res) => {
+  const {
+    tableNo = "", tableLabel = "", customerName = "Walk-in Guest",
+    customerPhone = "", guestCount = 1, orderType = "dine_in",
+    waiter = null, waiterName = "",
+    items = [], discountPercent = 0, serviceCharge = 0, tableNotes = "",
+  } = req.body;
+
+  if (!items.length) { res.status(400); throw new Error("Order must have at least one item"); }
+
+  const settings = await Setting.findOne().lean();
+  const taxRate = Number(settings?.taxRate ?? 15);
+  const { orderNo, dailySequence } = await generateCaptainOrderNo();
+
+  let subtotal = 0;
+  const processedItems = [];
+
+  for (const item of items) {
+    const qty = Math.max(0.001, Number(item.quantity) || 1);
+    const product = await Product.findById(item.product).lean();
+    if (!product) { res.status(400); throw new Error(`Product not found: ${item.productName || item.product}`); }
+
+    const unitPrice = Number(item.unitPrice !== undefined ? item.unitPrice : product.sellingPrice) || 0;
+    const lineTotal = Math.round(unitPrice * qty * 100) / 100;
+    subtotal += lineTotal;
+    const station = determineStation(product.category, product.parentCategory, product.name);
+
+    processedItems.push({
+      product: product._id,
+      productName: product.name,
+      productCode: product.code || "",
+      category: product.category || "General",
+      parentCategory: product.parentCategory || "FOOD",
+      quantity: qty,
+      unitPrice,
+      totalPrice: lineTotal,
+      notes: (item.notes || "").trim(),
+      station,
+      addedRound: item.addedRound || 1,
+    });
+  }
+
+  let finalDiscount = 0;
+  if (discountPercent > 0) finalDiscount = Math.round(subtotal * discountPercent / 100 * 100) / 100;
+  const taxableSubtotal = Math.max(0, subtotal - finalDiscount);
+  const taxAmount = Math.round(taxableSubtotal * taxRate / 100 * 100) / 100;
+  const grandTotal = Math.round((taxableSubtotal + taxAmount + (Number(serviceCharge) || 0)) * 100) / 100;
+
+  const order = await CaptainOrder.create({
+    orderNo, dailySequence,
+    tableNo, tableLabel, customerName, customerPhone,
+    guestCount: Number(guestCount) || 1, orderType,
+    waiter: waiter || null, waiterName: waiterName || "",
+    createdBy: req.user._id, createdByName: req.user.name || "Staff",
+    items: processedItems, subtotal,
+    discountPercent, discountAmount: finalDiscount,
+    taxPercent: taxRate, taxAmount, serviceCharge: Number(serviceCharge) || 0, grandTotal,
+    tableNotes: tableNotes || "",
+    status: req.body.status || "open",
+  });
+
+  res.status(201).json({ success: true, order, message: `Captain Order #${orderNo} created!` });
+});
+
+// @route GET /api/captain-orders
+const getCaptainOrders = asyncHandler(async (req, res) => {
+  const { status, tableNo, date, limit = 100, search } = req.query;
+  const filter = {};
+  if (status && status !== "all") filter.status = status;
+  if (tableNo) filter.tableNo = tableNo;
+  if (date) {
+    const s = new Date(date); s.setHours(0, 0, 0, 0);
+    const e = new Date(date); e.setHours(23, 59, 59, 999);
+    filter.createdAt = { $gte: s, $lte: e };
+  }
+  if (search) {
+    const q = search.trim();
+    filter.$or = [
+      { orderNo: new RegExp(q, "i") },
+      { customerName: new RegExp(q, "i") },
+      { tableNo: new RegExp(q, "i") },
+      { waiterName: new RegExp(q, "i") },
+    ];
+  }
+  const orders = await CaptainOrder.find(filter)
+    .sort({ createdAt: -1 }).limit(Number(limit)).lean();
+  res.json(orders);
+});
+
+// @route GET /api/captain-orders/:id
+const getCaptainOrderById = asyncHandler(async (req, res) => {
+  const order = await CaptainOrder.findById(req.params.id).lean();
+  if (!order) { res.status(404); throw new Error("Captain order not found"); }
+  res.json(order);
+});
+
+// @route PATCH /api/captain-orders/:id
+const updateCaptainOrder = asyncHandler(async (req, res) => {
+  const { items, tableNotes, guestCount, customerName, waiter, waiterName,
+    discountPercent, serviceCharge, status } = req.body;
+
+  const order = await CaptainOrder.findById(req.params.id);
+  if (!order) { res.status(404); throw new Error("Captain order not found"); }
+  if (["paid", "voided", "cancelled"].includes(order.status)) {
+    res.status(400); throw new Error(`Cannot edit an order with status: ${order.status}`);
+  }
+
+  if (items && items.length > 0) {
+    const settings = await Setting.findOne().lean();
+    const taxRate = Number(settings?.taxRate ?? 15);
+    let subtotal = 0;
+    const processedItems = [];
+    for (const item of items) {
+      const qty = Math.max(0.001, Number(item.quantity) || 1);
+      const product = await Product.findById(item.product).lean();
+      if (!product) continue;
+      const unitPrice = Number(item.unitPrice !== undefined ? item.unitPrice : product.sellingPrice) || 0;
+      const lineTotal = Math.round(unitPrice * qty * 100) / 100;
+      subtotal += lineTotal;
+      processedItems.push({
+        product: product._id, productName: product.name, productCode: product.code || "",
+        category: product.category || "General", parentCategory: product.parentCategory || "FOOD",
+        quantity: qty, unitPrice, totalPrice: lineTotal,
+        notes: (item.notes || "").trim(),
+        station: determineStation(product.category, product.parentCategory, product.name),
+        addedRound: item.addedRound || 1,
+      });
+    }
+    const dp = Number(discountPercent || order.discountPercent) || 0;
+    const finalDiscount = dp > 0 ? Math.round(subtotal * dp / 100 * 100) / 100 : 0;
+    const taxableSubtotal = Math.max(0, subtotal - finalDiscount);
+    const taxAmount = Math.round(taxableSubtotal * taxRate / 100 * 100) / 100;
+    const sc = Number(serviceCharge || order.serviceCharge) || 0;
+    const grandTotal = Math.round((taxableSubtotal + taxAmount + sc) * 100) / 100;
+    order.items = processedItems;
+    order.subtotal = subtotal;
+    order.discountPercent = dp;
+    order.discountAmount = finalDiscount;
+    order.taxAmount = taxAmount;
+    order.serviceCharge = sc;
+    order.grandTotal = grandTotal;
+  }
+
+  if (tableNotes !== undefined) order.tableNotes = tableNotes;
+  if (guestCount !== undefined) order.guestCount = Number(guestCount) || 1;
+  if (customerName !== undefined) order.customerName = customerName;
+  if (waiter !== undefined) order.waiter = waiter || null;
+  if (waiterName !== undefined) order.waiterName = waiterName || "";
+  if (status) {
+    order.status = status;
+    if (status === "paid") {
+      order.billedAt = new Date();
+      order.billedBy = req.user?._id || null;
+      order.billedByName = req.user?.name || "Cashier";
+      if (req.body.cashSaleRef) order.cashSaleRef = req.body.cashSaleRef;
+    }
+  }
+
+  await order.save();
+  res.json({ success: true, order, message: "Order updated successfully" });
+});
+
+// @route POST /api/captain-orders/:id/send-to-kitchen
+const sendToKitchen = asyncHandler(async (req, res) => {
+  const order = await CaptainOrder.findById(req.params.id);
+  if (!order) { res.status(404); throw new Error("Captain order not found"); }
+  order.status = "sent_to_kitchen";
+  order.kotPrinted = true;
+  order.kotPrintedAt = new Date();
+  await order.save();
+  res.json({ success: true, order });
+});
+
+// @route POST /api/captain-orders/:id/void
+const voidCaptainOrder = asyncHandler(async (req, res) => {
+  const { reason = "Voided by manager" } = req.body;
+  const order = await CaptainOrder.findById(req.params.id);
+  if (!order) { res.status(404); throw new Error("Captain order not found"); }
+  if (order.status === "paid") { res.status(400); throw new Error("Cannot void a paid order. Void the cash sale instead."); }
+  order.isVoided = true;
+  order.status = "voided";
+  order.voidReason = reason;
+  order.voidedBy = req.user._id;
+  order.voidedAt = new Date();
+  await order.save();
+  res.json({ success: true, order, message: `Captain Order #${order.orderNo} voided.` });
+});
+
+// @route GET /api/captain-orders/active-tables
+const getActiveTables = asyncHandler(async (req, res) => {
+  const activeOrders = await CaptainOrder.find({
+    status: { $in: ["open", "sent_to_kitchen", "ready", "billed"] },
+  }).select("tableNo tableLabel status waiterName guestCount grandTotal createdAt items orderNo").lean();
+  res.json(activeOrders);
+});
+
+module.exports = {
+  createCaptainOrder,
+  getCaptainOrders,
+  getCaptainOrderById,
+  updateCaptainOrder,
+  sendToKitchen,
+  voidCaptainOrder,
+  getActiveTables,
+};

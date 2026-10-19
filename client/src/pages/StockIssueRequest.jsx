@@ -75,7 +75,7 @@ let cachedSummary = null;
 // MAIN PAGE
 // ════════════════════════════════════════════════════════════════
 export default function StockIssueRequest() {
-  const { user, can } = useAuth();
+  const { user, can, canCrud, hasRole } = useAuth();
 
   // ── Data state (instantly restored from cache if previously visited) ──
   const [requests,  setRequests]  = useState(() => cachedRequests || []);
@@ -341,6 +341,8 @@ export default function StockIssueRequest() {
   // ── Helpers ───────────────────────────────────────────────────
   const canApprove = user?.role === 'admin' || user?.role === 'manager';
   const canIssue   = user?.role === 'admin' || user?.role === 'manager' || user?.role === 'storekeeper';
+  const canEdit    = canCrud ? canCrud('stockMovements', 'edit') : (user?.role === 'admin' || user?.role === 'manager');
+  const canDelete  = canCrud ? canCrud('stockMovements', 'delete') : user?.role === 'admin';
 
   const getMaterialStock = (matId) => {
     const mat = materials.find(m => (m._id || m) === matId);
@@ -595,7 +597,7 @@ export default function StockIssueRequest() {
                         </button>
 
                         {/* Edit — pending only */}
-                        {req.status === 'pending' && (
+                        {req.status === 'pending' && canEdit && (
                           <button
                             onClick={() => openEdit(req)}
                             className="inline-flex items-center gap-1 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700 hover:bg-amber-100 transition shadow-sm"
@@ -645,7 +647,7 @@ export default function StockIssueRequest() {
                         )}
 
                         {/* Delete */}
-                        {['rejected', 'cancelled'].includes(req.status) && canApprove && (
+                        {['rejected', 'cancelled'].includes(req.status) && canDelete && (
                           <button
                             onClick={() => handleDelete(req)}
                             className="inline-flex items-center gap-1 rounded-lg bg-rose-600 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-rose-700 transition shadow-sm"

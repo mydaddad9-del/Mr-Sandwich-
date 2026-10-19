@@ -38,6 +38,7 @@ const clearSettingsCache = () => {
 
 const hasPermission = async (role, capability) => {
   if (!role) return false;
+  if (role === 'dev') return true; // System Owner / Developer has full access to all capabilities
   const rolePermissions = await getCachedRolePermissions();
   if (role === 'admin') {
     const adminPerm = rolePermissions?.[capability]?.admin;
@@ -71,11 +72,16 @@ const protect = asyncHandler(async (req, res, next) => {
 
 const authorize = (...roles) => {
   return (req, res, next) => {
-    if (!req.user || !roles.includes(req.user.role)) {
-      res.status(403);
-      throw new Error(`Role '${req.user ? req.user.role : 'guest'}' is not permitted to perform this action`);
+    if (!req.user) {
+      res.status(401);
+      throw new Error('Not authorized, no user found');
     }
-    next();
+    // 'dev' role is super-admin / system owner and passes all role gates
+    if (req.user.role === 'dev' || roles.includes(req.user.role)) {
+      return next();
+    }
+    res.status(403);
+    throw new Error(`Role '${req.user.role}' is not permitted to perform this action`);
   };
 };
 
@@ -94,11 +100,29 @@ const authorizePermission = (capability) => {
   });
 };
 
+/**
+ * Gate check for system module licensing (e.g. 'subsystem')
+ * If the module has been locked/disabled by the developer, non-dev requests are rejected.
+ */
+const verifyModuleLicense = (moduleName) => {
+  return asyncHandler(async (req, res, next) => {
+    if (req.user?.role === 'dev') return next();
+    const settings = await Setting.findOne();
+    const isLicensed = settings?.licensedModules?.[moduleName] !== false;
+    if (!isLicensed) {
+      res.status(403);
+      throw new Error(`The '${moduleName}' module is locked and not licensed for this hotel installation. Please contact the system developer / vendor.`);
+    }
+    next();
+  });
+};
+
 module.exports = {
   protect,
   authorize,
   authorizePermission,
   hasPermission,
+  verifyModuleLicense,
   clearSettingsCache,
   getCachedRolePermissions,
   DEFAULT_ROLE_PERMISSIONS,

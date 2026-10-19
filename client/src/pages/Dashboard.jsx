@@ -78,6 +78,9 @@ const VOUCHER_LABELS = {
   pos_adjustment: { label: '+ve Adjustment', color: 'bg-violet-50 text-violet-700 border-violet-200' },
   disposal: { label: 'Disposal', color: 'bg-orange-50 text-orange-700 border-orange-200' },
   neg_adjustment: { label: '-ve Adjustment', color: 'bg-rose-50 text-rose-700 border-rose-200' },
+  sales_import: { label: 'Sales Import', color: 'bg-pink-50 text-pink-700 border-pink-200' },
+  manual_sale: { label: 'Manual Sale', color: 'bg-purple-50 text-purple-700 border-purple-200' },
+  pos_sale: { label: 'POS Sale', color: 'bg-cyan-50 text-cyan-700 border-cyan-200' },
 };
 
 // Custom Chart Tooltips

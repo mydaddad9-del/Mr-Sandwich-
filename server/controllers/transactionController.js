@@ -27,6 +27,8 @@ const generateVoucherNo = async (voucherType) => {
     pos_adjustment: 'PADJ',
     fresh_bazaar:   'FBR',
     sales_import:   'SALE',
+    pos_sale:       'POS',
+    manual_sale:    'MSALE',
   };
   const prefix = prefixes[voucherType] ?? 'TXN';
   const count = await StockTransaction.countDocuments({ voucherType });
@@ -750,18 +752,22 @@ const importSales = asyncHandler(async (req, res) => {
   }
 
   if (resolvedItems.length > 0) {
+    const isManual = Boolean(notes?.toLowerCase().includes('manual') || req.body.isManual);
+    const resolvedVoucherType = isManual ? 'manual_sale' : 'sales_import';
+    const resolvedReason = isManual ? 'Manual Sales Registration' : 'Sales Report Import';
+
     const totalAmount = resolvedItems.reduce((s, i) => s + i.totalCost, 0);
     transaction = await StockTransaction.create({
-      voucherType: 'sales_import',
-      voucherNo:   await generateVoucherNo('sales_import'),
+      voucherType: resolvedVoucherType,
+      voucherNo:   await generateVoucherNo(resolvedVoucherType),
       type:        'out',
       items:       resolvedItems.map(({ material, quantity, unitCost, totalCost }) => ({ material, quantity, unitCost, totalCost })),
       material:    resolvedItems[0].material,
       quantity:    resolvedItems[0].quantity,
       unitCost:    resolvedItems[0].unitCost,
-      reason:      'Sales Report Import',
+      reason:      resolvedReason,
       reference:   reference || '',
-      notes:       notes || 'Automated stock deduction from sales report',
+      notes:       notes || (isManual ? 'Manual Sales Registration' : 'Automated stock deduction from sales report'),
       date:        saleDate ? new Date(saleDate) : new Date(),
       performedBy: req.user._id,
       totalAmount,

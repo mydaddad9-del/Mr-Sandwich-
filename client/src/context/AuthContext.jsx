@@ -12,8 +12,28 @@ const DEFAULT_PERMISSIONS = {
   viewReports:      { storekeeper: false, manager: true,  admin: true },
   manageAccounts:   { storekeeper: false, manager: false, admin: true },
 };
+
+// CRUD privilege defaults per module
+// Modules: rawMaterials, products, suppliers, expenses, stockMovements, purchases, employees
+const CRUD_MODULES = [
+  'rawMaterials', 'products', 'suppliers', 'expenses',
+  'stockMovements', 'purchases', 'employees',
+];
+const DEFAULT_CRUD_PERMISSIONS = Object.fromEntries(
+  CRUD_MODULES.map((mod) => [
+    mod,
+    {
+      view:   { storekeeper: true,  manager: true,  admin: true },
+      edit:   { storekeeper: false, manager: true,  admin: true },
+      delete: { storekeeper: false, manager: false, admin: true },
+    },
+  ])
+);
 const DEFAULT_NAV_VISIBILITY = {
   dashboard:      { storekeeper: true,  manager: true,  admin: true },
+  pos:            { storekeeper: true,  manager: true,  admin: true },
+  captainOrder:   { storekeeper: true,  manager: true,  admin: true },
+  cashSales:      { storekeeper: true,  manager: true,  admin: true },
   rawMaterials:   { storekeeper: true,  manager: true,  admin: true },
   products:       { storekeeper: true,  manager: true,  admin: true },
   stockMovements: { storekeeper: true,  manager: true,  admin: true },
@@ -25,16 +45,24 @@ const DEFAULT_NAV_VISIBILITY = {
   staffAccounts:  { storekeeper: false, manager: false, admin: true },
 };
 
+const DEFAULT_LICENSED_MODULES = {
+  subsystem: true,
+};
+
 /** Clear every settings-related key from localStorage */
 const clearSettingsCache = () => {
   localStorage.removeItem('hotelStockPermissions');
   localStorage.removeItem('hotelStockNavVisibility');
+  localStorage.removeItem('hotelStockCrudPermissions');
+  localStorage.removeItem('hotelStockLicensedModules');
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser]                     = useState(null);
-  const [rolePermissions, setRolePermissions] = useState(DEFAULT_PERMISSIONS);
-  const [navVisibility,   setNavVisibility]   = useState(DEFAULT_NAV_VISIBILITY);
+  const [user, setUser]                       = useState(null);
+  const [rolePermissions, setRolePermissions]   = useState(DEFAULT_PERMISSIONS);
+  const [navVisibility,   setNavVisibility]     = useState(DEFAULT_NAV_VISIBILITY);
+  const [crudPermissions, setCrudPermissions]   = useState(DEFAULT_CRUD_PERMISSIONS);
+  const [licensedModules, setLicensedModules]   = useState(DEFAULT_LICENSED_MODULES);
 
   // loading stays true until BOTH the user AND the server settings are resolved
   const [loading, setLoading] = useState(true);
@@ -50,14 +78,26 @@ export const AuthProvider = ({ children }) => {
         setNavVisibility(res.data.navVisibility);
         localStorage.setItem('hotelStockNavVisibility', JSON.stringify(res.data.navVisibility));
       }
+      if (res.data?.crudPermissions) {
+        setCrudPermissions(res.data.crudPermissions);
+        localStorage.setItem('hotelStockCrudPermissions', JSON.stringify(res.data.crudPermissions));
+      }
+      if (res.data?.licensedModules) {
+        setLicensedModules(res.data.licensedModules);
+        localStorage.setItem('hotelStockLicensedModules', JSON.stringify(res.data.licensedModules));
+      }
       return res.data;
     } catch (err) {
       // Network failure: fall back to localStorage cache if available, else hardcoded defaults
       try {
         const cachedRP = localStorage.getItem('hotelStockPermissions');
         const cachedNV = localStorage.getItem('hotelStockNavVisibility');
+        const cachedCP = localStorage.getItem('hotelStockCrudPermissions');
+        const cachedLM = localStorage.getItem('hotelStockLicensedModules');
         if (cachedRP) setRolePermissions(JSON.parse(cachedRP));
         if (cachedNV) setNavVisibility(JSON.parse(cachedNV));
+        if (cachedCP) setCrudPermissions(JSON.parse(cachedCP));
+        if (cachedLM) setLicensedModules(JSON.parse(cachedLM));
       } catch { /* ignore parse errors */ }
       console.warn('Could not fetch settings from server, using cache/defaults', err);
     }
@@ -103,6 +143,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setRolePermissions(DEFAULT_PERMISSIONS);
     setNavVisibility(DEFAULT_NAV_VISIBILITY);
+    setCrudPermissions(DEFAULT_CRUD_PERMISSIONS);
   };
 
   const updateUser = (updatedData) => {
@@ -111,11 +152,16 @@ export const AuthProvider = ({ children }) => {
     setUser(newUser);
   };
 
-  const hasRole = (...roles) => user && roles.includes(user.role);
+  const hasRole = (...roles) => {
+    if (!user) return false;
+    if (user.role === 'dev') return true; // System Owner has full access to all role gates
+    return roles.includes(user.role);
+  };
 
   /** Check a workflow/action capability (e.g. 'recordGoods') */
   const can = (capability) => {
     if (!user) return false;
+    if (user.role === 'dev') return true; // System Owner has full capability
     if (user.role === 'admin') {
       const adminVal = rolePermissions?.[capability]?.admin;
       return adminVal !== false;
@@ -123,9 +169,35 @@ export const AuthProvider = ({ children }) => {
     return Boolean(rolePermissions?.[capability]?.[user.role]);
   };
 
+  /**
+   * Check CRUD permission: canCrud('rawMaterials', 'delete')
+   * action = 'view' | 'edit' | 'delete'
+   */
+  const canCrud = (module, action) => {
+    if (!user) return false;
+    if (user.role === 'dev') return true;
+    const modPerms = crudPermissions?.[module];
+    if (!modPerms) return user.role === 'admin';
+    const actionPerms = modPerms[action];
+    if (!actionPerms) return user.role === 'admin';
+    return Boolean(actionPerms[user.role]);
+  };
+
+  /** Check if a module is licensed / unlocked by the developer */
+  const isModuleLicensed = (moduleKey) => {
+    return Boolean(licensedModules?.[moduleKey] ?? true);
+  };
+
   /** Check whether a sidebar nav section is visible for this user's role */
   const canSeeNav = (navKey) => {
     if (!user) return false;
+    // Subsystem master gating: if locked by dev, hide completely from non-dev users!
+    if (['pos', 'captainOrder', 'cashSales'].includes(navKey)) {
+      if (licensedModules?.subsystem === false && user.role !== 'dev') {
+        return false;
+      }
+    }
+    if (user.role === 'dev') return true;
     const nav = navVisibility ?? DEFAULT_NAV_VISIBILITY;
     const entry = nav[navKey];
     if (!entry) return true; // unknown key — show by default
@@ -136,6 +208,8 @@ export const AuthProvider = ({ children }) => {
     if (newSettings) {
       const rp = newSettings.rolePermissions ?? newSettings;
       const nv = newSettings.navVisibility ?? null;
+      const cp = newSettings.crudPermissions ?? null;
+      const lm = newSettings.licensedModules ?? null;
 
       setRolePermissions(rp);
       localStorage.setItem('hotelStockPermissions', JSON.stringify(rp));
@@ -143,6 +217,14 @@ export const AuthProvider = ({ children }) => {
       if (nv) {
         setNavVisibility(nv);
         localStorage.setItem('hotelStockNavVisibility', JSON.stringify(nv));
+      }
+      if (cp) {
+        setCrudPermissions(cp);
+        localStorage.setItem('hotelStockCrudPermissions', JSON.stringify(cp));
+      }
+      if (lm) {
+        setLicensedModules(lm);
+        localStorage.setItem('hotelStockLicensedModules', JSON.stringify(lm));
       }
       return newSettings;
     }
@@ -158,9 +240,13 @@ export const AuthProvider = ({ children }) => {
         updateUser,
         hasRole,
         can,
+        canCrud,
         canSeeNav,
+        isModuleLicensed,
+        licensedModules,
         rolePermissions,
         navVisibility,
+        crudPermissions,
         refreshPermissions,
       }}
     >

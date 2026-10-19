@@ -16,8 +16,9 @@ const Suppliers = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing,   setEditing]   = useState(null);
   const [form,      setForm]      = useState(emptyForm);
-  const { hasRole, can } = useAuth();
-  const canDelete = hasRole('admin') || can('manageAccounts');
+  const { hasRole, can, canCrud } = useAuth();
+  const canEdit = canCrud ? canCrud('suppliers', 'edit') : hasRole('admin', 'manager');
+  const canDelete = canCrud ? canCrud('suppliers', 'delete') : (hasRole('admin') || can('manageAccounts'));
 
   const load = () => api.get('/suppliers', { params: { search } }).then(res => {
     setSuppliers(Array.isArray(res.data) ? res.data : []);
@@ -94,17 +95,19 @@ const Suppliers = () => {
     { key: 'category',      header: 'Category' },
     { key: 'contactPerson', header: 'Contact person' },
     { key: 'phone',         header: 'Phone' },
-    {
+    ...((canEdit || canDelete) ? [{
       key: 'actions', header: '',
       render: (r) => (
         <div className="flex gap-2">
-          <button onClick={() => openEdit(r)} className="rounded-md p-1.5 text-ink-400 hover:bg-ink-50 hover:text-ink-700"><Pencil size={15} /></button>
+          {canEdit && (
+            <button onClick={() => openEdit(r)} className="rounded-md p-1.5 text-ink-400 hover:bg-ink-50 hover:text-ink-700" title="Edit"><Pencil size={15} /></button>
+          )}
           {canDelete && (
-            <button onClick={() => handleDelete(r._id)} className="rounded-md p-1.5 text-ink-400 hover:bg-red-50 hover:text-red-600"><Trash2 size={15} /></button>
+            <button onClick={() => handleDelete(r._id)} className="rounded-md p-1.5 text-ink-400 hover:bg-red-50 hover:text-red-600" title="Delete"><Trash2 size={15} /></button>
           )}
         </div>
       ),
-    },
+    }] : []),
   ];
 
   return (
@@ -122,12 +125,14 @@ const Suppliers = () => {
             pdfTitle="Hotel Suppliers Directory"
             pdfColumns={pdfColumns}
           />
-          <Button variant="brass" onClick={openCreate}><Plus size={16} /> Add supplier</Button>
+          {canEdit && (
+            <Button variant="brass" onClick={openCreate}><Plus size={16} /> Add supplier</Button>
+          )}
         </div>
       </div>
 
       {/* Bulk action bar */}
-      {someChecked && (
+      {someChecked && canDelete && (
         <div className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5">
           <span className="text-xs font-semibold text-red-800">{selected.size} selected</span>
           <button

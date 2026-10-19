@@ -32,7 +32,8 @@ const ACTION_COLORS = {
 };
 
 export default function Purchases() {
-  const { user, can } = useAuth();
+  const { user, can, canCrud } = useAuth();
+  const canEdit = canCrud ? canCrud('purchases', 'edit') : can('recordGoods');
   const [purchases,  setPurchases]  = useState([]);
   const [suppliers,  setSuppliers]  = useState([]);
   const [materials,  setMaterials]  = useState([]);
@@ -240,7 +241,7 @@ export default function Purchases() {
           importLabel="Import Excel"
         />
         <input ref={importRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleImport} />
-        {can('recordGoods') && (
+        {canEdit && (
           <Button
             style={{ background: 'linear-gradient(135deg,#1a56db,#0d2d80)', color: 'white' }}
             onClick={openCreate}

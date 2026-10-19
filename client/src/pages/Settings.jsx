@@ -41,6 +41,9 @@ const CAPABILITIES = [
 
 const NAV_ITEMS = [
   { key: 'dashboard', label: 'Dashboard' },
+  { key: 'captainOrder', label: 'Subsystem — Captain Order' },
+  { key: 'cashSales', label: 'Subsystem — Cash Sales' },
+  { key: 'pos', label: 'Subsystem — POS Ordering' },
   { key: 'rawMaterials', label: 'Raw Materials' },
   { key: 'products', label: 'Products' },
   { key: 'stockMovements', label: 'Stock Movements' },
@@ -52,8 +55,19 @@ const NAV_ITEMS = [
   { key: 'staffAccounts', label: 'Staff Accounts' },
 ];
 
+// CRUD modules — must match AuthContext CRUD_MODULES
+const CRUD_MODULES_LIST = [
+  { key: 'rawMaterials',   label: 'Raw Materials' },
+  { key: 'products',       label: 'Products' },
+  { key: 'suppliers',      label: 'Suppliers' },
+  { key: 'expenses',       label: 'Overhead Expenses' },
+  { key: 'stockMovements', label: 'Stock Movements' },
+  { key: 'purchases',      label: 'Purchases / GRV' },
+  { key: 'employees',      label: 'Employees' },
+];
+
 export default function Settings() {
-  const { user, updateUser, hasRole, refreshPermissions } = useAuth();
+  const { user, updateUser, hasRole, refreshPermissions, licensedModules, isModuleLicensed } = useAuth();
   const { timeoutMinutes, setTimeoutMinutes } = useSessionTimeout();
   const [sessionTimeoutSuccess, setSessionTimeoutSuccess] = useState('');
   const [searchParams, setSearchParams] = useSearchParams();
@@ -114,15 +128,30 @@ export default function Settings() {
     },
     navVisibility: {
       dashboard: { storekeeper: true, manager: true, admin: true },
+      captainOrder: { storekeeper: true, manager: true, admin: true },
+      cashSales: { storekeeper: true, manager: true, admin: true },
+      pos: { storekeeper: true, manager: true, admin: true },
       rawMaterials: { storekeeper: true, manager: true, admin: true },
       products: { storekeeper: true, manager: true, admin: true },
       stockMovements: { storekeeper: true, manager: true, admin: true },
       suppliers: { storekeeper: false, manager: true, admin: true },
       consumption: { storekeeper: true, manager: true, admin: true },
       reports: { storekeeper: false, manager: true, admin: true },
+      expenses: { storekeeper: true, manager: true, admin: true },
       analytics: { storekeeper: false, manager: true, admin: true },
       staffAccounts: { storekeeper: false, manager: false, admin: true },
     },
+    // CRUD privileges per module
+    crudPermissions: Object.fromEntries(
+      CRUD_MODULES_LIST.map(({ key }) => [
+        key,
+        {
+          view:   { storekeeper: true,  manager: true,  admin: true },
+          edit:   { storekeeper: false, manager: true,  admin: true },
+          delete: { storekeeper: false, manager: false, admin: true },
+        },
+      ])
+    ),
     notes: '',
   });
   const [systemLoading, setSystemLoading] = useState(false);
@@ -135,6 +164,14 @@ export default function Settings() {
   const [bulkPriceApplying, setBulkPriceApplying] = useState(false);
   const [bulkPriceSuccess, setBulkPriceSuccess] = useState('');
   const [bulkPriceError, setBulkPriceError] = useState('');
+
+  // Developer / System Owner: license control state
+  const [devLicenseForm, setDevLicenseForm] = useState(null); // loaded from server
+  const [devSaving, setDevSaving] = useState(false);
+  const [devSuccess, setDevSuccess] = useState('');
+  const [devError, setDevError] = useState('');
+  const [devKeyConfirmOpen, setDevKeyConfirmOpen] = useState(false);
+  const [newDevKey, setNewDevKey] = useState('');
 
   // Telegram subscribers state (Admin)
   const [tgSubscribers, setTgSubscribers] = useState([]);
@@ -171,12 +208,32 @@ export default function Settings() {
         .then((res) => {
           if (res.data) {
             setSystemForm((prev) => ({ ...prev, ...res.data }));
+            // Pre-fill dev license form for dev users
+            if (user.role === 'dev' && res.data.licensedModules) {
+              setDevLicenseForm(res.data.licensedModules);
+            }
           }
         })
         .catch((err) => console.error('Failed to load settings', err))
         .finally(() => setSystemLoading(false));
     }
   }, [user]);
+
+  const handleDevLicenseSave = async () => {
+    if (!devLicenseForm) return;
+    setDevSaving(true); setDevSuccess(''); setDevError('');
+    try {
+      const payload = { licensedModules: devLicenseForm };
+      if (newDevKey.trim()) payload.newDevMasterKey = newDevKey.trim();
+      const res = await api.put('/settings/developer-license', payload);
+      setDevSuccess('Developer license settings saved successfully.');
+      setNewDevKey('');
+      setDevKeyConfirmOpen(false);
+      refreshPermissions(res.data);
+    } catch (e) {
+      setDevError(e.response?.data?.message || 'Failed to save developer license settings.');
+    } finally { setDevSaving(false); }
+  };
 
   // Load Telegram subscribers (admin only)
   const loadTgSubscribers = () => {
@@ -493,6 +550,24 @@ export default function Settings() {
               }`}
           >
             <Send size={16} /> Telegram Subscribers
+          </button>
+        )}
+
+        {/* Developer / System Owner tab — only visible to dev role */}
+        {user?.role === 'dev' && (
+          <button
+            onClick={() => setTab('dev')}
+            className={`flex items-center gap-2 border-b-2 px-3.5 py-3 text-sm font-semibold transition whitespace-nowrap ${
+              currentTab === 'dev'
+                ? 'border-amber-500 text-amber-600'
+                : 'border-transparent text-amber-400/60 hover:text-amber-600'
+            }`}
+          >
+            <span className="flex items-center gap-1.5">
+              <Lock size={16} />
+              <span>Developer Controls</span>
+              <span className="ml-1 inline-flex items-center rounded-full bg-amber-100 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-amber-700 border border-amber-200">OWNER</span>
+            </span>
           </button>
         )}
       </div>
@@ -1455,6 +1530,79 @@ export default function Settings() {
               </div>
             </div>
 
+            {/* ── CRUD Privileges Matrix ── */}
+            <div className="rounded-xl border border-ink-100 bg-surface p-4 shadow-sm space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="rounded-lg bg-rose-50 p-1.5 text-rose-600"><Shield size={15} /></span>
+                <div>
+                  <h4 className="text-sm font-bold text-ink-900">CRUD Action Privileges</h4>
+                  <p className="text-xs text-ink-400">
+                    Control which roles can <strong>View</strong>, <strong>Edit</strong>, and <strong>Delete</strong> records in each module.
+                  </p>
+                </div>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-xs text-left">
+                  <thead>
+                    <tr className="border-b border-ink-100 bg-ink-50/70 text-ink-600 font-semibold">
+                      <th className="py-2.5 px-3">Module</th>
+                      <th className="py-2.5 px-3 text-center" colSpan={3}>Storekeeper</th>
+                      <th className="py-2.5 px-3 text-center" colSpan={3}>Manager</th>
+                      <th className="py-2.5 px-3 text-center" colSpan={3}>Admin</th>
+                    </tr>
+                    <tr className="border-b border-ink-100 bg-ink-50/40 text-ink-500 text-[10px] font-bold uppercase tracking-wider">
+                      <th className="py-1.5 px-3"></th>
+                      {['storekeeper','manager','admin'].map(role =>
+                        ['View','Edit','Delete'].map(act => (
+                          <th key={`${role}-${act}`} className={`py-1.5 px-2 text-center ${act==='Delete'?'text-red-500':act==='Edit'?'text-amber-600':'text-emerald-600'}`}>{act}</th>
+                        ))
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-ink-50 text-ink-700">
+                    {CRUD_MODULES_LIST.map((mod) => (
+                      <tr key={mod.key} className="hover:bg-blue-50/20">
+                        <td className="py-2.5 px-3 font-semibold text-ink-800">{mod.label}</td>
+                        {['storekeeper', 'manager', 'admin'].map((role) =>
+                          ['view', 'edit', 'delete'].map((action) => (
+                            <td key={`${role}-${action}`} className="py-2.5 px-2 text-center">
+                              <input
+                                type="checkbox"
+                                disabled={!hasRole('admin')}
+                                checked={systemForm.crudPermissions?.[mod.key]?.[action]?.[role] ?? (role === 'admin')}
+                                onChange={(e) => {
+                                  const checked = e.target.checked;
+                                  setSystemForm(prev => ({
+                                    ...prev,
+                                    crudPermissions: {
+                                      ...prev.crudPermissions,
+                                      [mod.key]: {
+                                        ...prev.crudPermissions?.[mod.key],
+                                        [action]: {
+                                          ...prev.crudPermissions?.[mod.key]?.[action],
+                                          [role]: checked,
+                                        },
+                                      },
+                                    },
+                                  }));
+                                }}
+                                className={`h-4 w-4 rounded border-ink-300 focus:ring-blue-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${action==='delete'?'text-red-500':action==='edit'?'text-amber-500':'text-emerald-600'}`}
+                              />
+                            </td>
+                          ))
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-4 text-[11px] text-ink-500 pt-2 border-t border-ink-50">
+                <span className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-full bg-emerald-500"></span> <strong>View</strong> — Can see records</span>
+                <span className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-full bg-amber-500"></span> <strong>Edit</strong> — Can update records</span>
+                <span className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-full bg-red-500"></span> <strong>Delete</strong> — Can permanently remove records</span>
+              </div>
+            </div>
+
             {hasRole('admin') && (
               <div className="pt-5 flex justify-end">
                 <Button type="submit" disabled={systemSaving} className="bg-blue-600 hover:bg-blue-700 text-white">
@@ -1699,6 +1847,128 @@ export default function Settings() {
               </div>
             </div>
           )}
+        </Card>
+      )}
+      {/* ── Tab 6: Developer / System Owner Controls ── */}
+      {currentTab === 'dev' && user?.role === 'dev' && (
+        <Card className="max-w-2xl">
+          {/* Header */}
+          <div className="flex items-start gap-3 mb-5 pb-4 border-b border-amber-100">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg">
+              <Lock size={20} className="text-white" />
+            </div>
+            <div>
+              <h3 className="font-display text-base font-black text-ink-900 flex items-center gap-2">
+                Developer / System Owner Controls
+                <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-amber-700 border border-amber-200">OWNER ONLY</span>
+              </h3>
+              <p className="text-xs text-ink-400 mt-0.5">
+                These controls are hidden from all hotel admins and staff. Manage module licensing, lock/unlock premium features per installation.
+              </p>
+            </div>
+          </div>
+
+          {/* Warning Banner */}
+          <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
+            <strong>⚠ Sensitive Area:</strong> Changes here directly control what the hotel customer can access. Disabling a module will lock it for all roles including Admin — only you (dev@system.com) can re-enable it.
+          </div>
+
+          {/* Module Licensing */}
+          <div className="mb-6">
+            <h4 className="text-sm font-bold text-ink-900 mb-1 flex items-center gap-2">
+              <Sparkles size={15} className="text-amber-500" />
+              Module Licensing
+            </h4>
+            <p className="text-xs text-ink-400 mb-4">
+              Enable or disable premium modules for this hotel installation. Disabled modules show a locked screen to all users.
+            </p>
+
+            <div className="space-y-3">
+              {/* Subsystem Module */}
+              <div className="flex items-center justify-between rounded-xl border border-ink-100 bg-ink-50/40 px-4 py-3">
+                <div>
+                  <p className="text-sm font-bold text-ink-900">Subsystem Suite</p>
+                  <p className="text-xs text-ink-400">POS Ordering, Captain Order & Cash Sales — Full Restaurant POS Suite</p>
+                </div>
+                <label className="relative inline-flex cursor-pointer items-center">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={devLicenseForm?.subsystem ?? true}
+                    onChange={(e) => setDevLicenseForm(prev => ({ ...prev, subsystem: e.target.checked }))}
+                  />
+                  <div className="h-6 w-11 rounded-full bg-ink-200 peer-focus:ring-2 peer-focus:ring-amber-300 peer-checked:bg-amber-500 transition-colors after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-full after:shadow" />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Master Key Section */}
+          <div className="mb-6">
+            <h4 className="text-sm font-bold text-ink-900 mb-1 flex items-center gap-2">
+              <KeyRound size={15} className="text-amber-500" />
+              Developer Master Key
+            </h4>
+            <p className="text-xs text-ink-400 mb-3">
+              The master key is a secret code that allows emergency access to developer controls even without dev role login. Keep this private.
+            </p>
+            {!devKeyConfirmOpen ? (
+              <button
+                type="button"
+                onClick={() => setDevKeyConfirmOpen(true)}
+                className="inline-flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-bold text-amber-700 hover:bg-amber-100 transition"
+              >
+                <KeyRound size={13} /> Change Master Key
+              </button>
+            ) : (
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  value={newDevKey}
+                  onChange={e => setNewDevKey(e.target.value)}
+                  placeholder="Enter new master key (min 8 characters)"
+                  className="w-full rounded-lg border border-amber-200 bg-amber-50/50 px-3 py-2 text-sm font-mono outline-none focus:border-amber-400"
+                />
+                <div className="flex gap-2">
+                  <button onClick={() => { setDevKeyConfirmOpen(false); setNewDevKey(''); }}
+                    className="text-xs text-ink-400 hover:text-ink-700 px-2 py-1">Cancel</button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Dev Account Info */}
+          <div className="mb-6 rounded-xl border border-blue-100 bg-blue-50/50 p-4">
+            <h4 className="text-xs font-bold text-blue-700 mb-2 flex items-center gap-1.5">
+              <Shield size={13} /> Developer Account Info
+            </h4>
+            <div className="text-xs text-ink-600 space-y-1">
+              <p>Email: <strong className="font-mono text-ink-900">{user?.email}</strong></p>
+              <p>Role: <strong className="text-amber-700">System Developer / Owner</strong></p>
+              <p className="mt-2 text-ink-400">This account is invisible to hotel admins and cannot be deleted or edited by any admin/manager.</p>
+            </div>
+          </div>
+
+          {/* Actions */}
+          {devSuccess && (
+            <div className="mb-4 flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-700">
+              <CheckCircle2 size={16} className="flex-shrink-0" />{devSuccess}
+            </div>
+          )}
+          {devError && (
+            <div className="mb-4 flex items-center gap-2 rounded-xl bg-red-50 border border-red-200 p-3 text-xs text-red-600">
+              <AlertCircle size={16} className="flex-shrink-0" />{devError}
+            </div>
+          )}
+          <div className="flex justify-end">
+            <Button
+              onClick={handleDevLicenseSave}
+              disabled={devSaving}
+              className="bg-amber-500 hover:bg-amber-600 text-white"
+            >
+              <Save size={15} /> {devSaving ? 'Saving...' : 'Save Developer Settings'}
+            </Button>
+          </div>
         </Card>
       )}
     </div>

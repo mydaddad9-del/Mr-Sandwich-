@@ -238,6 +238,8 @@ const getStockBalanceReport = asyncHandler(async (req, res) => {
       neg_adjustment: { qty: 0, cost: 0 },
       disposal: { qty: 0, cost: 0 },
       sales_import: { qty: 0, cost: 0 },
+      pos_sale: { qty: 0, cost: 0 },
+      manual_sale: { qty: 0, cost: 0 },
       other_in: { qty: 0, cost: 0 },
       other_out: { qty: 0, cost: 0 },
       postPeriodNetChange: 0,
@@ -261,7 +263,7 @@ const getStockBalanceReport = asyncHandler(async (req, res) => {
   for (const txn of transactions) {
     const txnDate = new Date(txn.date);
     const vt = txn.voucherType || (txn.type === 'in' ? 'pos_adjustment' : 'neg_adjustment');
-    const isOut = ['disposal', 'neg_adjustment', 'sales_import'].includes(vt) || txn.type === 'out';
+    const isOut = ['disposal', 'neg_adjustment', 'sales_import', 'pos_sale', 'manual_sale'].includes(vt) || txn.type === 'out';
 
     const items = txn.items && txn.items.length > 0
       ? txn.items
@@ -337,6 +339,8 @@ const getStockBalanceReport = asyncHandler(async (req, res) => {
       item.neg_adjustment.qty +
       item.disposal.qty +
       item.sales_import.qty +
+      item.pos_sale.qty +
+      item.manual_sale.qty +
       item.other_out.qty
     ).toFixed(4));
 
@@ -344,6 +348,8 @@ const getStockBalanceReport = asyncHandler(async (req, res) => {
       item.neg_adjustment.cost +
       item.disposal.cost +
       item.sales_import.cost +
+      item.pos_sale.cost +
+      item.manual_sale.cost +
       item.other_out.cost
     ).toFixed(2));
 
@@ -391,6 +397,10 @@ const getStockBalanceReport = asyncHandler(async (req, res) => {
       disposalCost: Number(item.disposal.cost.toFixed(2)),
       salesImportQty: Number(item.sales_import.qty.toFixed(4)),
       salesImportCost: Number(item.sales_import.cost.toFixed(2)),
+      posSaleQty: Number(item.pos_sale.qty.toFixed(4)),
+      posSaleCost: Number(item.pos_sale.cost.toFixed(2)),
+      manualSaleQty: Number(item.manual_sale.qty.toFixed(4)),
+      manualSaleCost: Number(item.manual_sale.cost.toFixed(2)),
       totalOutQty,
       totalOutCost,
       netMovementQty: Number((totalInQty - totalOutQty).toFixed(4)),
@@ -451,7 +461,7 @@ const getItemStockLedger = asyncHandler(async (req, res) => {
 
   for (const txn of transactions) {
     const vt = txn.voucherType || (txn.type === 'in' ? 'pos_adjustment' : 'neg_adjustment');
-    const isOut = ['disposal', 'neg_adjustment', 'sales_import'].includes(vt) || txn.type === 'out';
+    const isOut = ['disposal', 'neg_adjustment', 'sales_import', 'pos_sale', 'manual_sale'].includes(vt) || txn.type === 'out';
 
     const items = txn.items?.length
       ? txn.items.filter(i => i.material?.toString() === materialId.toString())
@@ -561,7 +571,7 @@ const getMonthlyClosingReport = asyncHandler(async (req, res) => {
     const txnMonth = txnDate.getMonth();
 
     const vt = txn.voucherType || (txn.type === 'in' ? 'pos_adjustment' : 'neg_adjustment');
-    const isOut = ['disposal', 'neg_adjustment', 'sales_import'].includes(vt) || txn.type === 'out';
+    const isOut = ['disposal', 'neg_adjustment', 'sales_import', 'pos_sale', 'manual_sale'].includes(vt) || txn.type === 'out';
 
     const items = txn.items && txn.items.length > 0
       ? txn.items
@@ -587,7 +597,7 @@ const getMonthlyClosingReport = asyncHandler(async (req, res) => {
             bucket.totalOutwardVal += cost;
             if (vt === 'disposal') bucket.disposalVal += cost;
             else if (vt === 'neg_adjustment') bucket.negAdjVal += cost;
-            else if (vt === 'sales_import') bucket.salesVal += cost;
+            else if (['sales_import', 'pos_sale', 'manual_sale'].includes(vt)) bucket.salesVal += cost;
           } else {
             bucket.inwardQty += qty;
             bucket.totalInwardVal += cost;
@@ -610,7 +620,7 @@ const getMonthlyClosingReport = asyncHandler(async (req, res) => {
       const items = txn.items && txn.items.length > 0 ? txn.items : [txn];
       for (const it of items) {
         if (it.material?.toString() === mId) {
-          const isOut = ['disposal', 'neg_adjustment', 'sales_import'].includes(txn.voucherType) || txn.type === 'out';
+          const isOut = ['disposal', 'neg_adjustment', 'sales_import', 'pos_sale', 'manual_sale'].includes(txn.voucherType) || txn.type === 'out';
           matTxns.push({
             date: new Date(txn.date),
             qty: Number(it.quantity || 0),

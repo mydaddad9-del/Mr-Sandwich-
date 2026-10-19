@@ -11,6 +11,16 @@ const updateUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
   if (!user) { res.status(404); throw new Error('User not found'); }
 
+  // Prevent non-dev users from modifying dev account or assigning dev role
+  if (user.role === 'dev' && req.user.role !== 'dev') {
+    res.status(403);
+    throw new Error('Only a System Owner / Developer can modify developer accounts.');
+  }
+  if (req.body.role === 'dev' && req.user.role !== 'dev') {
+    res.status(403);
+    throw new Error('Only a System Owner / Developer can assign the dev role.');
+  }
+
   const wasActive = user.isActive;
   const oldRole   = user.role;
 
@@ -64,6 +74,10 @@ const updateUser = asyncHandler(async (req, res) => {
 const deleteUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
   if (!user) { res.status(404); throw new Error('User not found'); }
+  if (user.role === 'dev') {
+    res.status(403);
+    throw new Error('System Owner / Developer accounts cannot be deleted.');
+  }
   tg.notifyUserDeleted(user, req.user);
   await user.deleteOne();
   res.json({ message: 'User removed' });

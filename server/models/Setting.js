@@ -2,6 +2,9 @@ const mongoose = require('mongoose');
 
 const DEFAULT_NAV_VISIBILITY = {
   dashboard: { storekeeper: true, manager: true, admin: true },
+  pos: { storekeeper: true, manager: true, admin: true },
+  captainOrder: { storekeeper: true, manager: true, admin: true },
+  cashSales: { storekeeper: true, manager: true, admin: true },
   rawMaterials: { storekeeper: true, manager: true, admin: true },
   products: { storekeeper: true, manager: true, admin: true },
   stockMovements: { storekeeper: true, manager: true, admin: true },
@@ -11,6 +14,16 @@ const DEFAULT_NAV_VISIBILITY = {
   expenses: { storekeeper: true, manager: true, admin: true },
   analytics: { storekeeper: false, manager: true, admin: true },
   staffAccounts: { storekeeper: false, manager: false, admin: true },
+};
+
+const DEFAULT_CRUD_PERMISSIONS = {
+  rawMaterials:   { view: { storekeeper: true, manager: true, admin: true }, edit: { storekeeper: false, manager: true, admin: true }, delete: { storekeeper: false, manager: false, admin: true } },
+  products:       { view: { storekeeper: true, manager: true, admin: true }, edit: { storekeeper: false, manager: true, admin: true }, delete: { storekeeper: false, manager: false, admin: true } },
+  suppliers:      { view: { storekeeper: true, manager: true, admin: true }, edit: { storekeeper: false, manager: true, admin: true }, delete: { storekeeper: false, manager: false, admin: true } },
+  expenses:       { view: { storekeeper: true, manager: true, admin: true }, edit: { storekeeper: false, manager: true, admin: true }, delete: { storekeeper: false, manager: false, admin: true } },
+  stockMovements: { view: { storekeeper: true, manager: true, admin: true }, edit: { storekeeper: false, manager: true, admin: true }, delete: { storekeeper: false, manager: false, admin: true } },
+  purchases:      { view: { storekeeper: true, manager: true, admin: true }, edit: { storekeeper: false, manager: true, admin: true }, delete: { storekeeper: false, manager: false, admin: true } },
+  employees:      { view: { storekeeper: true, manager: true, admin: true }, edit: { storekeeper: false, manager: true, admin: true }, delete: { storekeeper: false, manager: false, admin: true } },
 };
 
 const settingSchema = new mongoose.Schema(
@@ -40,6 +53,21 @@ const settingSchema = new mongoose.Schema(
     navVisibility: {
       type: Object,
       default: DEFAULT_NAV_VISIBILITY,
+    },
+    crudPermissions: {
+      type: Object,
+      default: DEFAULT_CRUD_PERMISSIONS,
+    },
+    // Developer & System Owner Master Licensing Controls
+    licensedModules: {
+      type: Object,
+      default: {
+        subsystem: true, // Subsystem: POS Ordering, Captain Order, Cash Sales
+      },
+    },
+    devMasterKey: {
+      type: String,
+      default: 'dev-owner-2026',
     },
     // Telegram bot subscribers — array of { chatId, name, username, subscribedAt }
     telegramSubscribers: {

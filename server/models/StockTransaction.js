@@ -20,6 +20,8 @@ const VOUCHER_TYPES = [
   'pos_adjustment',
   'fresh_bazaar',
   'sales_import',
+  'pos_sale',
+  'manual_sale',
 ];
 
 // Direction each voucher type moves stock
@@ -31,6 +33,8 @@ const VOUCHER_DIRECTION = {
   pos_adjustment: 'in',
   fresh_bazaar:   'in',
   sales_import:   'out',
+  pos_sale:       'out',
+  manual_sale:    'out',
 };
 
 const lineItemSchema = new mongoose.Schema(
@@ -142,6 +146,9 @@ stockTransactionSchema.virtual('voucherLabel').get(function () {
     neg_adjustment: 'Negative Adjustment',
     pos_adjustment: 'Positive Adjustment',
     fresh_bazaar:   'Fresh Bazaar GRV',
+    sales_import:   'Imported Sales',
+    pos_sale:       'Baba Roti POS Sale',
+    manual_sale:    'Manual Sale',
   };
   return labels[this.voucherType] ?? this.voucherType;
 });

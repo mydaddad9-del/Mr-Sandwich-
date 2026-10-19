@@ -1,9 +1,16 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import ModuleLocked from './ui/ModuleLocked';
 
-const ProtectedRoute = ({ children, roles, capability }) => {
-  const { user, loading, can } = useAuth();
+/**
+ * ProtectedRoute:
+ *  - roles: restrict to specific roles
+ *  - capability: restrict to a workflow capability
+ *  - module: restrict based on developer module licensing (e.g. 'subsystem')
+ */
+const ProtectedRoute = ({ children, roles, capability, module: moduleProp }) => {
+  const { user, loading, can, isModuleLicensed } = useAuth();
 
   if (loading) {
     return (
@@ -14,6 +21,11 @@ const ProtectedRoute = ({ children, roles, capability }) => {
   }
 
   if (!user) return <Navigate to="/login" replace />;
+
+  // Module licensing gate: dev role always bypasses
+  if (moduleProp && user.role !== 'dev' && !isModuleLicensed(moduleProp)) {
+    return <ModuleLocked />;
+  }
 
   if (capability && !can(capability)) {
     return <Navigate to="/" replace />;

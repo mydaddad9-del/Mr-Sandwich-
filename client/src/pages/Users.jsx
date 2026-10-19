@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Users as UsersIcon, Phone, Send, Pencil, X } from 'lucide-react';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
@@ -11,9 +12,10 @@ const emptyForm = {
   phone: '', telegramChatId: '',
 };
 
-const roleColor  = { admin: 'brass', manager: 'green', storekeeper: 'ink' };
+const roleColor  = { admin: 'brass', manager: 'green', storekeeper: 'ink', dev: 'amber' };
 
 const Users = () => {
+  const { user: currentUser } = useAuth();
   const [users,      setUsers]      = useState([]);
   const [modalOpen,  setModalOpen]  = useState(false);
   const [editUser,   setEditUser]   = useState(null);
@@ -24,7 +26,14 @@ const Users = () => {
   const [pageSize,   setPageSize]   = useState(10);
 
   const load = () => api.get('/users')
-    .then((res) => setUsers(Array.isArray(res.data) ? res.data : []))
+    .then((res) => {
+      let list = Array.isArray(res.data) ? res.data : [];
+      // Hide dev accounts from non-dev users
+      if (currentUser?.role !== 'dev') {
+        list = list.filter(u => u.role !== 'dev');
+      }
+      setUsers(list);
+    })
     .catch(() => setUsers([]));
 
   useEffect(() => { load(); }, []);
@@ -217,6 +226,10 @@ const Users = () => {
                 <option value="storekeeper">Store Keeper</option>
                 <option value="manager">Manager</option>
                 <option value="admin">Admin</option>
+                {/* Dev option only visible to system owner */}
+                {currentUser?.role === 'dev' && (
+                  <option value="dev">🔒 System Developer (Owner)</option>
+                )}
               </select>
             </div>
             <div>
