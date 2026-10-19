@@ -165,6 +165,8 @@ export default function Settings() {
   const [bulkPriceSuccess, setBulkPriceSuccess] = useState('');
   const [bulkPriceError, setBulkPriceError] = useState('');
 
+  // Developer / System Owner: license control state
+  const [devLicenseForm, setDevLicenseForm] = useState({ subsystem: true });
   const [devSaving, setDevSaving] = useState(false);
   const [devSuccess, setDevSuccess] = useState('');
   const [devError, setDevError] = useState('');
