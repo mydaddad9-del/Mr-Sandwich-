@@ -13,7 +13,15 @@ const generateVoucherNo = async () => {
 };
 
 // ── Helper: apply/reverse stock deduction ────────────────────────
-async function applyStockDeduction(items, reverse = false) {
+// In single main-branch mode, affectsStock defaults to false.
+// Internal handoffs do NOT deduct RawMaterial.currentStock;
+// consumption occurs when sales are imported/recorded.
+async function applyStockDeduction(items, reverse = false, affectsStock = false) {
+  if (!affectsStock) {
+    // Single main-branch mode: internal handoffs do NOT deduct RawMaterial.currentStock.
+    // Stock is deducted upon Sales Import / menu item sales.
+    return;
+  }
   for (const item of items) {
     const mat = await RawMaterial.findById(item.material);
     if (!mat) continue;
@@ -124,14 +132,9 @@ const createStockRequest = asyncHandler(async (req, res) => {
   const isDirectIssue = requestType === 'direct_issue' &&
     ['admin', 'manager', 'storekeeper'].includes(req.user.role);
 
-  // Block direct issue if any item exceeds available stock — must use partial or request workflow
-  if (isDirectIssue && stockWarnings.length > 0) {
-    const msgs = stockWarnings.map(w =>
-      `${w.name}: requested ${w.requested} ${w.unit} but only ${w.available} available`
-    ).join('; ');
-    res.status(400);
-    throw new Error(`Insufficient stock for direct issue — ${msgs}`);
-  }
+  // In main-branch mode, direct issues record departmental hand-offs without
+  // deducting RawMaterial balances (actual consumption occurs upon Sales Import/POS).
+  // Therefore, stock shortfall is an advisory warning rather than a blocking error.
 
   const status = isDirectIssue ? 'issued' : 'pending';
   const voucherNo = await generateVoucherNo();
@@ -141,7 +144,7 @@ const createStockRequest = asyncHandler(async (req, res) => {
     by: req.user._id,
     byName: req.user.name,
     byRole: req.user.role,
-    note: isDirectIssue ? 'Direct issue by storekeeper/admin' : 'Request submitted',
+    note: isDirectIssue ? 'Direct issue by storekeeper/admin (Internal transfer)' : 'Request submitted',
   };
 
   // For direct issue, set issuedQty = requestedQty
@@ -152,6 +155,7 @@ const createStockRequest = asyncHandler(async (req, res) => {
   const newRequest = await StockRequest.create({
     voucherNo,
     requestType: isDirectIssue ? 'direct_issue' : 'request',
+    affectsStock: false, // Internal departmental hand-off in main branch; sales handle stock deduction
     department,
     requestedBy: req.user._id,
     requestedAt: date ? new Date(date) : new Date(),
@@ -166,9 +170,9 @@ const createStockRequest = asyncHandler(async (req, res) => {
     trail: [trailEntry],
   });
 
-  // Deduct stock immediately for direct issues
-  if (isDirectIssue) {
-    await applyStockDeduction(resolved);
+  // Deduct stock immediately only if affectsStock is explicitly true
+  if (isDirectIssue && newRequest.affectsStock) {
+    await applyStockDeduction(resolved, false, true);
   }
 
   const populated = await StockRequest.findById(newRequest._id)
@@ -282,42 +286,24 @@ const issueStock = asyncHandler(async (req, res) => {
     });
   }
 
-  // ── Stock sufficiency check ───────────────────────────────────
-  // Fetch current stock for all items in parallel
+  // ── Stock availability advisory check ─────────────────────────
+  // Fetch current stock for items (informational only; does not block issue in main branch)
   const matIds = request.items.map(i => i.material);
   const materials = await RawMaterial.find({ _id: { $in: matIds } }).select('name unit currentStock').lean();
   const matMap = {};
   materials.forEach(m => { matMap[m._id.toString()] = m; });
 
-  const insufficientItems = [];
-  const stockWarnings     = [];
+  const stockWarnings = [];
 
   for (const item of request.items) {
     if (item.issuedQty <= 0) continue;
     const mat = matMap[item.material.toString()];
     if (!mat) continue;
     if (item.issuedQty > mat.currentStock) {
-      insufficientItems.push({
-        name:      mat.name,
-        unit:      mat.unit,
-        requested: item.requestedQty,
-        issuing:   item.issuedQty,
-        available: mat.currentStock,
-        shortfall: item.issuedQty - mat.currentStock,
-      });
-    } else if (mat.currentStock - item.issuedQty <= 0) {
-      // Will empty the stock — note as warning but allow
-      stockWarnings.push(`${mat.name} will be completely emptied after this issue`);
+      stockWarnings.push(
+        `${mat.name}: issuing ${item.issuedQty} ${mat.unit} (system store stock shows ${mat.currentStock} ${mat.unit})`
+      );
     }
-  }
-
-  // If any item has insufficient stock — block and inform
-  if (insufficientItems.length > 0) {
-    const msgs = insufficientItems.map(w =>
-      `${w.name}: issuing ${w.issuing} ${w.unit} but only ${w.available} ${w.unit} available (shortfall: ${w.shortfall})`
-    ).join('\n');
-    res.status(400);
-    throw new Error(`Insufficient stock:\n${msgs}\n\nPlease reduce the issue quantity or wait for restocking.`);
   }
 
   // Recalculate total
@@ -332,13 +318,15 @@ const issueStock = asyncHandler(async (req, res) => {
     by: req.user._id,
     byName: req.user.name,
     byRole: req.user.role,
-    note,
+    note: note || 'Issued (Internal departmental hand-off)',
   });
 
   await request.save();
 
-  // Deduct stock
-  await applyStockDeduction(request.items);
+  // Deduct stock only if affectsStock is explicitly true (false for main-branch internal issue)
+  if (request.affectsStock) {
+    await applyStockDeduction(request.items, false, true);
+  }
 
   const populated = await StockRequest.findById(request._id)
     .populate('items.material', 'name unit unitCost currentStock')
@@ -347,9 +335,9 @@ const issueStock = asyncHandler(async (req, res) => {
 
   invalidateDashboardCache();
   tg.notifyStockIssued && tg.notifyStockIssued(populated, req.user);
-  notify.push({ type: 'stock_request', title: 'Stock Issued', message: `${req.user.name} issued stock for ${populated.department} — ETB ${Number(populated.totalCost || 0).toLocaleString()}`, icon: '📦', link: '/stock-requests', severity: 'success', userId: req.user._id });
+  notify.push({ type: 'stock_request', title: 'Stock Issued', message: `${req.user.name} issued stock for ${populated.department} — ETB ${Number(populated.totalCost || 0).toLocaleString()} (Internal hand-off)`, icon: '📦', link: '/stock-requests', severity: 'success', userId: req.user._id });
   res.json({
-    message: 'Stock issued and inventory deducted.',
+    message: 'Stock issued successfully (Internal hand-off · Raw material stock remains intact for sales consumption).',
     request: populated,
     stockWarnings,
   });

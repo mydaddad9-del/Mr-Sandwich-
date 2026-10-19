@@ -62,6 +62,12 @@ const stockRequestSchema = new mongoose.Schema(
       enum: ['request', 'direct_issue'],
       default: 'request',
     },
+    // Single main-branch mode: internal departmental issues do not affect raw material balances.
+    // Raw materials are consumed/deducted upon POS sales / Sales Import.
+    affectsStock: {
+      type: Boolean,
+      default: false,
+    },
     department:  { type: String, enum: DEPARTMENTS, required: true },
     requestedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     requestedAt: { type: Date, default: Date.now },

@@ -405,6 +405,27 @@ export default function StockIssueRequest() {
         </div>
       </div>
 
+      {/* ── Main Branch Operational Indicator ── */}
+      <div className="rounded-2xl border border-blue-200/80 bg-gradient-to-r from-blue-50/90 via-indigo-50/70 to-blue-50/90 p-4 shadow-xs">
+        <div className="flex items-start gap-3">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-xs">
+            <Building2 size={16} />
+          </div>
+          <div className="text-xs">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-bold text-blue-950">Main Branch Internal Requisition Mode</span>
+              <span className="rounded-full bg-blue-100 border border-blue-300 px-2.5 py-0.5 text-[10px] font-bold text-blue-800">
+                Non-Deducting Internal Hand-off
+              </span>
+            </div>
+            <p className="mt-1 text-blue-900/80 leading-relaxed">
+              Stock requests and direct issues track internal hand-offs to Kitchen, Bar, and departments for operational accountability. 
+              <strong> Raw material balances remain intact</strong> and are accurately deducted when menu items are sold through <strong>Sales Import &amp; POS Consumption</strong>.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* ── Summary KPI Cards ── */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {[
@@ -514,7 +535,10 @@ export default function StockIssueRequest() {
               <tbody className="divide-y divide-ink-50">
                 {filtered.map(req => (
                   <tr key={req._id} className="hover:bg-ink-50/50 transition group">
-                    <td className="px-4 py-3 font-bold text-blue-700">{req.voucherNo}</td>
+                    <td className="px-4 py-3 font-bold text-blue-700">
+                      <div>{req.voucherNo}</div>
+                      <div className="text-[9px] text-ink-400 font-normal">Internal Hand-off</div>
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1.5">
                         <Building2 size={12} className="text-ink-400" />
@@ -522,13 +546,18 @@ export default function StockIssueRequest() {
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`rounded-lg px-2 py-0.5 text-[10px] font-bold border ${
-                        req.requestType === 'direct_issue'
-                          ? 'bg-violet-50 text-violet-700 border-violet-200'
-                          : 'bg-blue-50 text-blue-700 border-blue-200'
-                      }`}>
-                        {req.requestType === 'direct_issue' ? 'Direct Issue' : 'Request'}
-                      </span>
+                      <div className="flex flex-col gap-1 items-start">
+                        <span className={`rounded-lg px-2 py-0.5 text-[10px] font-bold border ${
+                          req.requestType === 'direct_issue'
+                            ? 'bg-violet-50 text-violet-700 border-violet-200'
+                            : 'bg-blue-50 text-blue-700 border-blue-200'
+                        }`}>
+                          {req.requestType === 'direct_issue' ? 'Direct Issue' : 'Request'}
+                        </span>
+                        <span className="text-[9px] font-semibold text-ink-500 bg-ink-100/70 rounded px-1.5 py-0.5">
+                          Non-Deducting
+                        </span>
+                      </div>
                     </td>
                     <td className="px-4 py-3">
                       <span className={`rounded-lg px-2 py-0.5 text-[10px] font-bold border ${PRIORITY_CONFIG[req.priority]?.color}`}>
@@ -841,28 +870,21 @@ export default function StockIssueRequest() {
                   const matId       = item.material?._id || item.material;
                   const currentStock = item.material?.currentStock ?? 0;
                   const issueQty    = Number(issueQtys[matId] ?? item.requestedQty);
-                  const isInsufficient = actionType === 'issue' && issueQty > currentStock;
-                  const isExact        = actionType === 'issue' && issueQty === currentStock && currentStock < item.requestedQty;
+                  const isOverStock = actionType === 'issue' && issueQty > currentStock;
 
                   return (
-                    <div key={i} className={`rounded-xl border p-3 ${
-                      isInsufficient ? 'border-rose-200 bg-rose-50' : 'border-ink-100 bg-white'
-                    }`}>
+                    <div key={i} className="rounded-xl border border-ink-100 bg-white p-3">
                       <div className="flex items-center justify-between text-xs mb-1.5">
                         <span className="font-bold text-ink-900">{item.material?.name || '—'}</span>
                         {actionType === 'issue' && (
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                            isInsufficient
-                              ? 'bg-rose-100 text-rose-700'
-                              : currentStock >= item.requestedQty
+                            currentStock >= issueQty
                               ? 'bg-emerald-100 text-emerald-700'
-                              : 'bg-amber-100 text-amber-700'
+                              : 'bg-amber-100 text-amber-800'
                           }`}>
-                            {isInsufficient
-                              ? `⚠ Only ${currentStock} ${item.material?.unit} available`
-                              : currentStock >= item.requestedQty
-                              ? `✓ ${currentStock} ${item.material?.unit} in stock`
-                              : `⚡ ${currentStock} ${item.material?.unit} available`
+                            {currentStock >= issueQty
+                              ? `✓ ${currentStock} ${item.material?.unit} in store`
+                              : `⚡ Store stock: ${currentStock} ${item.material?.unit}`
                             }
                           </span>
                         )}
@@ -875,18 +897,13 @@ export default function StockIssueRequest() {
                             <input
                               type="number"
                               min="0"
-                              max={currentStock}
                               step="any"
                               value={issueQtys[matId] ?? item.requestedQty}
                               onChange={e => setIssueQtys(prev => ({
                                 ...prev,
                                 [matId]: e.target.value,
                               }))}
-                              className={`w-24 rounded-lg border px-2 py-1 text-xs text-center outline-none focus:ring-1 ${
-                                isInsufficient
-                                  ? 'border-rose-400 bg-rose-50 text-rose-700 focus:border-rose-500 focus:ring-rose-200'
-                                  : 'border-ink-200 bg-white focus:border-blue-500 focus:ring-blue-200'
-                              }`}
+                              className="w-24 rounded-lg border border-ink-200 bg-white px-2 py-1 text-xs text-center outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200"
                             />
                             <span className="text-ink-400">/ {item.requestedQty} {item.material?.unit}</span>
                           </div>
@@ -895,14 +912,9 @@ export default function StockIssueRequest() {
                           <span className="ml-auto text-ink-600">{item.requestedQty} {item.material?.unit}</span>
                         )}
                       </div>
-                      {isInsufficient && (
-                        <p className="text-[10px] text-rose-600 mt-1.5 font-semibold">
-                          ⚠ Not enough balance. Max you can issue: {currentStock} {item.material?.unit}. Reduce quantity or wait for restocking.
-                        </p>
-                      )}
-                      {isExact && !isInsufficient && (
-                        <p className="text-[10px] text-amber-600 mt-1.5 font-semibold">
-                          ⚡ This will completely empty {item.material?.name} from the store.
+                      {isOverStock && (
+                        <p className="text-[10px] text-amber-700 mt-1.5 font-medium">
+                          ℹ Qty exceeds recorded store count. Allowed for internal hand-off (raw materials are consumed on Sales).
                         </p>
                       )}
                     </div>
@@ -910,15 +922,16 @@ export default function StockIssueRequest() {
                 })}
               </div>
 
-              {/* Insufficient stock summary warning */}
-              {actionType === 'issue' && actionTarget.items?.some(item => {
-                const matId = item.material?._id || item.material;
-                const currentStock = item.material?.currentStock ?? 0;
-                return Number(issueQtys[matId] ?? item.requestedQty) > currentStock;
-              }) && (
-                <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-medium text-rose-700">
-                  <p className="font-bold mb-1">⚠ Insufficient Balance</p>
-                  <p>One or more items exceed available stock. Please reduce the issue quantity to available amount or the system will block this action.</p>
+              {/* Informational notice */}
+              {actionType === 'issue' && (
+                <div className="rounded-xl border border-blue-200 bg-blue-50/70 px-4 py-3 text-xs font-medium text-blue-900">
+                  <p className="font-bold flex items-center gap-1.5 mb-0.5">
+                    <Building2 size={13} className="text-blue-700" /> Main Branch Internal Issue Mode
+                  </p>
+                  <p className="text-[11px] text-blue-800/80 leading-relaxed">
+                    This records the departmental hand-off for operational tracking. 
+                    <strong> Raw material stock will not be deducted here</strong>; it will be consumed when sales are imported/recorded.
+                  </p>
                 </div>
               )}
 
@@ -1007,6 +1020,7 @@ export default function StockIssueRequest() {
                 {[
                   { label: 'Department',    value: detailRequest.department },
                   { label: 'Type',          value: detailRequest.requestType === 'direct_issue' ? 'Direct Issue' : 'Request' },
+                  { label: 'Stock Impact',  value: 'Internal Hand-off (Raw material deducted on Sales)' },
                   { label: 'Requested By',  value: detailRequest.requestedBy?.name },
                   { label: 'Date',          value: new Date(detailRequest.date || detailRequest.createdAt).toLocaleDateString('en-US', { dateStyle: 'medium' }) },
                   detailRequest.approvedBy  && { label: 'Approved By',  value: detailRequest.approvedBy?.name },
