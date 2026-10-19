@@ -857,7 +857,7 @@ export default function Expenses() {
       ══════════════════════════════════════════════════════════════ */}
       {modalOpen && (
         <Modal
-          isOpen={modalOpen}
+          open={modalOpen}
           onClose={() => setModalOpen(false)}
           title={editingExpense ? 'Edit Overhead Expense' : 'Record Overhead Expense'}
         >
@@ -1064,7 +1064,7 @@ export default function Expenses() {
       ══════════════════════════════════════════════════════════════ */}
       {voucherModalOpen && activeVoucher && (
         <Modal
-          isOpen={voucherModalOpen}
+          open={voucherModalOpen}
           onClose={() => setVoucherModalOpen(false)}
           title="Payment Voucher"
         >
