@@ -172,10 +172,6 @@ export default function Settings() {
   const [devError, setDevError] = useState('');
   const [devKeyConfirmOpen, setDevKeyConfirmOpen] = useState(false);
   const [newDevKey, setNewDevKey] = useState('');
-  const [devMasterKeyInput, setDevMasterKeyInput] = useState('');
-  const [isDevUnlocked, setIsDevUnlocked] = useState(() => localStorage.getItem('hotelStockDevUnlocked') === 'true');
-  const [unlockError, setUnlockError] = useState('');
-  const [promoting, setPromoting] = useState(false);
 
   // Telegram subscribers state (Admin)
   const [tgSubscribers, setTgSubscribers] = useState([]);
@@ -228,7 +224,6 @@ export default function Settings() {
     try {
       const payload = { licensedModules: devLicenseForm };
       if (newDevKey.trim()) payload.newDevMasterKey = newDevKey.trim();
-      if (user?.role !== 'dev') payload.devMasterKey = devMasterKeyInput.trim() || 'dev-owner-2026';
       const res = await api.put('/settings/developer-license', payload);
       setDevSuccess('Developer license settings saved successfully.');
       setNewDevKey('');
@@ -237,23 +232,6 @@ export default function Settings() {
     } catch (e) {
       setDevError(e.response?.data?.message || 'Failed to save developer license settings.');
     } finally { setDevSaving(false); }
-  };
-
-  const handlePromoteToDev = async () => {
-    if (!window.confirm('Upgrade your logged-in account to "dev" (System Owner / Developer)? You will have full permanent developer control.')) return;
-    setPromoting(true);
-    setDevError('');
-    try {
-      const payload = {
-        promoteUserId: user._id,
-        devMasterKey: devMasterKeyInput.trim() || 'dev-owner-2026',
-      };
-      await api.put('/settings/developer-license', payload);
-      updateUser({ role: 'dev' });
-      setDevSuccess('Success! Your account is now upgraded to System Developer / Owner (role: dev).');
-    } catch (e) {
-      setDevError(e.response?.data?.message || 'Failed to upgrade account.');
-    } finally { setPromoting(false); }
   };
 
   // Load Telegram subscribers (admin only)
@@ -574,21 +552,21 @@ export default function Settings() {
           </button>
         )}
 
-        {/* Developer / System Owner tab — visible to dev role or admin */}
-        {(user?.role === 'dev' || hasRole('admin')) && (
+        {/* Developer / System Owner tab — STRICTLY ONLY visible to dev role */}
+        {user?.role === 'dev' && (
           <button
             onClick={() => setTab('dev')}
             className={`flex items-center gap-2 border-b-2 px-3.5 py-3 text-sm font-semibold transition whitespace-nowrap ${
               currentTab === 'dev'
                 ? 'border-amber-500 text-amber-600'
-                : 'border-transparent text-amber-600/80 hover:text-amber-700'
+                : 'border-transparent text-amber-500/70 hover:text-amber-600'
             }`}
           >
             <span className="flex items-center gap-1.5">
               <Lock size={16} className="text-amber-500" />
               <span>Developer Controls</span>
               <span className="ml-1 inline-flex items-center rounded-full bg-amber-100 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-amber-700 border border-amber-200">
-                {user?.role === 'dev' ? 'OWNER' : 'LOCK'}
+                OWNER
               </span>
             </span>
           </button>
@@ -965,31 +943,6 @@ export default function Settings() {
             <p className="text-xs text-ink-400 mb-6">
               Configure hotel branding, currency symbols, and default stock safety thresholds
             </p>
-
-            {/* Subsystem Module License Status banner */}
-            <div className="flex items-center justify-between p-4 rounded-xl border border-amber-200 bg-amber-50/70 mb-6 shadow-2xs">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500 text-white font-bold shadow-xs">
-                  <Lock size={18} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-ink-900">Restaurant POS &amp; Subsystem Suite</h4>
-                  <p className="text-[11px] text-ink-500">
-                    License Status:{' '}
-                    <strong className={isModuleLicensed('subsystem') ? 'text-emerald-700 font-extrabold' : 'text-red-600 font-extrabold'}>
-                      {isModuleLicensed('subsystem') ? '● Active & Licensed' : '🔒 Locked / Hidden by Owner'}
-                    </strong>
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setTab('dev')}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-white border border-amber-300 text-amber-800 hover:bg-amber-100 transition shadow-2xs"
-              >
-                Developer License Controls →
-              </button>
-            </div>
 
             {systemSuccess && (
               <div className="mb-4 flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-700">
@@ -1897,177 +1850,129 @@ export default function Settings() {
           )}
         </Card>
       )}
-      {/* ── Tab 6: Developer / System Owner Controls ── */}
-      {currentTab === 'dev' && (user?.role === 'dev' || hasRole('admin')) && (
-        !isDevUnlocked && user?.role !== 'dev' ? (
-          <Card className="max-w-md mx-auto p-6 text-center border-amber-200 bg-gradient-to-b from-white to-amber-50/40 shadow-lg">
-            <div className="flex h-14 w-14 mx-auto items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-white mb-4 shadow-md">
-              <Lock size={26} />
+      {/* ── Tab 6: Developer / System Owner Controls (Strictly dev role only) ── */}
+      {currentTab === 'dev' && user?.role === 'dev' && (
+        <Card className="max-w-2xl">
+          {/* Header */}
+          <div className="flex items-start justify-between gap-3 mb-5 pb-4 border-b border-amber-100">
+            <div className="flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg">
+                <Lock size={20} className="text-white" />
+              </div>
+              <div>
+                <h3 className="font-display text-base font-black text-ink-900 flex items-center gap-2">
+                  Developer / System Owner Controls
+                  <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-amber-700 border border-amber-200">OWNER ONLY</span>
+                </h3>
+                <p className="text-xs text-ink-400 mt-0.5">
+                  Manage module licensing, lock/unlock restaurant subsystem per customer installation.
+                </p>
+              </div>
             </div>
-            <h3 className="font-display text-lg font-black text-ink-900">Developer License Portal</h3>
-            <p className="text-xs text-ink-500 mt-1 mb-5">
-              This panel controls system licensing, module locking, and developer master keys. Enter your Developer Master Key to access:
+          </div>
+
+          {/* Warning Banner */}
+          <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
+            <strong>⚠ Sensitive Area:</strong> Toggling the Subsystem Suite off locks POS, Captain Order, and Cash Sales across all roles including hotel Admin. Only someone with the dev role can re-enable it.
+          </div>
+
+          {/* Module Licensing */}
+          <div className="mb-6">
+            <h4 className="text-sm font-bold text-ink-900 mb-1 flex items-center gap-2">
+              <Sparkles size={15} className="text-amber-500" />
+              Module Licensing
+            </h4>
+            <p className="text-xs text-ink-400 mb-4">
+              Enable or disable premium modules for this hotel installation. Disabled modules show a locked screen to all users.
             </p>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              const key = devMasterKeyInput.trim();
-              if (key === 'dev-owner-2026' || key === systemForm?.devMasterKey) {
-                setIsDevUnlocked(true);
-                localStorage.setItem('hotelStockDevUnlocked', 'true');
-                setUnlockError('');
-              } else {
-                setUnlockError('Invalid Master Key. (Default: dev-owner-2026)');
-              }
-            }} className="space-y-3">
-              <input
-                type="password"
-                value={devMasterKeyInput}
-                onChange={(e) => { setDevMasterKeyInput(e.target.value); setUnlockError(''); }}
-                placeholder="Enter Master Key (default: dev-owner-2026)"
-                className="w-full text-center font-mono rounded-xl border border-ink-200 px-4 py-2.5 text-sm outline-none focus:border-amber-500 bg-white shadow-2xs"
-              />
-              {unlockError && <p className="text-xs text-red-600 font-semibold">{unlockError}</p>}
-              <button
-                type="submit"
-                className="w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-sm py-2.5 transition shadow"
-              >
-                Unlock Developer Panel
-              </button>
-            </form>
-          </Card>
-        ) : (
-          <Card className="max-w-2xl">
-            {/* Header */}
-            <div className="flex items-start justify-between gap-3 mb-5 pb-4 border-b border-amber-100">
-              <div className="flex items-start gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg">
-                  <Lock size={20} className="text-white" />
-                </div>
+
+            <div className="space-y-3">
+              {/* Subsystem Module */}
+              <div className="flex items-center justify-between rounded-xl border border-ink-100 bg-ink-50/40 px-4 py-3">
                 <div>
-                  <h3 className="font-display text-base font-black text-ink-900 flex items-center gap-2">
-                    Developer / System Owner Controls
-                    <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-amber-700 border border-amber-200">OWNER ONLY</span>
-                  </h3>
-                  <p className="text-xs text-ink-400 mt-0.5">
-                    Manage module licensing, lock/unlock restaurant subsystem per customer installation.
-                  </p>
+                  <p className="text-sm font-bold text-ink-900">Subsystem Suite (Restaurant POS &amp; Ordering)</p>
+                  <p className="text-xs text-ink-400">POS Ordering, Captain Order &amp; Cash Sales</p>
                 </div>
-              </div>
-              {user?.role !== 'dev' && (
-                <button
-                  type="button"
-                  onClick={handlePromoteToDev}
-                  disabled={promoting}
-                  className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:from-amber-600 hover:to-orange-700 transition shadow-xs"
-                >
-                  <Sparkles size={13} /> {promoting ? 'Upgrading...' : 'Make Me Dev Role'}
-                </button>
-              )}
-            </div>
-
-            {/* Warning Banner */}
-            <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
-              <strong>⚠ Sensitive Area:</strong> Toggling the Subsystem Suite off locks POS, Captain Order, and Cash Sales across all roles including hotel Admin. Only someone with the Developer Master Key or dev role can re-enable it.
-            </div>
-
-            {/* Module Licensing */}
-            <div className="mb-6">
-              <h4 className="text-sm font-bold text-ink-900 mb-1 flex items-center gap-2">
-                <Sparkles size={15} className="text-amber-500" />
-                Module Licensing
-              </h4>
-              <p className="text-xs text-ink-400 mb-4">
-                Enable or disable premium modules for this hotel installation. Disabled modules show a locked screen to all users.
-              </p>
-
-              <div className="space-y-3">
-                {/* Subsystem Module */}
-                <div className="flex items-center justify-between rounded-xl border border-ink-100 bg-ink-50/40 px-4 py-3">
-                  <div>
-                    <p className="text-sm font-bold text-ink-900">Subsystem Suite (Restaurant POS &amp; Ordering)</p>
-                    <p className="text-xs text-ink-400">POS Ordering, Captain Order &amp; Cash Sales</p>
-                  </div>
-                  <label className="relative inline-flex cursor-pointer items-center">
-                    <input
-                      type="checkbox"
-                      className="sr-only peer"
-                      checked={devLicenseForm?.subsystem ?? true}
-                      onChange={(e) => setDevLicenseForm(prev => ({ ...prev, subsystem: e.target.checked }))}
-                    />
-                    <div className="h-6 w-11 rounded-full bg-ink-200 peer-focus:ring-2 peer-focus:ring-amber-300 peer-checked:bg-amber-500 transition-colors after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-full after:shadow" />
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            {/* Master Key Section */}
-            <div className="mb-6">
-              <h4 className="text-sm font-bold text-ink-900 mb-1 flex items-center gap-2">
-                <KeyRound size={15} className="text-amber-500" />
-                Developer Master Key
-              </h4>
-              <p className="text-xs text-ink-400 mb-3">
-                Secret master key code that unlocks developer controls (Default: <code className="bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-mono text-xs">dev-owner-2026</code>).
-              </p>
-              {!devKeyConfirmOpen ? (
-                <button
-                  type="button"
-                  onClick={() => setDevKeyConfirmOpen(true)}
-                  className="inline-flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-bold text-amber-700 hover:bg-amber-100 transition"
-                >
-                  <KeyRound size={13} /> Change Master Key
-                </button>
-              ) : (
-                <div className="space-y-2">
+                <label className="relative inline-flex cursor-pointer items-center">
                   <input
-                    type="text"
-                    value={newDevKey}
-                    onChange={e => setNewDevKey(e.target.value)}
-                    placeholder="Enter new master key (min 8 characters)"
-                    className="w-full rounded-lg border border-amber-200 bg-amber-50/50 px-3 py-2 text-sm font-mono outline-none focus:border-amber-400"
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={devLicenseForm?.subsystem ?? true}
+                    onChange={(e) => setDevLicenseForm(prev => ({ ...prev, subsystem: e.target.checked }))}
                   />
-                  <div className="flex gap-2">
-                    <button onClick={() => { setDevKeyConfirmOpen(false); setNewDevKey(''); }}
-                      className="text-xs text-ink-400 hover:text-ink-700 px-2 py-1">Cancel</button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Dev Account Info */}
-            <div className="mb-6 rounded-xl border border-blue-100 bg-blue-50/50 p-4">
-              <h4 className="text-xs font-bold text-blue-700 mb-2 flex items-center gap-1.5">
-                <Shield size={13} /> Developer Account Login Details
-              </h4>
-              <div className="text-xs text-ink-600 space-y-1">
-                <p>Developer Email: <strong className="font-mono text-ink-900">dev@system.com</strong></p>
-                <p>Default Password: <strong className="font-mono text-ink-900">admin123</strong></p>
-                <p>Current Logged-in Role: <strong className="text-amber-700 font-bold uppercase">{user?.role}</strong></p>
+                  <div className="h-6 w-11 rounded-full bg-ink-200 peer-focus:ring-2 peer-focus:ring-amber-300 peer-checked:bg-amber-500 transition-colors after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-full after:shadow" />
+                </label>
               </div>
             </div>
+          </div>
 
-            {/* Actions */}
-            {devSuccess && (
-              <div className="mb-4 flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-700">
-                <CheckCircle2 size={16} className="flex-shrink-0" />{devSuccess}
-              </div>
-            )}
-            {devError && (
-              <div className="mb-4 flex items-center gap-2 rounded-xl bg-red-50 border border-red-200 p-3 text-xs text-red-600">
-                <AlertCircle size={16} className="flex-shrink-0" />{devError}
-              </div>
-            )}
-            <div className="flex justify-end gap-3">
-              <Button
-                onClick={handleDevLicenseSave}
-                disabled={devSaving}
-                className="bg-amber-500 hover:bg-amber-600 text-white"
+          {/* Master Key Section */}
+          <div className="mb-6">
+            <h4 className="text-sm font-bold text-ink-900 mb-1 flex items-center gap-2">
+              <KeyRound size={15} className="text-amber-500" />
+              Developer Master Key
+            </h4>
+            <p className="text-xs text-ink-400 mb-3">
+              Secret master key code that unlocks developer controls (Default: <code className="bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-mono text-xs">dev-owner-2026</code>).
+            </p>
+            {!devKeyConfirmOpen ? (
+              <button
+                type="button"
+                onClick={() => setDevKeyConfirmOpen(true)}
+                className="inline-flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-bold text-amber-700 hover:bg-amber-100 transition"
               >
-                <Save size={15} /> {devSaving ? 'Saving...' : 'Save Developer Settings'}
-              </Button>
+                <KeyRound size={13} /> Change Master Key
+              </button>
+            ) : (
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  value={newDevKey}
+                  onChange={e => setNewDevKey(e.target.value)}
+                  placeholder="Enter new master key (min 8 characters)"
+                  className="w-full rounded-lg border border-amber-200 bg-amber-50/50 px-3 py-2 text-sm font-mono outline-none focus:border-amber-400"
+                />
+                <div className="flex gap-2">
+                  <button onClick={() => { setDevKeyConfirmOpen(false); setNewDevKey(''); }}
+                    className="text-xs text-ink-400 hover:text-ink-700 px-2 py-1">Cancel</button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Dev Account Info */}
+          <div className="mb-6 rounded-xl border border-blue-100 bg-blue-50/50 p-4">
+            <h4 className="text-xs font-bold text-blue-700 mb-2 flex items-center gap-1.5">
+              <Shield size={13} /> Developer Account Login Details
+            </h4>
+            <div className="text-xs text-ink-600 space-y-1">
+              <p>Developer Email: <strong className="font-mono text-ink-900">{user?.email}</strong></p>
+              <p>Role: <strong className="text-amber-700 font-bold uppercase">{user?.role}</strong></p>
+              <p className="text-ink-400 text-[11px]">This account is invisible to hotel admins and staff.</p>
             </div>
-          </Card>
-        )
+          </div>
+
+          {/* Actions */}
+          {devSuccess && (
+            <div className="mb-4 flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-700">
+              <CheckCircle2 size={16} className="flex-shrink-0" />{devSuccess}
+            </div>
+          )}
+          {devError && (
+            <div className="mb-4 flex items-center gap-2 rounded-xl bg-red-50 border border-red-200 p-3 text-xs text-red-600">
+              <AlertCircle size={16} className="flex-shrink-0" />{devError}
+            </div>
+          )}
+          <div className="flex justify-end gap-3">
+            <Button
+              onClick={handleDevLicenseSave}
+              disabled={devSaving}
+              className="bg-amber-500 hover:bg-amber-600 text-white"
+            >
+              <Save size={15} /> {devSaving ? 'Saving...' : 'Save Developer Settings'}
+            </Button>
+          </div>
+        </Card>
       )}
     </div>
   );
