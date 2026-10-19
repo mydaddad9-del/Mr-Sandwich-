@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Truck, Boxes, ShoppingCart,
@@ -61,25 +61,37 @@ const SectionLabel = ({ children, collapsed }) =>
     </p>
   );
 
-/* ── Collapsible section ── */
+/* ── Collapsible section with '>' indicator ── */
 const CollapsibleNav = ({ label, icon: Icon, isActive, open, onToggle, children, collapsed }) => (
   <div>
-    <button onClick={onToggle} title={collapsed ? label : undefined}
-      className={`group w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${collapsed ? 'justify-center' : ''
-        } ${isActive
+    <button
+      type="button"
+      onClick={onToggle}
+      title={collapsed ? label : undefined}
+      className={`group w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer ${
+        collapsed ? 'justify-center' : ''
+      } ${
+        isActive
           ? 'bg-white/15 text-white shadow-sm ring-1 ring-white/10'
           : 'text-blue-100/80 hover:bg-white/8 hover:text-white'
-        }`}
+      }`}
     >
-      <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all ${isActive ? 'bg-white/20' : 'bg-white/5 group-hover:bg-white/10'
-        }`}>
+      <span
+        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all ${
+          isActive ? 'bg-white/20 text-white' : 'bg-white/5 text-blue-200 group-hover:bg-white/10 group-hover:text-white'
+        }`}
+      >
         <Icon size={15} strokeWidth={2} />
       </span>
       {!collapsed && (
         <>
           <span className="flex-1 text-left text-[13px]">{label}</span>
-          <span className={`transition-transform duration-200 opacity-50 ${open ? 'rotate-180' : ''}`}>
-            <ChevronDown size={13} />
+          <span
+            className={`transition-transform duration-200 text-blue-300/70 group-hover:text-white ${
+              open ? 'rotate-90' : ''
+            }`}
+          >
+            <ChevronRight size={13} strokeWidth={2.5} />
           </span>
         </>
       )}
@@ -203,11 +215,25 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
   const { user, canSeeNav } = useAuth();
   const location = useLocation();
 
-  const onTransactions = location.pathname.startsWith('/transactions');
+  const onTransactions = location.pathname.startsWith('/transactions') || location.pathname === '/sales-import';
   const onReports = location.pathname.startsWith('/reports');
+  const onInventory = ['/materials', '/products', '/suppliers', '/consumption'].some(p => location.pathname.startsWith(p));
+  const onFinance = location.pathname.startsWith('/expenses') || location.pathname.startsWith('/analytics');
+  const onStaff = location.pathname.startsWith('/users') || location.pathname.startsWith('/employees');
 
   const [stockOpen, setStockOpen] = useState(onTransactions);
   const [reportOpen, setReportOpen] = useState(onReports);
+  const [inventoryOpen, setInventoryOpen] = useState(onInventory);
+  const [financeOpen, setFinanceOpen] = useState(onFinance);
+  const [staffOpen, setStaffOpen] = useState(onStaff);
+
+  useEffect(() => {
+    if (onTransactions) setStockOpen(true);
+    if (onReports) setReportOpen(true);
+    if (onInventory) setInventoryOpen(true);
+    if (onFinance) setFinanceOpen(true);
+    if (onStaff) setStaffOpen(true);
+  }, [location.pathname]);
 
   const linkCls = (isActive) =>
     `group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${collapsed ? 'justify-center' : ''
@@ -306,9 +332,46 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
 
           <SectionLabel collapsed={collapsed}>Main</SectionLabel>
           {canSeeNav('dashboard') && navLink('/', LayoutDashboard, 'Dashboard', true)}
-          {canSeeNav('rawMaterials') && navLink('/materials', Boxes, 'Raw Materials')}
-          {canSeeNav('products') && navLink('/products', UtensilsCrossed, 'Products')}
-          {canSeeNav('analytics') && navLink('/analytics', TrendingUp, 'Analytics & P&L')}
+
+          {/* ── Inventory & Items Group ── */}
+          {(canSeeNav('rawMaterials') || canSeeNav('products') || canSeeNav('suppliers') || canSeeNav('consumption')) && (
+            collapsed ? (
+              <NavLink
+                to="/materials"
+                onClick={onClose}
+                title="Inventory & Items"
+                className={({ isActive }) => linkCls(isActive || onInventory)}
+              >
+                {({ isActive }) => (
+                  <span className={iconSpan(isActive || onInventory)}>
+                    <Boxes size={15} strokeWidth={2} />
+                  </span>
+                )}
+              </NavLink>
+            ) : (
+              <CollapsibleNav
+                label="Inventory & Items"
+                icon={Boxes}
+                isActive={onInventory}
+                open={inventoryOpen}
+                onToggle={() => setInventoryOpen((o) => !o)}
+                collapsed={collapsed}
+              >
+                {canSeeNav('rawMaterials') && (
+                  <SubLink to="/materials" label="Raw Materials" icon={Boxes} onClick={onClose} />
+                )}
+                {canSeeNav('products') && (
+                  <SubLink to="/products" label="Products" icon={UtensilsCrossed} onClick={onClose} />
+                )}
+                {canSeeNav('suppliers') && (
+                  <SubLink to="/suppliers" label="Suppliers" icon={Truck} onClick={onClose} />
+                )}
+                {canSeeNav('consumption') && (
+                  <SubLink to="/consumption" label="Consumption" icon={Coffee} onClick={onClose} />
+                )}
+              </CollapsibleNav>
+            )
+          )}
 
           <SectionLabel collapsed={collapsed}>Operations</SectionLabel>
 
@@ -331,9 +394,6 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
               </CollapsibleNav>
             )
           )}
-
-          {canSeeNav('suppliers') && navLink('/suppliers', Truck, 'Suppliers')}
-          {canSeeNav('consumption') && navLink('/consumption', Coffee, 'Consumption')}
 
           {/* Stock Issue & Request */}
           {navLink('/stock-requests', SendToBack, 'Stock Issue & Request')}
@@ -358,12 +418,72 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
             )
           )}
 
-          {/* Overhead Expenses */}
-          {canSeeNav('expenses') && navLink('/expenses', Receipt, 'Overhead Expenses')}
+          {/* ── Finance & Expenses Group ── */}
+          {(canSeeNav('expenses') || canSeeNav('analytics')) && (
+            collapsed ? (
+              <NavLink
+                to="/expenses"
+                onClick={onClose}
+                title="Finance & Expenses"
+                className={({ isActive }) => linkCls(isActive || onFinance)}
+              >
+                {({ isActive }) => (
+                  <span className={iconSpan(isActive || onFinance)}>
+                    <Receipt size={15} strokeWidth={2} />
+                  </span>
+                )}
+              </NavLink>
+            ) : (
+              <CollapsibleNav
+                label="Finance & Expenses"
+                icon={Receipt}
+                isActive={onFinance}
+                open={financeOpen}
+                onToggle={() => setFinanceOpen((o) => !o)}
+                collapsed={collapsed}
+              >
+                {canSeeNav('expenses') && (
+                  <SubLink to="/expenses" label="Overhead Expenses" icon={Receipt} onClick={onClose} />
+                )}
+                {canSeeNav('analytics') && (
+                  <SubLink to="/analytics" label="Analytics & P&L" icon={TrendingUp} onClick={onClose} />
+                )}
+              </CollapsibleNav>
+            )
+          )}
 
           <SectionLabel collapsed={collapsed}>Admin</SectionLabel>
-          {canSeeNav('staffAccounts') && navLink('/users', Users, 'Staff Accounts')}
-          {canSeeNav('staffAccounts') && navLink('/employees', UserCog, 'Employees')}
+
+          {/* ── Staff & Employees Group (Collapsible >) ── */}
+          {canSeeNav('staffAccounts') && (
+            collapsed ? (
+              <NavLink
+                to="/users"
+                onClick={onClose}
+                title="Staff & Employees"
+                className={({ isActive }) => linkCls(isActive || onStaff)}
+              >
+                {({ isActive }) => (
+                  <span className={iconSpan(isActive || onStaff)}>
+                    <Users size={15} strokeWidth={2} />
+                  </span>
+                )}
+              </NavLink>
+            ) : (
+              <CollapsibleNav
+                label="Staff & Employees"
+                icon={Users}
+                isActive={onStaff}
+                open={staffOpen}
+                onToggle={() => setStaffOpen((o) => !o)}
+                collapsed={collapsed}
+              >
+                <SubLink to="/users" label="Staff Accounts" icon={Users} onClick={onClose} />
+                <SubLink to="/employees" label="Employees Directory" icon={UserCog} onClick={onClose} />
+              </CollapsibleNav>
+            )
+          )}
+
           {navLink('/settings', SettingsIcon, 'Settings')}
 
           {/* Recycle Bin */}
