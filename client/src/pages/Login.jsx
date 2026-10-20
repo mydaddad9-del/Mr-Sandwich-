@@ -1010,26 +1010,7 @@ export default function Login() {
           {/* right panel footer */}
           <footer className="login-footer">
             <div className="login-footer__top">
-              <span>Developed &amp; powered by <span className="login-footer__name">Mequannent Gashaw</span></span>
-              <div className="login-footer__pills">
-                <a
-                  href="https://t.me/+251918592028"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="login-pill login-pill--tg"
-                >
-                  Telegram
-                </a>
-                <a
-                  href="https://wa.me/251918592028"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="login-pill login-pill--wa"
-                >
-                  WhatsApp
-                </a>
-                <a href="tel:0918592028" className="login-footer__phone">0918592028</a>
-              </div>
+              <span>Developed By <span className="login-footer__name">Mega Tech Teams</span></span>
             </div>
             <div className="login-footer__bottom">
               <a
