@@ -6,7 +6,7 @@
  */
 
 const net  = require('net');
-const { buildKOT, buildReceipt } = require('./escpos');
+const { buildKOT, buildReceipt, buildKOT_plain, buildReceipt_plain } = require('./escpos');
 
 const CONNECT_TIMEOUT_MS = 5000;
 const WRITE_TIMEOUT_MS   = 8000;
@@ -56,7 +56,24 @@ function sendToPrinter(ip, port, data) {
 }
 
 /**
+ * Returns true if the printer brand is a laser/PCL printer (not ESC/POS thermal).
+ */
+function isLaserPrinter(printer) {
+  const laserBrands = ['hp', 'lexmark', 'brother', 'samsung', 'xerox', 'canon', 'ricoh', 'kyocera', 'konica', 'sharp'];
+  const brand = String(printer.brand || '').toLowerCase();
+  const model = String(printer.model || '').toLowerCase();
+  return laserBrands.some(b => brand.includes(b)) ||
+         model.includes('laserjet') ||
+         model.includes('laser') ||
+         model.includes('m402') ||
+         model.includes('m404') ||
+         model.includes('m428') ||
+         model.includes('m118');
+}
+
+/**
  * Print a KOT (Kitchen Order Ticket) to the given printer config.
+ * Auto-detects ESC/POS thermal vs HP LaserJet/PCL laser.
  * @param {Object} printer  – PrinterSettings document
  * @param {Object} order    – order object with items, tableNo, waiterName, etc.
  * @param {Object} opts     – optional overrides { businessName, charWidth }
@@ -65,11 +82,21 @@ async function printKOT(printer, order, opts = {}) {
   if (!printer.enabled) return;
   if (!printer.ipAddress) throw new Error('Printer IP address not configured');
 
-  const data = buildKOT(order, {
-    charWidth:    printer.charWidth || 42,
-    businessName: opts.businessName || printer.headerLine1 || 'Kitchen Order',
-    ...opts,
-  });
+  let data;
+  if (isLaserPrinter(printer)) {
+    // HP LaserJet / PCL plain-text mode
+    data = buildKOT_plain(order, {
+      businessName: opts.businessName || printer.headerLine1 || 'Kitchen Order',
+      ...opts,
+    });
+  } else {
+    // Standard ESC/POS thermal mode
+    data = buildKOT(order, {
+      charWidth:    printer.charWidth || 42,
+      businessName: opts.businessName || printer.headerLine1 || 'Kitchen Order',
+      ...opts,
+    });
+  }
 
   const copies = Math.max(1, Math.min(5, printer.copies || 1));
   const combined = Buffer.concat(Array(copies).fill(data));
@@ -78,6 +105,7 @@ async function printKOT(printer, order, opts = {}) {
 
 /**
  * Print a customer receipt to the given printer config.
+ * Auto-detects ESC/POS thermal vs HP LaserJet/PCL laser.
  * @param {Object} printer  – PrinterSettings document
  * @param {Object} order    – completed order with payment details
  * @param {Object} opts     – optional overrides { hotelName, taxRate, currency }
@@ -86,15 +114,29 @@ async function printReceipt(printer, order, opts = {}) {
   if (!printer.enabled) return;
   if (!printer.ipAddress) throw new Error('Printer IP address not configured');
 
-  const data = buildReceipt(order, {
-    charWidth:   printer.charWidth || 42,
-    hotelName:   opts.hotelName || printer.headerLine1 || 'Baba Roti Café',
-    headerLine2: opts.headerLine2 || printer.headerLine2 || '',
-    footerLine:  opts.footerLine || printer.footerLine || 'Thank you! Come again.',
-    taxRate:     opts.taxRate ?? 15,
-    currency:    opts.currency || 'ETB',
-    ...opts,
-  });
+  let data;
+  if (isLaserPrinter(printer)) {
+    // HP LaserJet / PCL plain-text mode
+    data = buildReceipt_plain(order, {
+      hotelName:   opts.hotelName || printer.headerLine1 || 'Baba Roti Café',
+      headerLine2: opts.headerLine2 || printer.headerLine2 || '',
+      footerLine:  opts.footerLine || printer.footerLine || 'Thank you! Come again.',
+      taxRate:     opts.taxRate ?? 15,
+      currency:    opts.currency || 'ETB',
+      ...opts,
+    });
+  } else {
+    // Standard ESC/POS thermal mode
+    data = buildReceipt(order, {
+      charWidth:   printer.charWidth || 42,
+      hotelName:   opts.hotelName || printer.headerLine1 || 'Baba Roti Café',
+      headerLine2: opts.headerLine2 || printer.headerLine2 || '',
+      footerLine:  opts.footerLine || printer.footerLine || 'Thank you! Come again.',
+      taxRate:     opts.taxRate ?? 15,
+      currency:    opts.currency || 'ETB',
+      ...opts,
+    });
+  }
 
   const copies = Math.max(1, Math.min(5, printer.copies || 1));
   const combined = Buffer.concat(Array(copies).fill(data));

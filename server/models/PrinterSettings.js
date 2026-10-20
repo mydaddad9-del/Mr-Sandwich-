@@ -19,7 +19,7 @@ const printerSchema = new mongoose.Schema(
     },
     brand: {
       type: String,
-      enum: ['Epson', 'Star', 'Datecs', 'Citizen', 'Bixolon', 'Generic'],
+      enum: ['Epson', 'Star', 'Datecs', 'Citizen', 'Bixolon', 'HP', 'Generic'],
       default: 'Generic',
     },
     model: {
@@ -29,7 +29,7 @@ const printerSchema = new mongoose.Schema(
     },
     paperWidth: {
       type: String,
-      enum: ['58mm', '80mm'],
+      enum: ['58mm', '80mm', 'A4'],
       default: '80mm',
     },
     connectionType: {

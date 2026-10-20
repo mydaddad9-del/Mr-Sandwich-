@@ -181,14 +181,14 @@ export default function Settings() {
   const [newDevKey, setNewDevKey] = useState('');
 
   // ── Printer Settings state ──────────────────────────────────────────────
-  const PRINTER_BRANDS = ['Epson', 'Star', 'Datecs', 'Citizen', 'Bixolon', 'Generic'];
+  const PRINTER_BRANDS = ['Epson', 'Star', 'Datecs', 'Citizen', 'Bixolon', 'HP', 'Generic'];
   const PRINTER_TYPES  = [
     { key: 'kitchen', label: 'Kitchen / Prep Station' },
     { key: 'receipt', label: 'Customer Receipt' },
     { key: 'bar',     label: 'Bar Printer' },
     { key: 'both',    label: 'Kitchen + Receipt' },
   ];
-  const PAPER_WIDTHS   = ['58mm', '80mm'];
+  const PAPER_WIDTHS   = ['58mm', '80mm', 'A4'];
 
   // Real-world thermal printer models grouped by brand
   const PRINTER_MODELS = {
@@ -245,6 +245,30 @@ export default function Settings() {
       'SEWOO SLK-TS400',
       'Custom (type manually)',
     ],
+    HP: [
+      // LaserJet Pro — most common office/restaurant laser printers
+      'LaserJet M402dne',
+      'LaserJet M402dn',
+      'LaserJet M402n',
+      'LaserJet M404dn',
+      'LaserJet M404dw',
+      'LaserJet M404n',
+      'LaserJet M428fdw',
+      'LaserJet M428fdn',
+      // LaserJet Pro M series
+      'LaserJet Pro M118dw',
+      'LaserJet Pro M203dn',
+      'LaserJet Pro M203dw',
+      'LaserJet Pro M227fdw',
+      'LaserJet Pro M227sdn',
+      // Color LaserJet
+      'Color LaserJet Pro M255dw',
+      'Color LaserJet Pro M283fdw',
+      'Color LaserJet Pro M479fdw',
+      // Older popular models
+      'LaserJet 1020', 'LaserJet P1102w',
+      'LaserJet P2055dn', 'LaserJet P3015dn',
+    ],
   };
 
   const blankPrinter = {
@@ -265,6 +289,7 @@ export default function Settings() {
   const [printerSuccess, setPrinterSuccess] = useState('');
   const [printerError, setPrinterError]     = useState('');
   const [pingStatus, setPingStatus]         = useState({}); // { [ip]: 'ok' | 'fail' | 'pending' }
+  const [printTestStatus, setPrintTestStatus] = useState({}); // { [idOrIp]: 'ok' | 'fail' | 'pending' }
 
   // Load printers from API (component-scoped so nav button can call it)
   const loadPrinters = async () => {
@@ -2157,6 +2182,38 @@ export default function Settings() {
           }
         };
 
+        const printTestPage = async (printerOrForm) => {
+          const key = printerOrForm._id || `${printerOrForm.ipAddress}:${printerOrForm.port}`;
+          setPrintTestStatus(prev => ({ ...prev, [key]: 'pending' }));
+          setPrinterError('');
+          try {
+            const payload = printerOrForm._id
+              ? { printerId: printerOrForm._id }
+              : {
+                  ip: printerOrForm.ipAddress,
+                  port: printerOrForm.port,
+                  brand: printerOrForm.brand,
+                  model: printerOrForm.model,
+                };
+            const res = await api.post('/printers/action/test-page', payload);
+            if (res.data.ok) {
+              setPrintTestStatus(prev => ({ ...prev, [key]: 'ok' }));
+              setPrinterSuccess(`Test page sent successfully to ${printerOrForm.name || printerOrForm.ipAddress}! Check printer.`);
+              setTimeout(() => {
+                setPrinterSuccess('');
+                setPrintTestStatus(prev => ({ ...prev, [key]: null }));
+              }, 6000);
+            } else {
+              setPrintTestStatus(prev => ({ ...prev, [key]: 'fail' }));
+              setPrinterError(res.data.error || 'Test print failed');
+            }
+          } catch (err) {
+            setPrintTestStatus(prev => ({ ...prev, [key]: 'fail' }));
+            setPrinterError(err.response?.data?.error || err.response?.data?.message || err.message || 'Test print failed');
+            setTimeout(() => setPrinterError(''), 6000);
+          }
+        };
+
         const toggleEnabled = async (p) => {
           try {
             await api.put(`/printers/${p._id}`, { ...p, enabled: !p.enabled });
@@ -2174,7 +2231,7 @@ export default function Settings() {
                   Order Printer Configuration
                 </h2>
                 <p className="text-sm text-ink-400 mt-1">
-                  Connect thermal printers via IP address. Supports Epson, Star, Datecs, Citizen, Bixolon &amp; Generic ESC/POS printers.
+                  Connect thermal &amp; laser printers via IP address. Supports Epson, Star, Datecs, Citizen, Bixolon, HP LaserJet &amp; Generic printers.
                 </p>
               </div>
               <button
@@ -2278,7 +2335,27 @@ export default function Settings() {
                               {ping === 'ok' ? <><Wifi size={12} className="text-emerald-500" /> Online</> :
                                ping === 'fail' ? <><WifiOff size={12} /> Offline</> :
                                ping === 'pending' ? <><span className="animate-spin inline-block w-3 h-3 border-2 border-ink-400 border-t-transparent rounded-full" /> Testing…</> :
-                               <><Wifi size={12} /> Test</>
+                               <><Wifi size={12} /> Ping</>
+                              }
+                            </button>
+                          )}
+                          {/* Print Test Page */}
+                          {p.ipAddress && (
+                            <button
+                              onClick={() => printTestPage(p)}
+                              disabled={printTestStatus[p._id || `${p.ipAddress}:${p.port}`] === 'pending'}
+                              title="Send a sample test print ticket"
+                              className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-semibold transition ${
+                                printTestStatus[p._id || `${p.ipAddress}:${p.port}`] === 'ok' ? 'border-emerald-300 bg-emerald-50 text-emerald-700' :
+                                printTestStatus[p._id || `${p.ipAddress}:${p.port}`] === 'fail' ? 'border-red-300 bg-red-50 text-red-600' :
+                                printTestStatus[p._id || `${p.ipAddress}:${p.port}`] === 'pending' ? 'border-ink-200 bg-ink-50 text-ink-400' :
+                                'border-violet-200 bg-violet-50 text-violet-700 hover:bg-violet-100'
+                              }`}
+                            >
+                              {printTestStatus[p._id || `${p.ipAddress}:${p.port}`] === 'ok' ? '✓ Printed' :
+                               printTestStatus[p._id || `${p.ipAddress}:${p.port}`] === 'fail' ? '✗ Print Failed' :
+                               printTestStatus[p._id || `${p.ipAddress}:${p.port}`] === 'pending' ? <><span className="animate-spin inline-block w-3 h-3 border-2 border-violet-600 border-t-transparent rounded-full" /> Printing…</> :
+                               <><Printer size={12} /> Test Page</>
                               }
                             </button>
                           )}
@@ -2405,7 +2482,11 @@ export default function Settings() {
                           {PAPER_WIDTHS.map(w => (
                             <button
                               key={w} type="button"
-                              onClick={() => setPrinterForm(f => ({ ...f, paperWidth: w, charWidth: w === '58mm' ? 32 : 42 }))}
+                              onClick={() => setPrinterForm(f => ({
+                                ...f,
+                                paperWidth: w,
+                                charWidth: w === '58mm' ? 32 : w === 'A4' ? 60 : 42,
+                              }))}
                               className={`flex-1 rounded-xl border py-2 text-sm font-semibold transition ${
                                 printerForm.paperWidth === w
                                   ? 'border-violet-500 bg-violet-50 text-violet-700'
@@ -2503,26 +2584,63 @@ export default function Settings() {
                       ))}
                     </div>
 
-                    {/* Test Connection inline */}
+                    {/* HP / Laser Notice */}
+                    {(printerForm.brand === 'HP' || /laser|m402|m404/i.test(printerForm.model)) && (
+                      <div className="flex items-start gap-2.5 p-3 rounded-xl bg-blue-50/80 border border-blue-200 text-xs text-blue-800">
+                        <Printer size={16} className="text-blue-600 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="font-semibold text-blue-900">HP LaserJet / Laser Printer Mode</p>
+                          <p className="text-[11px] text-blue-700 mt-0.5">
+                            Orders and receipts will automatically use clean ASCII/PCL format sent over TCP port 9100 (RAW). Your HP LaserJet M402dne can print both KOT tickets and customer receipts.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Test Connection & Test Print inline */}
                     {printerForm.ipAddress && (
-                      <div className="flex items-center gap-3 p-3 rounded-xl border border-ink-100 bg-ink-50/50">
-                        <Wifi size={14} className="text-violet-500 flex-shrink-0" />
-                        <span className="text-xs text-ink-600 flex-1">Test connection to <strong className="font-mono">{printerForm.ipAddress}:{printerForm.port}</strong></span>
-                        <button
-                          type="button"
-                          onClick={() => pingPrinter(printerForm.ipAddress, printerForm.port)}
-                          disabled={pingStatus[`${printerForm.ipAddress}:${printerForm.port}`] === 'pending'}
-                          className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
-                            pingStatus[`${printerForm.ipAddress}:${printerForm.port}`] === 'ok' ? 'border-emerald-300 bg-emerald-50 text-emerald-700' :
-                            pingStatus[`${printerForm.ipAddress}:${printerForm.port}`] === 'fail' ? 'border-red-300 bg-red-50 text-red-600' :
-                            'border-violet-200 bg-white text-violet-700 hover:bg-violet-50'
-                          }`}
-                        >
-                          {pingStatus[`${printerForm.ipAddress}:${printerForm.port}`] === 'ok' ? '✓ Connected' :
-                           pingStatus[`${printerForm.ipAddress}:${printerForm.port}`] === 'fail' ? '✗ Unreachable' :
-                           pingStatus[`${printerForm.ipAddress}:${printerForm.port}`] === 'pending' ? 'Testing…' :
-                           'Test Connection'}
-                        </button>
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3.5 rounded-xl border border-ink-100 bg-ink-50/50">
+                        <div className="flex items-center gap-2">
+                          <Wifi size={14} className="text-violet-500 flex-shrink-0" />
+                          <span className="text-xs text-ink-600">
+                            Target: <strong className="font-mono text-ink-800">{printerForm.ipAddress}:{printerForm.port}</strong>
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => pingPrinter(printerForm.ipAddress, printerForm.port)}
+                            disabled={pingStatus[`${printerForm.ipAddress}:${printerForm.port}`] === 'pending'}
+                            className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+                              pingStatus[`${printerForm.ipAddress}:${printerForm.port}`] === 'ok' ? 'border-emerald-300 bg-emerald-50 text-emerald-700' :
+                              pingStatus[`${printerForm.ipAddress}:${printerForm.port}`] === 'fail' ? 'border-red-300 bg-red-50 text-red-600' :
+                              pingStatus[`${printerForm.ipAddress}:${printerForm.port}`] === 'pending' ? 'border-ink-200 bg-ink-100 text-ink-400' :
+                              'border-ink-200 bg-white text-ink-700 hover:bg-ink-50'
+                            }`}
+                          >
+                            {pingStatus[`${printerForm.ipAddress}:${printerForm.port}`] === 'ok' ? '✓ Connected' :
+                             pingStatus[`${printerForm.ipAddress}:${printerForm.port}`] === 'fail' ? '✗ Unreachable' :
+                             pingStatus[`${printerForm.ipAddress}:${printerForm.port}`] === 'pending' ? 'Testing…' :
+                             'Ping Test'}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => printTestPage(printerForm)}
+                            disabled={printTestStatus[`${printerForm.ipAddress}:${printerForm.port}`] === 'pending'}
+                            className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+                              printTestStatus[`${printerForm.ipAddress}:${printerForm.port}`] === 'ok' ? 'border-emerald-300 bg-emerald-50 text-emerald-700' :
+                              printTestStatus[`${printerForm.ipAddress}:${printerForm.port}`] === 'fail' ? 'border-red-300 bg-red-50 text-red-600' :
+                              printTestStatus[`${printerForm.ipAddress}:${printerForm.port}`] === 'pending' ? 'border-ink-200 bg-ink-100 text-ink-400' :
+                              'border-violet-300 bg-violet-600 text-white hover:bg-violet-700 shadow-sm'
+                            }`}
+                          >
+                            {printTestStatus[`${printerForm.ipAddress}:${printerForm.port}`] === 'ok' ? '✓ Page Sent' :
+                             printTestStatus[`${printerForm.ipAddress}:${printerForm.port}`] === 'fail' ? '✗ Send Failed' :
+                             printTestStatus[`${printerForm.ipAddress}:${printerForm.port}`] === 'pending' ? 'Sending…' :
+                             <><Printer size={12} /> Print Test Page</>}
+                          </button>
+                        </div>
                       </div>
                     )}
 

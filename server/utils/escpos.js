@@ -9,7 +9,12 @@
  *   Bixolon SRP-350
  *   Generic 80mm/58mm POS printers
  *
- * All printers above use ESC/POS protocol over TCP port 9100 (raw socket).
+ * Also supports HP LaserJet & PCL laser printers via plain-text mode:
+ *   HP LaserJet M402dne, M404dn, Pro M404n, Pro M118dw, M428fdw
+ *   Any PCL/plain-text printer accessible over TCP port 9100
+ *
+ * All ESC/POS printers use TCP port 9100 (raw socket).
+ * HP LaserJet printers also use TCP port 9100 in RAW mode.
  */
 
 const ESC = 0x1b;
@@ -265,4 +270,148 @@ function buildReceipt(order, opts = {}) {
   return Buffer.concat(chunks);
 }
 
-module.exports = { buildKOT, buildReceipt, OPEN_DRAWER };
+// ─────────────────────────────────────────────────────────────────────────────
+// PLAIN-TEXT / PCL MODE  –  for HP LaserJet, Lexmark, and other PCL printers
+//
+// These functions produce clean ASCII text with basic PCL header/footer.
+// Send over TCP port 9100 (RAW mode) — works on any HP LaserJet network printer.
+// HP LaserJet M402dne default RAW port: 9100
+// ─────────────────────────────────────────────────────────────────────────────
+
+// PCL escape sequences for laser printers
+const PCL_RESET   = '\x1bE';           // PCL printer reset
+const PCL_LF      = '\n';             // line feed
+const PCL_FF      = '\x0c';           // form feed (eject page)
+// Set font size 12pt, portrait, letter/A4
+const PCL_SETUP   = '\x1b&l0O\x1b(s12V\x1b&k2G';
+
+/**
+ * Build plain-text KOT for HP LaserJet / PCL laser printers.
+ * Outputs clean ASCII; no binary ESC/POS sequences.
+ */
+function buildKOT_plain(order, opts = {}) {
+  const W = 60; // wider for laser/letter page
+  const businessName = opts.businessName || 'KITCHEN ORDER';
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('en-ET', { hour: '2-digit', minute: '2-digit' });
+  const dateStr = now.toLocaleDateString('en-ET');
+
+  const lines = [];
+  lines.push(PCL_RESET + PCL_SETUP);
+  lines.push('');
+  lines.push('='.repeat(W));
+  lines.push(center('** KITCHEN ORDER TICKET **', W));
+  lines.push(center(businessName.toUpperCase(), W));
+  lines.push('='.repeat(W));
+  lines.push(twoCol('Order #:', order.orderNo || '--', W));
+  lines.push(twoCol('Type:', (order.orderType || 'dine_in').replace('_', ' ').toUpperCase(), W));
+  if (order.tableNo)    lines.push(twoCol('Table:', order.tableNo, W));
+  if (order.waiterName) lines.push(twoCol('Waiter:', order.waiterName, W));
+  if (order.customerName && order.customerName !== 'Walk-in Guest')
+    lines.push(twoCol('Customer:', order.customerName, W));
+  lines.push(twoCol('Date:', dateStr, W));
+  lines.push(twoCol('Time:', timeStr, W));
+  lines.push('-'.repeat(W));
+  lines.push(padEnd('ITEM', W - 10) + padEnd('QTY', 5) + 'NOTE');
+  lines.push('-'.repeat(W));
+
+  (order.items || []).forEach(item => {
+    const name = String(item.productName || item.name || '').slice(0, W - 14);
+    const qty  = `x${item.quantity || 1}`;
+    const note = String(item.notes || '');
+    lines.push(padEnd(name, W - 14) + padEnd(qty, 6) + note);
+    if (item.notes) lines.push(`    >> ${item.notes}`);
+  });
+
+  lines.push('='.repeat(W));
+  lines.push(center('** PREPARE IMMEDIATELY **', W));
+  lines.push('');
+  lines.push('');
+  lines.push(PCL_FF); // eject page
+
+  return Buffer.from(lines.join(PCL_LF), 'utf8');
+}
+
+/**
+ * Build plain-text customer receipt for HP LaserJet / PCL laser printers.
+ */
+function buildReceipt_plain(order, opts = {}) {
+  const W = 60;
+  const hotelName  = opts.hotelName  || 'Baba Roti Café';
+  const footerLine = opts.footerLine || 'Thank you! Come again.';
+  const taxRate    = opts.taxRate ?? 15;
+  const currency   = opts.currency || 'ETB';
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-ET');
+  const timeStr = now.toLocaleTimeString('en-ET', { hour: '2-digit', minute: '2-digit' });
+
+  const subtotal  = (order.items || []).reduce((s, i) => s + (i.quantity * i.unitPrice), 0);
+  const discAmt   = subtotal * ((order.discountPercent || 0) / 100);
+  const afterDisc = subtotal - discAmt;
+  const svcAmt    = order.serviceCharge || 0;
+  const taxAmt    = afterDisc * (taxRate / 100);
+  const grandTotal = afterDisc + svcAmt + taxAmt;
+  const amountPaid = order.amountPaid || grandTotal;
+  const change    = amountPaid - grandTotal;
+  const fmt = (n) => `${currency} ${Number(n || 0).toFixed(2)}`;
+
+  const lines = [];
+  lines.push(PCL_RESET + PCL_SETUP);
+  lines.push('');
+  lines.push(center('='.repeat(W), W));
+  lines.push(center(hotelName.toUpperCase(), W));
+  lines.push(center('CUSTOMER RECEIPT', W));
+  lines.push('='.repeat(W));
+  lines.push(twoCol('Receipt #:', order.orderNo || '--', W));
+  lines.push(twoCol('Date:', dateStr, W));
+  lines.push(twoCol('Time:', timeStr, W));
+  if (order.tableNo)   lines.push(twoCol('Table:', order.tableNo, W));
+  if (order.waiterName) lines.push(twoCol('Server:', order.waiterName, W));
+  if (order.customerName && order.customerName !== 'Walk-in Guest')
+    lines.push(twoCol('Guest:', order.customerName, W));
+
+  lines.push('-'.repeat(W));
+  lines.push(padEnd('ITEM', W - 24) + padEnd('QTY', 5) + padEnd('PRICE', 10) + 'TOTAL');
+  lines.push('-'.repeat(W));
+
+  (order.items || []).forEach(item => {
+    const name  = String(item.productName || item.name || '').slice(0, W - 24);
+    const qty   = `x${item.quantity || 1}`;
+    const price = fmt(item.unitPrice);
+    const total = fmt(item.quantity * item.unitPrice);
+    lines.push(padEnd(name, W - 24) + padEnd(qty, 5) + padEnd(price, 10) + total);
+  });
+
+  lines.push('-'.repeat(W));
+  if (discAmt > 0)
+    lines.push(twoCol(`Discount (${order.discountPercent}%):`, `-${fmt(discAmt)}`, W));
+  if (svcAmt > 0)
+    lines.push(twoCol('Service Charge:', fmt(svcAmt), W));
+  lines.push(twoCol(`Tax (${taxRate}%):`, fmt(taxAmt), W));
+  lines.push('='.repeat(W));
+  lines.push(twoCol('TOTAL:', fmt(grandTotal), W));
+  lines.push('-'.repeat(W));
+  lines.push(twoCol('Payment:', order.paymentMethod || 'Cash', W));
+  lines.push(twoCol('Paid:', fmt(amountPaid), W));
+  if (change > 0) lines.push(twoCol('Change:', fmt(change), W));
+  lines.push('='.repeat(W));
+  lines.push('');
+  lines.push(center(footerLine, W));
+  lines.push(center(`Printed: ${dateStr} ${timeStr}`, W));
+  lines.push('');
+  lines.push('');
+  lines.push(PCL_FF); // eject page
+
+  return Buffer.from(lines.join(PCL_LF), 'utf8');
+}
+
+/** Center a string within a given width */
+function center(str, width) {
+  const s = String(str || '');
+  if (s.length >= width) return s;
+  const pad = Math.floor((width - s.length) / 2);
+  return ' '.repeat(pad) + s;
+}
+
+module.exports = { buildKOT, buildReceipt, OPEN_DRAWER, buildKOT_plain, buildReceipt_plain };

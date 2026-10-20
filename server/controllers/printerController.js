@@ -102,6 +102,57 @@ const printReceiptEndpoint = asyncHandler(async (req, res) => {
   res.status(allOk ? 200 : 207).json({ results });
 });
 
+// ── PRINT TEST PAGE ─────────────────────────────────────────────────────────
+const printTestPageEndpoint = asyncHandler(async (req, res) => {
+  const { printerId, ip, port, brand, model } = req.body;
+
+  let printer;
+  if (printerId) {
+    printer = await PrinterSettings.findById(printerId);
+    if (!printer) return res.status(404).json({ ok: false, error: 'Printer not found' });
+  } else if (ip) {
+    printer = {
+      name: 'Test Printer',
+      ipAddress: ip,
+      port: Number(port) || 9100,
+      brand: brand || 'Generic',
+      model: model || '',
+      enabled: true,
+      headerLine1: 'Baba Roti Café',
+      footerLine: 'Test Print Successful!',
+      copies: 1,
+    };
+  } else {
+    return res.status(400).json({ ok: false, error: 'printerId or ip required' });
+  }
+
+  const sampleOrder = {
+    orderNo: 'TEST-001',
+    orderType: 'dine_in',
+    tableNo: 'Table 1',
+    waiterName: 'Test Server',
+    customerName: 'Test Customer',
+    paymentMethod: 'Cash',
+    discountPercent: 0,
+    serviceCharge: 0,
+    amountPaid: 150,
+    items: [
+      { productName: 'Baba Roti Special Bun', quantity: 2, unitPrice: 50 },
+      { productName: 'Hot Cappuccino', quantity: 1, unitPrice: 50 },
+    ],
+  };
+
+  try {
+    await printReceipt(printer, sampleOrder, {
+      hotelName: 'Baba Roti Café - Test Print',
+      footerLine: `Print Test Passed • ${printer.brand || ''} ${printer.model || ''}`.trim(),
+    });
+    res.json({ ok: true, message: `Test page sent to ${printer.ipAddress}:${printer.port || 9100}` });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 module.exports = {
   getPrinters,
   getPrinter,
@@ -111,4 +162,5 @@ module.exports = {
   pingPrinter,
   printKOTEndpoint,
   printReceiptEndpoint,
+  printTestPageEndpoint,
 };
