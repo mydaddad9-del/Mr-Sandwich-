@@ -82,10 +82,10 @@ export const AuthProvider = ({ children }) => {
         setCrudPermissions(res.data.crudPermissions);
         localStorage.setItem('hotelStockCrudPermissions', JSON.stringify(res.data.crudPermissions));
       }
-      if (res.data?.licensedModules) {
-        setLicensedModules(res.data.licensedModules);
-        localStorage.setItem('hotelStockLicensedModules', JSON.stringify(res.data.licensedModules));
-      }
+      // Always update licensedModules from server — even { subsystem: false } must apply
+      const lm = res.data?.licensedModules ?? DEFAULT_LICENSED_MODULES;
+      setLicensedModules(lm);
+      localStorage.setItem('hotelStockLicensedModules', JSON.stringify(lm));
       return res.data;
     } catch (err) {
       // Network failure: fall back to localStorage cache if available, else hardcoded defaults
@@ -144,6 +144,7 @@ export const AuthProvider = ({ children }) => {
     setRolePermissions(DEFAULT_PERMISSIONS);
     setNavVisibility(DEFAULT_NAV_VISIBILITY);
     setCrudPermissions(DEFAULT_CRUD_PERMISSIONS);
+    setLicensedModules(DEFAULT_LICENSED_MODULES); // ← reset subsystem license state on logout
   };
 
   const updateUser = (updatedData) => {
