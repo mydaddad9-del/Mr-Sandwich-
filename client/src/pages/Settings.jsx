@@ -190,6 +190,63 @@ export default function Settings() {
   ];
   const PAPER_WIDTHS   = ['58mm', '80mm'];
 
+  // Real-world thermal printer models grouped by brand
+  const PRINTER_MODELS = {
+    Epson: [
+      // 80mm POS
+      'TM-T20III', 'TM-T20X', 'TM-T70II', 'TM-T82III',
+      'TM-T83III', 'TM-T88VI', 'TM-T88VII',
+      // 58mm POS
+      'TM-T20II', 'TM-T81III',
+      // Kitchen / Open-frame
+      'TM-U220', 'TM-U330', 'TM-H6000V',
+    ],
+    Star: [
+      // 80mm TSP series
+      'TSP100III', 'TSP100IIIBI', 'TSP143IIIW',
+      'TSP650II', 'TSP654II', 'TSP700II', 'TSP800II',
+      // 58mm mPOP / mC series
+      'mC-Print2', 'mC-Print3',
+      // Kitchen
+      'SP700', 'SP742', 'SP747',
+    ],
+    Datecs: [
+      // Desktop ESC/POS
+      'DP-25', 'DP-35', 'DP-50', 'DP-150',
+      // Mobile
+      'DPP-250', 'DPP-350', 'DPP-450',
+      // Fiscal
+      'FP-700', 'FP-800',
+      // Label
+      'LP-50', 'LP-60', 'LP-600',
+      // Kiosk
+      'WP-500X', 'KP-200', 'KP-300',
+    ],
+    Citizen: [
+      'CT-E351', 'CT-E651', 'CT-E301',
+      'CT-S310II', 'CT-S651', 'CT-S801II',
+      'CMP-20II', 'CMP-25L', 'CMP-30II', 'CMP-40L',
+    ],
+    Bixolon: [
+      'SRP-350plusIII', 'SRP-380', 'SRP-330II',
+      'SRP-Q200', 'SRP-Q300', 'SRP-F310II',
+      'SRP-270', 'SRP-275III',
+    ],
+    Generic: [
+      'Generic 80mm ESC/POS',
+      'Generic 58mm ESC/POS',
+      'XP-58 (Generic)',
+      'XP-80 (Generic)',
+      'POS-80 (Generic)',
+      'POS-58 (Generic)',
+      'JP-5890K (Generic)',
+      'Rongta RP80USE',
+      'Rongta RP58BU',
+      'SEWOO SLK-TS400',
+      'Custom (type manually)',
+    ],
+  };
+
   const blankPrinter = {
     name: '', type: 'kitchen', brand: 'Generic', model: '',
     paperWidth: '80mm', connectionType: 'network',
@@ -2297,16 +2354,36 @@ export default function Settings() {
                         </select>
                       </div>
 
-                      {/* Model */}
+                      {/* Model — grouped by selected brand */}
                       <div>
-                        <label className="block text-xs font-semibold text-ink-700 mb-1">Model (optional)</label>
-                        <input
-                          type="text"
+                        <label className="block text-xs font-semibold text-ink-700 mb-1">Model</label>
+                        <select
                           value={printerForm.model}
-                          onChange={e => setPrinterForm(f => ({ ...f, model: e.target.value }))}
-                          className="w-full rounded-xl border border-ink-200 py-2.5 px-3 text-sm outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
-                          placeholder="e.g. TM-T88VI, TSP100III, DP-50"
-                        />
+                          onChange={e => {
+                            const val = e.target.value;
+                            setPrinterForm(f => ({ ...f, model: val === '__custom__' ? '' : val }));
+                          }}
+                          className="w-full rounded-xl border border-ink-200 py-2.5 px-3 text-sm outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 bg-white"
+                        >
+                          <option value="">— Select a model —</option>
+                          {(PRINTER_MODELS[printerForm.brand] || PRINTER_MODELS.Generic).map(m => (
+                            <option key={m} value={m === 'Custom (type manually)' ? '__custom__' : m}>{m}</option>
+                          ))}
+                        </select>
+                        {/* Show free-text input if custom or model not in list */}
+                        {(printerForm.model === '' ||
+                          !(PRINTER_MODELS[printerForm.brand] || PRINTER_MODELS.Generic)
+                            .filter(m => m !== 'Custom (type manually)')
+                            .includes(printerForm.model)
+                        ) && (
+                          <input
+                            type="text"
+                            value={printerForm.model}
+                            onChange={e => setPrinterForm(f => ({ ...f, model: e.target.value }))}
+                            className="mt-2 w-full rounded-xl border border-violet-200 bg-violet-50/30 py-2 px-3 text-sm outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 font-mono"
+                            placeholder="Type model name manually (e.g. TM-T88VI)"
+                          />
+                        )}
                       </div>
 
                       {/* Printer Type */}
