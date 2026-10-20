@@ -1577,7 +1577,7 @@ export default function POS() {
               </div>
             ) : (
               filteredProducts.map((p) => {
-                const inCart = orderItems.find(
+                const inCart = items.find(
                   (item) => (item.product?._id || item.product) === p._id
                 );
                 const isSelected = !!inCart;
