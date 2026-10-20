@@ -12,7 +12,7 @@ import Pagination from '../components/ui/Pagination';
 import { useAuth } from '../context/AuthContext';
 
 const DEPARTMENTS = [
-  'Kitchen', 'Food & Beverage', 'Front Office', 'Housekeeping',
+  'Waiter', 'Kitchen', 'Food & Beverage', 'Front Office', 'Housekeeping',
   'Security', 'Maintenance', 'Finance & Accounting', 'Human Resources',
   'Sales & Marketing', 'Laundry', 'Management', 'Other',
 ];

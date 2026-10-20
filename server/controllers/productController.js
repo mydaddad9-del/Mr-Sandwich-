@@ -116,9 +116,25 @@ const createProduct = asyncHandler(async (req, res) => {
 
   if (!name?.trim()) { res.status(400); throw new Error('Product name is required.'); }
 
-  // Duplicate code check (only if a non-empty code was provided)
-  const trimmedCode = (code || '').trim();
-  if (trimmedCode) {
+  // Product code handling: auto-generate next sequential code if blank
+  let trimmedCode = (code || '').trim();
+  if (!trimmedCode) {
+    const allProducts = await Product.find({ code: { $regex: /^P-?\d+$/i } }, 'code').lean();
+    let maxNum = 0;
+    let detectedPad = 4;
+    allProducts.forEach((p) => {
+      const match = String(p.code || '').match(/^P-?(\d+)$/i);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        if (num > maxNum) {
+          maxNum = num;
+          detectedPad = match[1].length;
+        }
+      }
+    });
+    const nextNum = maxNum + 1;
+    trimmedCode = `P-${String(nextNum).padStart(Math.max(detectedPad, 3), '0')}`;
+  } else {
     const existing = await Product.findOne({
       code: { $regex: `^${trimmedCode.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}-*$`, $options: 'i' },
       isActive: true,

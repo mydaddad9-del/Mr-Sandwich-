@@ -175,28 +175,25 @@ export default function POS() {
       const parsedWaiters = [];
       const seen = new Set();
 
-      // From Employee directory
+      // ONLY employees registered in Department: 'Waiter' (or Position: 'Waiter')
       allEmployees.forEach((emp) => {
+        const isWaiter =
+          (emp.department && emp.department.trim().toLowerCase() === "waiter") ||
+          (emp.position && emp.position.trim().toLowerCase() === "waiter");
+        if (!isWaiter) return;
+
         const fullName = `${emp.firstName || ""} ${emp.lastName || ""}`.trim();
         if (fullName && !seen.has(fullName.toLowerCase())) {
           seen.add(fullName.toLowerCase());
           parsedWaiters.push({
             _id: emp._id,
             name: fullName,
-            role: emp.position || emp.department || "Staff",
+            role: emp.position || emp.department || "Waiter",
             code: emp.employeeId || "",
           });
         }
       });
 
-      // Default quick waiters fallback
-      if (parsedWaiters.length === 0) {
-        parsedWaiters.push(
-          { _id: "w1", name: "Waiter 1", role: "Service Staff" },
-          { _id: "w2", name: "Waiter 2", role: "Service Staff" },
-          { _id: "w3", name: "Captain", role: "Captain" }
-        );
-      }
       setWaiters(parsedWaiters);
     } catch (e) {
       // Soft fail: cached data remains intact
@@ -2489,6 +2486,15 @@ export default function POS() {
                 <span>— No Waiter (Counter / Self) —</span>
                 {!selectedWaiter && <Check size={14} />}
               </button>
+
+              {waiters.length === 0 && (
+                <div style={{ textAlign: "center", padding: "20px 14px", color: "#64748b", fontSize: 12, background: "#f8fafc", borderRadius: 10, border: "1px dashed #cbd5e1", marginTop: 4 }}>
+                  <p style={{ margin: "0 0 4px", fontWeight: 700, color: "#334155" }}>No Registered Waiters Found</p>
+                  <span style={{ fontSize: 11, color: "#94a3b8" }}>
+                    Only staff registered with <strong>Department: Waiter</strong> appear here. Register waiters in Employee Management.
+                  </span>
+                </div>
+              )}
 
               {waiters
                 .filter((w) => !waiterSearchQ || w.name.toLowerCase().includes(waiterSearchQ.toLowerCase()))

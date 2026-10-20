@@ -11,6 +11,7 @@ import ApproveModal, { TrailTimeline } from '../components/ui/ApproveModal';
 import ExportDropdown from '../components/ui/ExportDropdown';
 import AttachmentUploader, { AttachmentViewer } from '../components/ui/AttachmentUploader';
 import Pagination from '../components/ui/Pagination';
+import SearchableSelect from '../components/ui/SearchableSelect';
 import { useAuth } from '../context/AuthContext';
 
 // ── Voucher config ────────────────────────────────────────────────────
@@ -557,11 +558,13 @@ export default function StockTransactions({ defaultVoucher } = {}) {
               <div className="space-y-2">
                 {form.items.map((item, idx) => (
                   <div key={idx} className={`grid gap-2 items-center ${activeV.needsCost ? 'grid-cols-[1fr_80px_110px_26px]' : 'grid-cols-[1fr_80px_26px]'}`}>
-                    <select required value={item.material} onChange={e => updateItem(idx,'material',e.target.value)}
-                      className="rounded-lg border border-ink-200 px-2 py-2 text-sm outline-none focus:border-blue-500">
-                      <option value="">Select material…</option>
-                      {materials.map(m => <option key={m._id} value={m._id}>{m.name} — {m.currentStock} {m.unit} in stock</option>)}
-                    </select>
+                    <SearchableSelect
+                      required
+                      placeholder="Select material…"
+                      options={materials}
+                      value={item.material}
+                      onChange={val => updateItem(idx, 'material', val)}
+                    />
                     <input type="number" step="0.001" min="0.001" required placeholder="Qty" value={item.quantity}
                       onChange={e => updateItem(idx,'quantity',e.target.value)}
                       className="rounded-lg border border-ink-200 px-2 py-2 text-sm outline-none focus:border-blue-500"/>

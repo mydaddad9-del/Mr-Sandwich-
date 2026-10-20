@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const DEPARTMENTS = [
+  'Waiter',
   'Kitchen',
   'Food & Beverage',
   'Front Office',

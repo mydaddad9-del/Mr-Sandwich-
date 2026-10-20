@@ -6,6 +6,7 @@ import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import ExportDropdown from '../components/ui/ExportDropdown';
 import Pagination from '../components/ui/Pagination';
+import SearchableSelect from '../components/ui/SearchableSelect';
 
 const emptyForm = {
   code: '',
@@ -78,18 +79,36 @@ const Products = () => {
 
 
   // ── CRUD ──
-  const openCreate = () => { setEditing(null); setForm(emptyForm); setFormError(''); setModalOpen(true); };
+  // Calculate next sequential product code respecting format (e.g. P-001 -> P-002, P-0001 -> P-0002)
+  const getNextProductCode = () => {
+    let maxNum = 0;
+    let detectedPad = 4;
+    products.forEach((p) => {
+      const match = String(p.code || '').match(/^P-?(\d+)$/i);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        if (num > maxNum) {
+          maxNum = num;
+          detectedPad = match[1].length;
+        }
+      }
+    });
+    const nextNum = maxNum + 1;
+    const padLength = Math.max(detectedPad, 3);
+    return `P-${String(nextNum).padStart(padLength, '0')}`;
+  };
 
-  // Auto-generate next sequential P-XXXX code
+  const openCreate = () => {
+    setEditing(null);
+    setFormError('');
+    const autoCode = getNextProductCode();
+    setForm({ ...emptyForm, code: autoCode });
+    setModalOpen(true);
+  };
+
+  // Re-generate or recalculate code
   const generateCode = () => {
-    const nums = products
-      .map(p => {
-        const match = String(p.code || '').match(/^P-?(\d+)$/i);
-        return match ? parseInt(match[1], 10) : 0;
-      })
-      .filter(n => n > 0);
-    const next = nums.length > 0 ? Math.max(...nums) + 1 : 1;
-    setForm(f => ({ ...f, code: `P-${String(next).padStart(4, '0')}` }));
+    setForm(f => ({ ...f, code: getNextProductCode() }));
   };
 
   const openEdit = (p) => {
@@ -711,13 +730,13 @@ const Products = () => {
             <div className="space-y-2">
               {form.ingredients.map((ing, idx) => (
                 <div key={idx} className="grid grid-cols-[1fr_auto_auto] items-center gap-2">
-                  <select required value={ing.material} onChange={(e) => updateIngredient(idx, 'material', e.target.value)}
-                    className="rounded-lg border border-ink-200 px-3 py-2 text-sm outline-none focus:border-blue-500">
-                    <option value="">Select raw material…</option>
-                    {materials.map((m) => (
-                      <option key={m._id} value={m._id}>{m.name} ({m.unit})</option>
-                    ))}
-                  </select>
+                  <SearchableSelect
+                    required
+                    placeholder="Select raw material…"
+                    options={materials}
+                    value={ing.material}
+                    onChange={(val) => updateIngredient(idx, 'material', val)}
+                  />
                   <div className="flex items-center gap-1">
                     <input type="number" step="0.001" min="0" required value={ing.quantity}
                       onChange={(e) => updateIngredient(idx, 'quantity', Number(e.target.value))}

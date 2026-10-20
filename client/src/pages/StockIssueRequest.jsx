@@ -10,6 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import Modal from '../components/ui/Modal';
+import SearchableSelect from '../components/ui/SearchableSelect';
 
 // ── Constants ────────────────────────────────────────────────────
 const DEPARTMENTS = [
@@ -762,18 +763,13 @@ export default function StockIssueRequest() {
                       <div key={idx} className="flex items-start gap-2 rounded-xl border border-ink-100 bg-ink-50/40 p-3">
                         <div className="flex-1 grid grid-cols-3 gap-2">
                           <div className="col-span-2">
-                            <select
+                            <SearchableSelect
+                              required
+                              placeholder="Select material…"
+                              options={materials}
                               value={item.material}
-                              onChange={e => updateItem(idx, 'material', e.target.value)}
-                              className="w-full rounded-lg border border-ink-200 bg-white px-2.5 py-2 text-xs outline-none focus:border-blue-500"
-                            >
-                              <option value="">{materials.length === 0 ? 'Loading materials...' : 'Select material...'}</option>
-                              {materials.map(m => (
-                                <option key={m._id} value={m._id}>
-                                  {m.name} ({m.currentStock} {m.unit} available)
-                                </option>
-                              ))}
-                            </select>
+                              onChange={val => updateItem(idx, 'material', val)}
+                            />
                           </div>
                           <div>
                             <input
