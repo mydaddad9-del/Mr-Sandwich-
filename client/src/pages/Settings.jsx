@@ -22,6 +22,13 @@ import {
   Trash2,
   Clock,
   Send,
+  Printer,
+  Wifi,
+  WifiOff,
+  Plus,
+  X,
+  ToggleLeft,
+  ToggleRight,
 } from 'lucide-react';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
@@ -172,6 +179,45 @@ export default function Settings() {
   const [devError, setDevError] = useState('');
   const [devKeyConfirmOpen, setDevKeyConfirmOpen] = useState(false);
   const [newDevKey, setNewDevKey] = useState('');
+
+  // ── Printer Settings state ──────────────────────────────────────────────
+  const PRINTER_BRANDS = ['Epson', 'Star', 'Datecs', 'Citizen', 'Bixolon', 'Generic'];
+  const PRINTER_TYPES  = [
+    { key: 'kitchen', label: 'Kitchen / Prep Station' },
+    { key: 'receipt', label: 'Customer Receipt' },
+    { key: 'bar',     label: 'Bar Printer' },
+    { key: 'both',    label: 'Kitchen + Receipt' },
+  ];
+  const PAPER_WIDTHS   = ['58mm', '80mm'];
+
+  const blankPrinter = {
+    name: '', type: 'kitchen', brand: 'Generic', model: '',
+    paperWidth: '80mm', connectionType: 'network',
+    ipAddress: '', port: 9100, enabled: true,
+    printOnOrder: true, printOnCheckout: true, copies: 1,
+    headerLine1: 'Baba Roti Café', headerLine2: '', footerLine: 'Thank you! Come again.',
+    charWidth: 42,
+  };
+
+  const [printers, setPrinters]             = useState([]);
+  const [printersLoading, setPrintersLoading] = useState(false);
+  const [printerForm, setPrinterForm]       = useState(blankPrinter);
+  const [editingPrinterId, setEditingPrinterId] = useState(null);
+  const [showPrinterForm, setShowPrinterForm]   = useState(false);
+  const [printerSaving, setPrinterSaving]   = useState(false);
+  const [printerSuccess, setPrinterSuccess] = useState('');
+  const [printerError, setPrinterError]     = useState('');
+  const [pingStatus, setPingStatus]         = useState({}); // { [ip]: 'ok' | 'fail' | 'pending' }
+
+  // Load printers from API (component-scoped so nav button can call it)
+  const loadPrinters = async () => {
+    setPrintersLoading(true);
+    try {
+      const res = await api.get('/printers');
+      setPrinters(Array.isArray(res.data) ? res.data : []);
+    } catch (_) {}
+    finally { setPrintersLoading(false); }
+  };
 
   // Telegram subscribers state (Admin)
   const [tgSubscribers, setTgSubscribers] = useState([]);
@@ -549,6 +595,18 @@ export default function Settings() {
               }`}
           >
             <Send size={16} /> Telegram Subscribers
+          </button>
+        )}
+
+        {hasRole('admin') && (
+          <button
+            onClick={() => { setTab('printers'); loadPrinters(); }}
+            className={`flex items-center gap-2 border-b-2 px-3.5 py-3 text-sm font-semibold transition whitespace-nowrap ${currentTab === 'printers'
+              ? 'border-violet-600 text-violet-600'
+              : 'border-transparent text-ink-400 hover:text-ink-700'
+              }`}
+          >
+            <Printer size={16} /> Order Printers
           </button>
         )}
 
@@ -1974,6 +2032,439 @@ export default function Settings() {
           </div>
         </Card>
       )}
+
+      {/* ── Tab: Order Printers ── */}
+      {currentTab === 'printers' && (() => {
+        // loadPrinters is defined at component scope above
+        const openAdd = () => {
+          setPrinterForm(blankPrinter);
+          setEditingPrinterId(null);
+          setPrinterError('');
+          setPrinterSuccess('');
+          setShowPrinterForm(true);
+        };
+
+        const openEdit = (p) => {
+          setPrinterForm({ ...blankPrinter, ...p });
+          setEditingPrinterId(p._id);
+          setPrinterError('');
+          setPrinterSuccess('');
+          setShowPrinterForm(true);
+        };
+
+        const savePrinter = async (e) => {
+          e.preventDefault();
+          if (!printerForm.name.trim()) { setPrinterError('Printer name is required'); return; }
+          if (printerForm.connectionType === 'network' && !printerForm.ipAddress.trim()) {
+            setPrinterError('IP address is required for network printers'); return;
+          }
+          setPrinterSaving(true);
+          setPrinterError('');
+          try {
+            if (editingPrinterId) {
+              await api.put(`/printers/${editingPrinterId}`, printerForm);
+            } else {
+              await api.post('/printers', printerForm);
+            }
+            setPrinterSuccess(editingPrinterId ? 'Printer updated.' : 'Printer added.');
+            setTimeout(() => setPrinterSuccess(''), 4000);
+            setShowPrinterForm(false);
+            loadPrinters();
+          } catch (err) {
+            setPrinterError(err.response?.data?.message || 'Failed to save printer');
+          } finally {
+            setPrinterSaving(false);
+          }
+        };
+
+        const deletePrinter = async (id) => {
+          if (!window.confirm('Delete this printer configuration?')) return;
+          try {
+            await api.delete(`/printers/${id}`);
+            setPrinterSuccess('Printer removed.');
+            setTimeout(() => setPrinterSuccess(''), 3000);
+            loadPrinters();
+          } catch (err) {
+            setPrinterError(err.response?.data?.message || 'Failed to delete');
+          }
+        };
+
+        const pingPrinter = async (ip, port) => {
+          const key = `${ip}:${port}`;
+          setPingStatus(prev => ({ ...prev, [key]: 'pending' }));
+          try {
+            const res = await api.post('/printers/action/ping', { ip, port: Number(port) });
+            setPingStatus(prev => ({ ...prev, [key]: res.data.ok ? 'ok' : 'fail' }));
+          } catch (_) {
+            setPingStatus(prev => ({ ...prev, [key]: 'fail' }));
+          }
+        };
+
+        const toggleEnabled = async (p) => {
+          try {
+            await api.put(`/printers/${p._id}`, { ...p, enabled: !p.enabled });
+            loadPrinters();
+          } catch (_) {}
+        };
+
+        return (
+          <div className="max-w-4xl">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="font-display text-xl font-bold text-ink-900 flex items-center gap-2">
+                  <span className="rounded-xl bg-violet-100 p-2 text-violet-600"><Printer size={20} /></span>
+                  Order Printer Configuration
+                </h2>
+                <p className="text-sm text-ink-400 mt-1">
+                  Connect thermal printers via IP address. Supports Epson, Star, Datecs, Citizen, Bixolon &amp; Generic ESC/POS printers.
+                </p>
+              </div>
+              <button
+                onClick={openAdd}
+                className="inline-flex items-center gap-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-semibold text-sm px-4 py-2.5 transition shadow-md"
+              >
+                <Plus size={16} /> Add Printer
+              </button>
+            </div>
+
+            {printerSuccess && (
+              <div className="mb-4 flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-700">
+                <CheckCircle2 size={16} className="flex-shrink-0" />{printerSuccess}
+              </div>
+            )}
+            {printerError && !showPrinterForm && (
+              <div className="mb-4 flex items-center gap-2 rounded-xl bg-red-50 border border-red-200 p-3 text-xs text-red-600">
+                <AlertCircle size={16} className="flex-shrink-0" />{printerError}
+              </div>
+            )}
+
+            {/* How-to banner */}
+            <div className="mb-6 rounded-2xl border border-violet-100 bg-gradient-to-r from-violet-50 to-indigo-50 p-4">
+              <h4 className="text-xs font-bold text-violet-700 mb-2 flex items-center gap-1.5"><Wifi size={13} /> How It Works</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-ink-600">
+                <div className="flex gap-2">
+                  <span className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full bg-violet-600 text-white flex items-center justify-center font-black text-[10px]">1</span>
+                  <span>Connect your thermal printer to the <strong>same WiFi/LAN network</strong> as the POS computer.</span>
+                </div>
+                <div className="flex gap-2">
+                  <span className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full bg-violet-600 text-white flex items-center justify-center font-black text-[10px]">2</span>
+                  <span>Find the printer's <strong>IP address</strong> by printing a self-test page or checking your router. Port is usually <strong>9100</strong>.</span>
+                </div>
+                <div className="flex gap-2">
+                  <span className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full bg-violet-600 text-white flex items-center justify-center font-black text-[10px]">3</span>
+                  <span>Click <strong>Test Connection</strong> to verify, then set the printer type. Orders will print automatically.</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Printer list */}
+            {printersLoading ? (
+              <div className="flex items-center justify-center py-16 text-ink-400">
+                <span className="animate-spin mr-2"><Printer size={20} /></span> Loading printers…
+              </div>
+            ) : printers.length === 0 ? (
+              <div className="rounded-2xl border-2 border-dashed border-ink-200 p-12 text-center">
+                <Printer size={40} className="mx-auto text-ink-300 mb-3" />
+                <p className="text-ink-500 font-semibold">No printers configured yet</p>
+                <p className="text-xs text-ink-400 mt-1 mb-4">Add your first printer to start printing kitchen orders and receipts automatically</p>
+                <button onClick={openAdd} className="inline-flex items-center gap-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-semibold text-sm px-4 py-2.5 transition">
+                  <Plus size={15} /> Configure First Printer
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {printers.map(p => {
+                  const pingKey = `${p.ipAddress}:${p.port}`;
+                  const ping = pingStatus[pingKey];
+                  return (
+                    <div key={p._id} className={`rounded-2xl border ${p.enabled ? 'border-violet-100 bg-white' : 'border-ink-100 bg-ink-50/50'} p-5 shadow-sm`}>
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start gap-3 flex-1 min-w-0">
+                          <div className={`mt-0.5 flex-shrink-0 rounded-xl p-2.5 ${p.enabled ? 'bg-violet-100 text-violet-600' : 'bg-ink-100 text-ink-400'}`}>
+                            <Printer size={20} />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-bold text-ink-900 text-sm">{p.name}</span>
+                              <span className="rounded-full bg-violet-100 text-violet-700 px-2 py-0.5 text-[10px] font-bold uppercase">{p.brand}</span>
+                              <span className="rounded-full bg-blue-50 text-blue-600 px-2 py-0.5 text-[10px] font-bold capitalize">{PRINTER_TYPES.find(t => t.key === p.type)?.label || p.type}</span>
+                              <span className="rounded-full bg-ink-100 text-ink-500 px-2 py-0.5 text-[10px] font-semibold">{p.paperWidth}</span>
+                              {!p.enabled && <span className="rounded-full bg-red-100 text-red-600 px-2 py-0.5 text-[10px] font-bold">DISABLED</span>}
+                            </div>
+                            {p.model && <p className="text-xs text-ink-400 mt-0.5">Model: {p.model}</p>}
+                            <p className="text-xs font-mono text-ink-500 mt-1">
+                              <Wifi size={11} className="inline mr-1" />
+                              {p.ipAddress}:{p.port}
+                            </p>
+                            <div className="flex flex-wrap gap-2 mt-2 text-[10px] text-ink-500">
+                              {p.printOnOrder && <span className="bg-emerald-50 text-emerald-700 rounded px-1.5 py-0.5 font-semibold">✓ Auto KOT on Order</span>}
+                              {p.printOnCheckout && <span className="bg-blue-50 text-blue-700 rounded px-1.5 py-0.5 font-semibold">✓ Auto Receipt on Checkout</span>}
+                              <span className="bg-ink-50 text-ink-600 rounded px-1.5 py-0.5">{p.copies}x copies</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
+                          {/* Ping Test */}
+                          {p.ipAddress && (
+                            <button
+                              onClick={() => pingPrinter(p.ipAddress, p.port)}
+                              disabled={ping === 'pending'}
+                              title="Test Connection"
+                              className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-semibold transition ${
+                                ping === 'ok' ? 'border-emerald-300 bg-emerald-50 text-emerald-700' :
+                                ping === 'fail' ? 'border-red-300 bg-red-50 text-red-600' :
+                                ping === 'pending' ? 'border-ink-200 bg-ink-50 text-ink-400' :
+                                'border-ink-200 bg-white text-ink-600 hover:border-violet-300 hover:text-violet-700'
+                              }`}
+                            >
+                              {ping === 'ok' ? <><Wifi size={12} className="text-emerald-500" /> Online</> :
+                               ping === 'fail' ? <><WifiOff size={12} /> Offline</> :
+                               ping === 'pending' ? <><span className="animate-spin inline-block w-3 h-3 border-2 border-ink-400 border-t-transparent rounded-full" /> Testing…</> :
+                               <><Wifi size={12} /> Test</>
+                              }
+                            </button>
+                          )}
+                          {/* Toggle Enable */}
+                          <button
+                            onClick={() => toggleEnabled(p)}
+                            title={p.enabled ? 'Disable printer' : 'Enable printer'}
+                            className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-[11px] font-semibold transition ${
+                              p.enabled ? 'border-violet-200 bg-violet-50 text-violet-700 hover:bg-violet-100' :
+                              'border-ink-200 bg-white text-ink-500 hover:bg-ink-50'
+                            }`}
+                          >
+                            {p.enabled ? <ToggleRight size={14} className="text-violet-600" /> : <ToggleLeft size={14} />}
+                            {p.enabled ? 'Enabled' : 'Disabled'}
+                          </button>
+                          <button onClick={() => openEdit(p)} title="Edit" className="rounded-lg border border-ink-200 bg-white hover:bg-ink-50 p-1.5 text-ink-500 hover:text-ink-800 transition">
+                            <Save size={13} />
+                          </button>
+                          <button onClick={() => deletePrinter(p._id)} title="Delete" className="rounded-lg border border-red-100 bg-red-50 hover:bg-red-100 p-1.5 text-red-500 transition">
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* ── Add / Edit Printer Modal ── */}
+            {showPrinterForm && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+                <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <div className="flex items-center justify-between p-6 border-b border-ink-100">
+                    <h3 className="font-display text-lg font-bold text-ink-900 flex items-center gap-2">
+                      <Printer size={18} className="text-violet-600" />
+                      {editingPrinterId ? 'Edit Printer' : 'Add New Printer'}
+                    </h3>
+                    <button onClick={() => setShowPrinterForm(false)} className="rounded-lg p-1.5 hover:bg-ink-100 text-ink-400">
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  <form onSubmit={savePrinter} className="p-6 space-y-5">
+                    {printerError && (
+                      <div className="flex items-center gap-2 rounded-xl bg-red-50 border border-red-200 p-3 text-xs text-red-600">
+                        <AlertCircle size={14} className="flex-shrink-0" />{printerError}
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* Printer Name */}
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs font-semibold text-ink-700 mb-1">Printer Name *</label>
+                        <input
+                          type="text" required
+                          value={printerForm.name}
+                          onChange={e => setPrinterForm(f => ({ ...f, name: e.target.value }))}
+                          className="w-full rounded-xl border border-ink-200 py-2.5 px-3 text-sm outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+                          placeholder="e.g. Kitchen Printer 1"
+                        />
+                      </div>
+
+                      {/* Brand */}
+                      <div>
+                        <label className="block text-xs font-semibold text-ink-700 mb-1">Printer Brand</label>
+                        <select
+                          value={printerForm.brand}
+                          onChange={e => setPrinterForm(f => ({ ...f, brand: e.target.value }))}
+                          className="w-full rounded-xl border border-ink-200 py-2.5 px-3 text-sm outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 bg-white"
+                        >
+                          {PRINTER_BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
+                        </select>
+                      </div>
+
+                      {/* Model */}
+                      <div>
+                        <label className="block text-xs font-semibold text-ink-700 mb-1">Model (optional)</label>
+                        <input
+                          type="text"
+                          value={printerForm.model}
+                          onChange={e => setPrinterForm(f => ({ ...f, model: e.target.value }))}
+                          className="w-full rounded-xl border border-ink-200 py-2.5 px-3 text-sm outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+                          placeholder="e.g. TM-T88VI, TSP100III, DP-50"
+                        />
+                      </div>
+
+                      {/* Printer Type */}
+                      <div>
+                        <label className="block text-xs font-semibold text-ink-700 mb-1">Printer Type</label>
+                        <select
+                          value={printerForm.type}
+                          onChange={e => setPrinterForm(f => ({ ...f, type: e.target.value }))}
+                          className="w-full rounded-xl border border-ink-200 py-2.5 px-3 text-sm outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 bg-white"
+                        >
+                          {PRINTER_TYPES.map(t => <option key={t.key} value={t.key}>{t.label}</option>)}
+                        </select>
+                      </div>
+
+                      {/* Paper Width */}
+                      <div>
+                        <label className="block text-xs font-semibold text-ink-700 mb-1">Paper Width</label>
+                        <div className="flex gap-2">
+                          {PAPER_WIDTHS.map(w => (
+                            <button
+                              key={w} type="button"
+                              onClick={() => setPrinterForm(f => ({ ...f, paperWidth: w, charWidth: w === '58mm' ? 32 : 42 }))}
+                              className={`flex-1 rounded-xl border py-2 text-sm font-semibold transition ${
+                                printerForm.paperWidth === w
+                                  ? 'border-violet-500 bg-violet-50 text-violet-700'
+                                  : 'border-ink-200 bg-white text-ink-500 hover:border-violet-300'
+                              }`}
+                            >{w}</button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* IP Address */}
+                      <div>
+                        <label className="block text-xs font-semibold text-ink-700 mb-1">IP Address *</label>
+                        <input
+                          type="text"
+                          value={printerForm.ipAddress}
+                          onChange={e => setPrinterForm(f => ({ ...f, ipAddress: e.target.value }))}
+                          className="w-full rounded-xl border border-ink-200 py-2.5 px-3 text-sm outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 font-mono"
+                          placeholder="192.168.1.100"
+                        />
+                      </div>
+
+                      {/* Port */}
+                      <div>
+                        <label className="block text-xs font-semibold text-ink-700 mb-1">Port (default: 9100)</label>
+                        <input
+                          type="number" min="1" max="65535"
+                          value={printerForm.port}
+                          onChange={e => setPrinterForm(f => ({ ...f, port: Number(e.target.value) }))}
+                          className="w-full rounded-xl border border-ink-200 py-2.5 px-3 text-sm outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 font-mono"
+                        />
+                      </div>
+
+                      {/* Copies */}
+                      <div>
+                        <label className="block text-xs font-semibold text-ink-700 mb-1">Copies per Print</label>
+                        <input
+                          type="number" min="1" max="5"
+                          value={printerForm.copies}
+                          onChange={e => setPrinterForm(f => ({ ...f, copies: Number(e.target.value) }))}
+                          className="w-full rounded-xl border border-ink-200 py-2.5 px-3 text-sm outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+                        />
+                      </div>
+
+                      {/* Header Line 1 */}
+                      <div>
+                        <label className="block text-xs font-semibold text-ink-700 mb-1">Receipt Header Line 1</label>
+                        <input
+                          type="text"
+                          value={printerForm.headerLine1}
+                          onChange={e => setPrinterForm(f => ({ ...f, headerLine1: e.target.value }))}
+                          className="w-full rounded-xl border border-ink-200 py-2.5 px-3 text-sm outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+                          placeholder="Baba Roti Café"
+                        />
+                      </div>
+
+                      {/* Footer Line */}
+                      <div>
+                        <label className="block text-xs font-semibold text-ink-700 mb-1">Receipt Footer Message</label>
+                        <input
+                          type="text"
+                          value={printerForm.footerLine}
+                          onChange={e => setPrinterForm(f => ({ ...f, footerLine: e.target.value }))}
+                          className="w-full rounded-xl border border-ink-200 py-2.5 px-3 text-sm outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+                          placeholder="Thank you! Come again."
+                        />
+                      </div>
+                    </div>
+
+                    {/* Toggle options */}
+                    <div className="rounded-xl border border-ink-100 bg-ink-50/50 p-4 space-y-3">
+                      <h4 className="text-xs font-bold text-ink-700 mb-2">Auto-Print Options</h4>
+                      {[
+                        { key: 'enabled',        label: 'Printer Enabled', desc: 'Disable to skip this printer without deleting it' },
+                        { key: 'printOnOrder',   label: 'Auto KOT on Order Send', desc: 'Print kitchen order ticket when order is submitted' },
+                        { key: 'printOnCheckout',label: 'Auto Receipt on Checkout', desc: 'Print customer receipt when payment is completed' },
+                      ].map(({ key, label, desc }) => (
+                        <div key={key} className="flex items-start justify-between gap-4">
+                          <div>
+                            <p className="text-xs font-semibold text-ink-800">{label}</p>
+                            <p className="text-[11px] text-ink-400">{desc}</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setPrinterForm(f => ({ ...f, [key]: !f[key] }))}
+                            className={`flex-shrink-0 rounded-full w-10 h-6 flex items-center px-1 transition ${
+                              printerForm[key] ? 'bg-violet-600' : 'bg-ink-200'
+                            }`}
+                          >
+                            <span className={`w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                              printerForm[key] ? 'translate-x-4' : 'translate-x-0'
+                            }`} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Test Connection inline */}
+                    {printerForm.ipAddress && (
+                      <div className="flex items-center gap-3 p-3 rounded-xl border border-ink-100 bg-ink-50/50">
+                        <Wifi size={14} className="text-violet-500 flex-shrink-0" />
+                        <span className="text-xs text-ink-600 flex-1">Test connection to <strong className="font-mono">{printerForm.ipAddress}:{printerForm.port}</strong></span>
+                        <button
+                          type="button"
+                          onClick={() => pingPrinter(printerForm.ipAddress, printerForm.port)}
+                          disabled={pingStatus[`${printerForm.ipAddress}:${printerForm.port}`] === 'pending'}
+                          className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+                            pingStatus[`${printerForm.ipAddress}:${printerForm.port}`] === 'ok' ? 'border-emerald-300 bg-emerald-50 text-emerald-700' :
+                            pingStatus[`${printerForm.ipAddress}:${printerForm.port}`] === 'fail' ? 'border-red-300 bg-red-50 text-red-600' :
+                            'border-violet-200 bg-white text-violet-700 hover:bg-violet-50'
+                          }`}
+                        >
+                          {pingStatus[`${printerForm.ipAddress}:${printerForm.port}`] === 'ok' ? '✓ Connected' :
+                           pingStatus[`${printerForm.ipAddress}:${printerForm.port}`] === 'fail' ? '✗ Unreachable' :
+                           pingStatus[`${printerForm.ipAddress}:${printerForm.port}`] === 'pending' ? 'Testing…' :
+                           'Test Connection'}
+                        </button>
+                      </div>
+                    )}
+
+                    <div className="flex justify-end gap-3 pt-2">
+                      <button type="button" onClick={() => setShowPrinterForm(false)} className="rounded-xl border border-ink-200 px-4 py-2 text-sm font-semibold text-ink-600 hover:bg-ink-50 transition">
+                        Cancel
+                      </button>
+                      <button type="submit" disabled={printerSaving} className="inline-flex items-center gap-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-semibold text-sm px-5 py-2 transition">
+                        <Save size={14} /> {printerSaving ? 'Saving…' : editingPrinterId ? 'Update Printer' : 'Save Printer'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
     </div>
   );
 }

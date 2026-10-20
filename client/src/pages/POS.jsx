@@ -408,6 +408,18 @@ export default function POS() {
     showToast("Cart cleared. Ready for next order.", "info");
   };
 
+  // ── SILENT THERMAL PRINTER FIRE ──────────────────────────────────
+  // Sends print job to configured network printers via server API.
+  // Errors are non-blocking — ordering always continues.
+  const firePrinter = async (type, order, opts = {}) => {
+    try {
+      const endpoint = type === 'kot' ? '/printers/action/kot' : '/printers/action/receipt';
+      await api.post(endpoint, { order, opts });
+    } catch (_) {
+      // silent — printer errors must never block ordering
+    }
+  };
+
   // ── "ORDER" ACTION: BY DEFAULT PLACES ORDER AS "HELD" ───────────
   const handleOrder = async () => {
     if (!items.length) {
@@ -450,8 +462,11 @@ export default function POS() {
         showToast(`Order #${savedOrder.orderNo} placed & held for ${selectedTable || "Counter"}!`);
       }
 
-      // Print KOT ticket for prep station
+      // Print KOT on browser (browser print dialog fallback)
       posPrint.printKOT(savedOrder, { businessName: "Baba Roti Café" });
+
+      // Auto-fire to network thermal printer (silent, non-blocking)
+      firePrinter('kot', savedOrder, { businessName: "Baba Roti Café" });
 
       // Reset cart
       setHeldOrderId(null);
@@ -520,10 +535,17 @@ export default function POS() {
 
       showToast(`Sale #${savedSale.orderNo} completed & converted to Cash Sales! Stock deducted.`);
 
-      // Print thermal receipt
+      // Print receipt in browser (browser print dialog fallback)
       posPrint.printReceipt(savedSale, {
         hotelName: "Baba Roti Café",
         taxRate: settings.taxRate,
+      });
+
+      // Auto-fire to network thermal printer (silent, non-blocking)
+      firePrinter('receipt', savedSale, {
+        hotelName: "Baba Roti Café",
+        taxRate: settings.taxRate,
+        currency: "ETB",
       });
 
       // Clear cart
