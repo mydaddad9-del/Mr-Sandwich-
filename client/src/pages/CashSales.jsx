@@ -197,13 +197,20 @@ export default function CashSales() {
       }}
     >
       <style>{`
-        @keyframes slideInRight { from { transform: translateX(100%); opacity:0 } to { transform: translateX(0); opacity:1 } }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        @keyframes slideInRight { from { transform: translateX(120%); opacity:0 } to { transform: translateX(0); opacity:1 } }
         @keyframes spin { to { transform: rotate(360deg) } }
-        .sale-row:hover { background: rgba(16,185,129,0.08) !important; }
+        @keyframes fadeInUp { from { transform: translateY(10px); opacity:0 } to { transform: translateY(0); opacity:1 } }
+        @keyframes shimmer { 0% { background-position: -200% center } 100% { background-position: 200% center } }
+        .sale-row { transition: all 0.15s ease; }
+        .sale-row:hover { background: rgba(16,185,129,0.09) !important; transform: translateX(2px); }
+        .kpi-card { animation: fadeInUp 0.3s ease both; transition: all 0.2s ease; }
+        .kpi-card:hover { transform: translateY(-3px); }
         .ref-btn:hover { background: rgba(16,185,129,0.3) !important; border-color: rgba(16,185,129,0.7) !important; transform: scale(1.02); }
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
       `}</style>
 
       {/* ── TOPBAR HEADER ────────────────────────────────────────── */}
@@ -364,47 +371,91 @@ export default function CashSales() {
         </div>
       </header>
 
-      {/* ── KPI METRICS CARDS (STRICTLY SALES REVENUE) ────────────── */}
+      {/* ── PREMIUM KPI METRICS CARDS ── */}
       {activeTab === "report" && (
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-            gap: 12,
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: 14,
             padding: "16px 20px 0",
           }}
         >
           {[
-            { label: "Total Cash Sales", value: ETB(totalRevenue), sub: `${totalTxnCount} completed sales`, color: "#10b981", bg: "rgba(16,185,129,0.1)" },
-            { label: "Cash Tendered", value: ETB(totalCash), sub: "Physical cash in drawer", color: "#34d399", bg: "rgba(52,211,153,0.1)" },
-            { label: "Telebirr Sales", value: ETB(totalTelebirr), sub: "Digital wallet settlement", color: "#60a5fa", bg: "rgba(96,165,250,0.1)" },
-            { label: "Card / POS Terminal", value: ETB(totalCard), sub: "Bank credit/debit card", color: "#fbbf24", bg: "rgba(251,191,36,0.1)" },
+            {
+              label: "Total Cash Sales", value: ETB(totalRevenue),
+              sub: `${totalTxnCount} completed sales`,
+              color: "#10b981", glow: "rgba(16,185,129,0.3)",
+              bg: "linear-gradient(135deg, rgba(16,185,129,0.18) 0%, rgba(5,150,105,0.1) 100%)",
+              border: "rgba(16,185,129,0.35)", icon: "💰",
+            },
+            {
+              label: "Cash Tendered", value: ETB(totalCash),
+              sub: "Physical cash in drawer",
+              color: "#34d399", glow: "rgba(52,211,153,0.25)",
+              bg: "linear-gradient(135deg, rgba(52,211,153,0.16) 0%, rgba(16,185,129,0.08) 100%)",
+              border: "rgba(52,211,153,0.3)", icon: "💵",
+            },
+            {
+              label: "Telebirr Sales", value: ETB(totalTelebirr),
+              sub: "Digital wallet settlement",
+              color: "#60a5fa", glow: "rgba(96,165,250,0.25)",
+              bg: "linear-gradient(135deg, rgba(96,165,250,0.16) 0%, rgba(59,130,246,0.08) 100%)",
+              border: "rgba(96,165,250,0.3)", icon: "📱",
+            },
+            {
+              label: "Card / POS Terminal", value: ETB(totalCard),
+              sub: "Bank credit/debit card",
+              color: "#fbbf24", glow: "rgba(251,191,36,0.25)",
+              bg: "linear-gradient(135deg, rgba(251,191,36,0.16) 0%, rgba(245,158,11,0.08) 100%)",
+              border: "rgba(251,191,36,0.3)", icon: "💳",
+            },
           ].map((k, i) => (
             <div
               key={i}
+              className="kpi-card"
               style={{
                 background: k.bg,
-                border: `1px solid ${k.color}30`,
-                borderRadius: 14,
-                padding: "12px 16px",
+                border: `1.5px solid ${k.border}`,
+                borderRadius: 18,
+                padding: "18px 20px",
                 display: "flex",
                 flexDirection: "column",
-                gap: 4,
+                gap: 6,
+                position: "relative",
+                overflow: "hidden",
+                boxShadow: `0 8px 30px ${k.glow}, inset 0 1px 0 rgba(255,255,255,0.08)`,
+                animationDelay: `${i * 0.07}s`,
               }}
             >
-              <span style={{ fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase" }}>
-                {k.label}
-              </span>
-              <div style={{ fontSize: 20, fontWeight: 900, color: k.color, fontVariantNumeric: "tabular-nums" }}>
+              {/* Top shimmer line */}
+              <div style={{
+                position: "absolute", top: 0, left: 0, right: 0, height: 2,
+                background: `linear-gradient(90deg, transparent, ${k.color}, transparent)`,
+                borderRadius: "18px 18px 0 0",
+              }} />
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.8 }}>
+                  {k.label}
+                </span>
+                <span style={{ fontSize: 22 }}>{k.icon}</span>
+              </div>
+              <div style={{ fontSize: 24, fontWeight: 900, color: k.color, fontVariantNumeric: "tabular-nums", letterSpacing: -0.5 }}>
                 {k.value}
               </div>
-              <span style={{ fontSize: 11, color: "#64748b" }}>{k.sub}</span>
+              <span style={{
+                fontSize: 11, color: "#64748b",
+                display: "flex", alignItems: "center", gap: 4,
+              }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: k.color, display: "inline-block", opacity: 0.7 }} />
+                {k.sub}
+              </span>
             </div>
           ))}
         </div>
       )}
 
-      {/* ── FILTER & SEARCH TOOLBAR (REPORT TAB) ──────────────────── */}
+      {/* ── FILTER & SEARCH TOOLBAR ── */}
       {activeTab === "report" && (
         <div style={{ padding: "14px 20px 0", display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
           {/* Search */}

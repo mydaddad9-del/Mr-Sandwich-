@@ -164,13 +164,21 @@ export default function CaptainOrder() {
       }}
     >
       <style>{`
-        @keyframes slideInRight { from { transform: translateX(100%); opacity:0 } to { transform: translateX(0); opacity:1 } }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        @keyframes slideInRight { from { transform: translateX(120%); opacity:0 } to { transform: translateX(0); opacity:1 } }
         @keyframes spin { to { transform: rotate(360deg) } }
-        .order-row:hover { background: rgba(99,102,241,0.08) !important; }
+        @keyframes fadeInUp { from { transform: translateY(10px); opacity:0 } to { transform: translateY(0); opacity:1 } }
+        .order-row { transition: all 0.15s ease; }
+        .order-row:hover { background: rgba(99,102,241,0.1) !important; transform: translateX(2px); }
+        .kpi-card { animation: fadeInUp 0.3s ease both; transition: all 0.2s ease; }
+        .kpi-card:hover { transform: translateY(-3px); }
         .ref-btn:hover { background: rgba(59,130,246,0.3) !important; border-color: rgba(59,130,246,0.7) !important; transform: scale(1.02); }
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        .status-pill { transition: all 0.15s; }
+        .status-pill:hover { transform: scale(1.05); }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
       `}</style>
 
       {/* ── HEADER & TOPBAR ────────────────────────────────────────── */}
@@ -285,40 +293,78 @@ export default function CaptainOrder() {
         </div>
       </header>
 
-      {/* ── KPI METRICS SUMMARY ROW ──────────────────────────────── */}
+      {/* ── PREMIUM KPI METRICS SUMMARY ROW ── */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-          gap: 12,
+          gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
+          gap: 14,
           padding: "16px 20px 0",
         }}
       >
         {[
-          { label: "Total Orders", count: totalCount, value: ETB(totalValue), color: "#38bdf8", bg: "rgba(56,189,248,0.1)" },
-          { label: "Held Orders", count: heldCount, color: "#c084fc", bg: "rgba(192,132,252,0.1)" },
-          { label: "In Kitchen (KOT)", count: kitchenCount, color: "#fbbf24", bg: "rgba(251,191,36,0.1)" },
-          { label: "Ready to Serve", count: readyCount, color: "#2dd4bf", bg: "rgba(45,212,191,0.1)" },
-          { label: "Voided Orders", count: voidCount, color: "#f87171", bg: "rgba(248,113,113,0.1)" },
+          {
+            label: "Total Orders", count: totalCount, extra: ETB(totalValue),
+            color: "#38bdf8", glow: "rgba(56,189,248,0.25)",
+            bg: "linear-gradient(135deg, rgba(56,189,248,0.16) 0%, rgba(14,165,233,0.08) 100%)",
+            border: "rgba(56,189,248,0.35)", icon: "📊",
+          },
+          {
+            label: "Held Orders", count: heldCount,
+            color: "#c084fc", glow: "rgba(192,132,252,0.25)",
+            bg: "linear-gradient(135deg, rgba(192,132,252,0.16) 0%, rgba(139,92,246,0.08) 100%)",
+            border: "rgba(192,132,252,0.35)", icon: "⏸️",
+          },
+          {
+            label: "In Kitchen (KOT)", count: kitchenCount,
+            color: "#fbbf24", glow: "rgba(251,191,36,0.25)",
+            bg: "linear-gradient(135deg, rgba(251,191,36,0.16) 0%, rgba(245,158,11,0.08) 100%)",
+            border: "rgba(251,191,36,0.35)", icon: "🔥",
+          },
+          {
+            label: "Ready to Serve", count: readyCount,
+            color: "#2dd4bf", glow: "rgba(45,212,191,0.25)",
+            bg: "linear-gradient(135deg, rgba(45,212,191,0.16) 0%, rgba(20,184,166,0.08) 100%)",
+            border: "rgba(45,212,191,0.35)", icon: "✅",
+          },
+          {
+            label: "Voided Orders", count: voidCount,
+            color: "#f87171", glow: "rgba(248,113,113,0.25)",
+            bg: "linear-gradient(135deg, rgba(248,113,113,0.16) 0%, rgba(239,68,68,0.08) 100%)",
+            border: "rgba(248,113,113,0.35)", icon: "❌",
+          },
         ].map((k, i) => (
           <div
             key={i}
+            className="kpi-card"
             style={{
               background: k.bg,
-              border: `1px solid ${k.color}30`,
-              borderRadius: 14,
-              padding: "12px 16px",
+              border: `1.5px solid ${k.border}`,
+              borderRadius: 18,
+              padding: "16px 18px",
               display: "flex",
               flexDirection: "column",
-              gap: 4,
+              gap: 6,
+              position: "relative",
+              overflow: "hidden",
+              boxShadow: `0 8px 28px ${k.glow}, inset 0 1px 0 rgba(255,255,255,0.08)`,
+              animationDelay: `${i * 0.06}s`,
             }}
           >
-            <span style={{ fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase" }}>
-              {k.label}
-            </span>
-            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-              <span style={{ fontSize: 22, fontWeight: 900, color: k.color }}>{k.count}</span>
-              {k.value && <span style={{ fontSize: 12, fontWeight: 700, color: "#e2e8f0" }}>{k.value}</span>}
+            <div style={{
+              position: "absolute", top: 0, left: 0, right: 0, height: 2,
+              background: `linear-gradient(90deg, transparent, ${k.color}, transparent)`,
+              borderRadius: "18px 18px 0 0",
+            }} />
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{ fontSize: 10, fontWeight: 800, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 1 }}>
+                {k.label}
+              </span>
+              <span style={{ fontSize: 20 }}>{k.icon}</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+              <span style={{ fontSize: 28, fontWeight: 900, color: k.color, lineHeight: 1 }}>{k.count}</span>
+              {k.extra && <span style={{ fontSize: 12, fontWeight: 700, color: "#e2e8f0", opacity: 0.8 }}>{k.extra}</span>}
             </div>
           </div>
         ))}
@@ -367,18 +413,19 @@ export default function CaptainOrder() {
             return (
               <button
                 key={s}
+                className="status-pill"
                 onClick={() => setStatusFilter(s)}
                 style={{
-                  padding: "6px 12px",
-                  borderRadius: 8,
+                  padding: "6px 14px",
+                  borderRadius: 50,
                   border: active ? `1.5px solid ${cfg.color}` : "1px solid rgba(255,255,255,0.08)",
                   background: active ? cfg.bg : "rgba(255,255,255,0.03)",
                   color: active ? cfg.color : "#94a3b8",
-                  fontWeight: 700,
+                  fontWeight: active ? 800 : 600,
                   fontSize: 11,
                   cursor: "pointer",
                   whiteSpace: "nowrap",
-                  transition: "all 0.15s",
+                  boxShadow: active ? `0 0 12px ${cfg.color}44` : "none",
                 }}
               >
                 {cfg.label}

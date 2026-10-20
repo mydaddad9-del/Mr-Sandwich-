@@ -485,16 +485,37 @@ export default function POS() {
       }}
     >
       <style>{`
-        @keyframes slideInRight { from { transform: translateX(100%); opacity:0 } to { transform: translateX(0); opacity:1 } }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        @keyframes slideInRight { from { transform: translateX(120%); opacity:0 } to { transform: translateX(0); opacity:1 } }
+        @keyframes fadeInUp { from { transform: translateY(12px); opacity:0 } to { transform: translateY(0); opacity:1 } }
         @keyframes spin { to { transform: rotate(360deg) } }
-        .product-card:hover { background: rgba(99,102,241,0.18) !important; border-color: rgba(99,102,241,0.5) !important; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(99,102,241,0.25); }
-        .qbtn:hover { background: rgba(99,102,241,0.3) !important; }
-        .checkout-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 25px rgba(16,185,129,0.45); }
-        .order-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(245,158,11,0.35); }
-        .ref-card:hover { background: rgba(59,130,246,0.15) !important; border-color: rgba(59,130,246,0.5) !important; }
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        @keyframes pulse-glow { 0%,100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.4) } 50% { box-shadow: 0 0 0 8px rgba(16,185,129,0) } }
+        .product-card {
+          transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+          animation: fadeInUp 0.25s ease both;
+        }
+        .product-card:hover {
+          transform: translateY(-4px) scale(1.02);
+          box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 0 1.5px rgba(99,102,241,0.6) !important;
+          background: rgba(99,102,241,0.14) !important;
+        }
+        .product-card:active { transform: scale(0.97); }
+        .qbtn { transition: all 0.15s; }
+        .qbtn:hover { background: rgba(99,102,241,0.35) !important; transform: scale(1.12); }
+        .checkout-btn { transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .checkout-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 12px 35px rgba(16,185,129,0.55) !important; }
+        .checkout-btn:active { transform: scale(0.97); }
+        .order-btn { transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .order-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 10px 28px rgba(245,158,11,0.45) !important; }
+        .ref-card:hover { background: rgba(59,130,246,0.18) !important; border-color: rgba(59,130,246,0.6) !important; transform: translateY(-2px); }
+        .cat-pill { transition: all 0.2s ease; }
+        .cat-pill:hover { transform: scale(1.05); }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+        .cart-item { transition: all 0.15s ease; }
+        .cart-item:hover { background: rgba(255,255,255,0.06) !important; }
       `}</style>
 
       {/* ── TOPBAR HEADER ────────────────────────────────────────── */}
@@ -1317,32 +1338,33 @@ export default function POS() {
               </div>
             </div>
 
-            {/* ── THE REQUESTED SIDE-TO-SIDE BUTTONS: [ Order ] (Held) & [ Checkout > ] (Cash Sales) ── */}
+            {/* ── THE REQUESTED SIDE-TO-SIDE BUTTONS ── */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
               <button
                 type="button"
                 className="order-btn"
                 disabled={placing}
                 onClick={handleOrder}
-                title="Save order (default status: held) and print KOT for kitchen"
+                title="Save order as held and print KOT for kitchen"
                 style={{
-                  padding: "13px 12px",
-                  borderRadius: 12,
-                  border: "1.5px solid rgba(245,158,11,0.5)",
-                  background: "rgba(245,158,11,0.15)",
+                  padding: "14px 12px",
+                  borderRadius: 14,
+                  border: "1.5px solid rgba(245,158,11,0.45)",
+                  background: "linear-gradient(135deg, rgba(245,158,11,0.2) 0%, rgba(217,119,6,0.15) 100%)",
                   color: "#fbbf24",
-                  fontWeight: 800,
+                  fontWeight: 900,
                   fontSize: 13,
                   cursor: placing ? "not-allowed" : "pointer",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   gap: 7,
-                  transition: "all 0.2s",
+                  boxShadow: "0 4px 16px rgba(245,158,11,0.2), inset 0 1px 0 rgba(255,255,255,0.08)",
+                  letterSpacing: 0.3,
                 }}
               >
                 <UtensilsCrossed size={16} />
-                {heldOrderId ? "Update Order" : "Order"}
+                {heldOrderId ? "Update" : "🍽 Order"}
               </button>
 
               <button
@@ -1350,32 +1372,29 @@ export default function POS() {
                 className="checkout-btn"
                 disabled={placing}
                 onClick={() => {
-                  if (!items.length) {
-                    showToast("Please add items to cart", "error");
-                    return;
-                  }
+                  if (!items.length) { showToast("Please add items to cart", "error"); return; }
                   setShowPayModal(true);
                 }}
-                title="Pay now and automatically change status to Cash Sales (deducts stock)"
+                title="Pay now and automatically convert to Cash Sales"
                 style={{
-                  padding: "13px 12px",
-                  borderRadius: 12,
+                  padding: "14px 12px",
+                  borderRadius: 14,
                   border: "none",
-                  background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                  background: "linear-gradient(135deg, #10b981 0%, #059669 60%, #047857 100%)",
                   color: "#ffffff",
-                  fontWeight: 800,
+                  fontWeight: 900,
                   fontSize: 13,
                   cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   gap: 7,
-                  boxShadow: "0 4px 16px rgba(16,185,129,0.35)",
-                  transition: "all 0.2s",
+                  boxShadow: "0 6px 20px rgba(16,185,129,0.4), inset 0 1px 0 rgba(255,255,255,0.15)",
+                  letterSpacing: 0.3,
                 }}
               >
                 <ReceiptText size={16} />
-                Checkout &gt;
+                Checkout ›
               </button>
             </div>
 
@@ -1493,37 +1512,43 @@ export default function POS() {
             style={{
               display: "flex",
               gap: 8,
-              padding: "8px 16px",
+              padding: "10px 16px",
               overflowX: "auto",
-              borderBottom: "1px solid rgba(255,255,255,0.06)",
+              borderBottom: "1px solid rgba(255,255,255,0.07)",
               scrollbarWidth: "none",
               flexShrink: 0,
+              background: "rgba(0,0,0,0.2)",
             }}
           >
-            {categories.map((cat) => {
+            {categories.map((cat, ci) => {
               const active = activeCategory === cat;
+              const catColors = [
+                "#3b82f6","#10b981","#f59e0b","#8b5cf6","#ef4444","#06b6d4","#ec4899","#14b8a6",
+              ];
+              const c = catColors[ci % catColors.length];
               return (
                 <button
                   key={cat}
                   type="button"
+                  className="cat-pill"
                   onClick={() => setActiveCategory(cat)}
                   style={{
-                    padding: "6px 16px",
-                    borderRadius: 20,
-                    border: active ? "1.5px solid #3b82f6" : "1px solid rgba(255,255,255,0.1)",
+                    padding: "7px 18px",
+                    borderRadius: 50,
+                    border: active ? `1.5px solid ${c}` : "1px solid rgba(255,255,255,0.1)",
                     background: active
-                      ? "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)"
-                      : "rgba(255,255,255,0.05)",
-                    color: active ? "#ffffff" : "#94a3b8",
-                    fontWeight: 700,
+                      ? `linear-gradient(135deg, ${c}33 0%, ${c}22 100%)`
+                      : "rgba(255,255,255,0.04)",
+                    color: active ? c : "#94a3b8",
+                    fontWeight: active ? 800 : 600,
                     fontSize: 12,
                     cursor: "pointer",
                     whiteSpace: "nowrap",
-                    transition: "all 0.15s ease",
-                    boxShadow: active ? "0 2px 10px rgba(59,130,246,0.3)" : "none",
+                    boxShadow: active ? `0 0 16px ${c}44, 0 2px 8px rgba(0,0,0,0.3)` : "none",
+                    letterSpacing: 0.3,
                   }}
                 >
-                  {cat === "All" ? "+ All Categories" : cat}
+                  {cat === "All" ? "✦ All Items" : cat}
                 </button>
               );
             })}
@@ -1534,9 +1559,9 @@ export default function POS() {
             style={{
               flex: 1,
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
-              gap: 12,
-              padding: 16,
+              gridTemplateColumns: "repeat(auto-fill, minmax(175px, 1fr))",
+              gap: 14,
+              padding: "16px",
               overflowY: "auto",
               alignContent: "start",
               minHeight: 0,
@@ -1552,7 +1577,9 @@ export default function POS() {
               </div>
             ) : (
               filteredProducts.map((p) => {
-                const inCart = items.find((i) => i.product === p._id);
+                const inCart = orderItems.find(
+                  (item) => (item.product?._id || item.product) === p._id
+                );
                 const isSelected = !!inCart;
                 return (
                   <div
@@ -1560,105 +1587,130 @@ export default function POS() {
                     className="product-card"
                     onClick={() => addItem(p)}
                     style={{
-                      background: isSelected ? "rgba(59,130,246,0.15)" : "rgba(255,255,255,0.04)",
+                      background: isSelected
+                        ? "linear-gradient(135deg, rgba(59,130,246,0.2) 0%, rgba(99,102,241,0.15) 100%)"
+                        : "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.03) 100%)",
                       border: isSelected
-                        ? "1.5px solid rgba(59,130,246,0.5)"
-                        : "1.5px solid rgba(255,255,255,0.08)",
-                      borderRadius: 14,
-                      padding: "12px 12px",
+                        ? "1.5px solid rgba(99,102,241,0.6)"
+                        : "1.5px solid rgba(255,255,255,0.09)",
+                      borderRadius: 18,
+                      padding: "14px 14px 12px",
                       cursor: "pointer",
-                      transition: "all 0.15s ease",
                       display: "flex",
                       flexDirection: "column",
-                      gap: 4,
+                      gap: 0,
                       position: "relative",
+                      overflow: "hidden",
+                      backdropFilter: "blur(6px)",
+                      boxShadow: isSelected
+                        ? "0 8px 30px rgba(99,102,241,0.25), inset 0 1px 0 rgba(255,255,255,0.1)"
+                        : "0 4px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.06)",
                     }}
                   >
-                    {/* Badge if added to cart */}
-                    {isSelected && (
-                      <span
-                        style={{
-                          position: "absolute",
-                          top: 8,
-                          right: 8,
-                          width: 20,
-                          height: 20,
-                          borderRadius: "50%",
-                          background: "#3b82f6",
-                          color: "#fff",
-                          fontSize: 10,
-                          fontWeight: 800,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          boxShadow: "0 2px 6px rgba(59,130,246,0.5)",
-                        }}
-                      >
-                        {inCart.quantity}
-                      </span>
-                    )}
+                    {/* Top shimmer line */}
+                    <div style={{
+                      position: "absolute", top: 0, left: 0, right: 0, height: 2,
+                      background: isSelected
+                        ? "linear-gradient(90deg, #6366f1, #3b82f6)"
+                        : "linear-gradient(90deg, rgba(255,255,255,0.15), transparent)",
+                      borderRadius: "18px 18px 0 0",
+                    }} />
 
-                    {/* Category Label */}
-                    <div
-                      style={{
-                        fontSize: 9,
-                        fontWeight: 800,
-                        textTransform: "uppercase",
-                        color: "#60a5fa",
-                        letterSpacing: 0.8,
-                      }}
-                    >
-                      {p.category || "General"}
-                    </div>
+                    {/* Category icon area */}
+                    {(() => {
+                      const catColorMap = {
+                        "Dinner": { bg: "rgba(245,158,11,0.18)", color: "#fbbf24", emoji: "🍽️" },
+                        "Break Fast": { bg: "rgba(16,185,129,0.18)", color: "#34d399", emoji: "☀️" },
+                        "Breakfast": { bg: "rgba(16,185,129,0.18)", color: "#34d399", emoji: "☀️" },
+                        "Lunch": { bg: "rgba(251,146,60,0.18)", color: "#fb923c", emoji: "🌤️" },
+                        "Drinks": { bg: "rgba(6,182,212,0.18)", color: "#22d3ee", emoji: "🥤" },
+                        "Beverages": { bg: "rgba(6,182,212,0.18)", color: "#22d3ee", emoji: "☕" },
+                        "Desserts": { bg: "rgba(236,72,153,0.18)", color: "#f472b6", emoji: "🍰" },
+                        "Starters": { bg: "rgba(139,92,246,0.18)", color: "#a78bfa", emoji: "🥗" },
+                        "Snacks": { bg: "rgba(234,179,8,0.18)", color: "#facc15", emoji: "🥨" },
+                        "General": { bg: "rgba(99,102,241,0.18)", color: "#818cf8", emoji: "⭐" },
+                      };
+                      const cc = catColorMap[p.category] || { bg: "rgba(99,102,241,0.18)", color: "#818cf8", emoji: "🍴" };
+                      return (
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                          <div style={{
+                            width: 36, height: 36, borderRadius: 10,
+                            background: cc.bg,
+                            border: `1px solid ${cc.color}33`,
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            fontSize: 18, flexShrink: 0,
+                          }}>
+                            {cc.emoji}
+                          </div>
+                          <span style={{
+                            fontSize: 9, fontWeight: 800, textTransform: "uppercase",
+                            color: cc.color, letterSpacing: 1,
+                            background: cc.bg, padding: "2px 7px", borderRadius: 20,
+                          }}>
+                            {p.category || "General"}
+                          </span>
+                        </div>
+                      );
+                    })()}
 
                     {/* Product Name */}
-                    <div
-                      style={{
-                        fontWeight: 700,
-                        fontSize: 14,
-                        color: "#ffffff",
-                        lineHeight: 1.3,
-                        flex: 1,
-                        paddingRight: isSelected ? 18 : 0,
-                      }}
-                    >
+                    <div style={{
+                      fontWeight: 800, fontSize: 15, color: "#ffffff",
+                      lineHeight: 1.25, paddingRight: isSelected ? 22 : 0,
+                      marginBottom: 4, flex: 1,
+                    }}>
                       {p.name}
                     </div>
 
                     {/* Product Code */}
-                    <div style={{ fontSize: 10, color: "#64748b" }}>#{p.code || "—"}</div>
+                    <div style={{ fontSize: 10, color: "#475569", marginBottom: 10, fontFamily: "monospace" }}>
+                      #{p.code || "—"}
+                    </div>
 
-                    {/* Price & Tag */}
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        marginTop: 6,
-                        paddingTop: 6,
-                        borderTop: "1px solid rgba(255,255,255,0.05)",
-                      }}
-                    >
-                      <span style={{ fontWeight: 900, fontSize: 14, color: "#10b981" }}>
-                        ETB {Number(p.sellingPrice || 0).toFixed(2)}
+                    {/* Price + Tag row */}
+                    <div style={{
+                      display: "flex", alignItems: "center",
+                      justifyContent: "space-between",
+                      paddingTop: 8,
+                      borderTop: "1px solid rgba(255,255,255,0.07)",
+                    }}>
+                      <span style={{
+                        fontWeight: 900, fontSize: 15, color: "#10b981",
+                        background: "rgba(16,185,129,0.12)",
+                        padding: "3px 10px", borderRadius: 20,
+                        border: "1px solid rgba(16,185,129,0.25)",
+                        letterSpacing: -0.3,
+                      }}>
+                        {Number(p.sellingPrice || 0).toFixed(0)} ETB
                       </span>
                       {(p.ingredients?.length || 0) > 0 ? (
-                        <span
-                          style={{
-                            fontSize: 9,
-                            color: "#fbbf24",
-                            fontWeight: 700,
-                            background: "rgba(245,158,11,0.15)",
-                            padding: "2px 6px",
-                            borderRadius: 6,
-                          }}
-                        >
-                          ● Recipe
-                        </span>
+                        <span style={{
+                          fontSize: 9, color: "#fbbf24", fontWeight: 800,
+                          background: "rgba(245,158,11,0.15)", padding: "2px 7px",
+                          borderRadius: 20, border: "1px solid rgba(245,158,11,0.3)",
+                        }}>⚡ Recipe</span>
                       ) : (
-                        <span style={{ fontSize: 9, color: "#64748b" }}>Direct</span>
+                        <span style={{
+                          fontSize: 9, color: "#64748b", fontWeight: 600,
+                          background: "rgba(255,255,255,0.05)", padding: "2px 7px", borderRadius: 20,
+                        }}>Direct</span>
                       )}
                     </div>
+
+                    {/* Cart quantity badge */}
+                    {isSelected && (
+                      <span style={{
+                        position: "absolute", top: 10, right: 10,
+                        width: 24, height: 24, borderRadius: "50%",
+                        background: "linear-gradient(135deg, #6366f1, #3b82f6)",
+                        color: "#fff", fontSize: 11, fontWeight: 900,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        boxShadow: "0 4px 12px rgba(99,102,241,0.6)",
+                        animation: "pulse-glow 2s infinite",
+                      }}>
+                        {inCart.quantity}
+                      </span>
+                    )}
                   </div>
                 );
               })
