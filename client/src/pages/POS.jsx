@@ -160,7 +160,6 @@ export default function POS() {
         dept.includes("waiter") ||
         pos.includes("waiter");
       if (!isWaiter) return;
-
       const fullName = `${emp.firstName || ""} ${emp.lastName || ""}`.trim();
       if (fullName && !seen.has(fullName.toLowerCase())) {
         seen.add(fullName.toLowerCase());
@@ -201,6 +200,32 @@ export default function POS() {
       refreshWaiters(false);
     }
   }, [showWaiterPicker, refreshWaiters]);
+
+  // Real-time automatic detection: detect when staff are registered or edited in other tabs/windows
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === "baba_roti_employees_updated" || e.key === "baba_roti_pos_waiters_cache") {
+        refreshWaiters(false);
+      }
+    };
+    const handleFocus = () => {
+      refreshWaiters(false);
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("focus", handleFocus);
+
+    // Silent periodic background check (every 10 seconds)
+    const interval = setInterval(() => {
+      refreshWaiters(false);
+    }, 10000);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("focus", handleFocus);
+      clearInterval(interval);
+    };
+  }, [refreshWaiters]);
 
   // Load products, settings, waiters (Fast POS queries, non-blocking)
   const loadData = useCallback(async () => {
