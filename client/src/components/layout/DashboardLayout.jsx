@@ -61,7 +61,7 @@ const DashboardLayout = () => {
           title={title}
         />
         {isPos ? (
-          <main className="flex-1 flex flex-col overflow-hidden min-h-0 bg-[#070c1e]">
+          <main className="flex-1 flex flex-col overflow-hidden min-h-0 bg-[#f8fafc]">
             <Outlet />
           </main>
         ) : (

@@ -446,12 +446,12 @@ export default function POS() {
           alignItems: "center",
           justifyContent: "center",
           height: "100vh",
-          background: "linear-gradient(135deg,#0a0f1e 0%,#0d1530 50%,#0f1e45 100%)",
+          background: "#f8fafc",
         }}
       >
         <div style={{ textAlign: "center" }}>
-          <RefreshCw size={36} color="#6366f1" style={{ animation: "spin 1s linear infinite" }} />
-          <p style={{ color: "#94a3b8", marginTop: 12, fontWeight: 600 }}>Loading POS Terminal...</p>
+          <RefreshCw size={36} color="#2563eb" style={{ animation: "spin 1s linear infinite" }} />
+          <p style={{ color: "#64748b", marginTop: 12, fontWeight: 700, fontSize: 14 }}>Loading POS Terminal...</p>
         </div>
       </div>
     );
@@ -478,8 +478,8 @@ export default function POS() {
         maxHeight: "100%",
         flex: 1,
         minHeight: 0,
-        background: "linear-gradient(135deg, #070c1e 0%, #0a1128 50%, #0d173d 100%)",
-        color: "#e2e8f0",
+        background: "#f8fafc",
+        color: "#0f172a",
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
         overflow: "hidden",
       }}
@@ -487,35 +487,36 @@ export default function POS() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         @keyframes slideInRight { from { transform: translateX(120%); opacity:0 } to { transform: translateX(0); opacity:1 } }
-        @keyframes fadeInUp { from { transform: translateY(12px); opacity:0 } to { transform: translateY(0); opacity:1 } }
+        @keyframes fadeInUp { from { transform: translateY(10px); opacity:0 } to { transform: translateY(0); opacity:1 } }
         @keyframes spin { to { transform: rotate(360deg) } }
-        @keyframes pulse-glow { 0%,100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.4) } 50% { box-shadow: 0 0 0 8px rgba(16,185,129,0) } }
+        @keyframes pulse-glow { 0%,100% { box-shadow: 0 0 0 0 rgba(37,99,235,0.4) } 50% { box-shadow: 0 0 0 8px rgba(37,99,235,0) } }
         .product-card {
           transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
           animation: fadeInUp 0.25s ease both;
         }
         .product-card:hover {
-          transform: translateY(-4px) scale(1.02);
-          box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 0 1.5px rgba(99,102,241,0.6) !important;
-          background: rgba(99,102,241,0.14) !important;
+          transform: translateY(-3px);
+          box-shadow: 0 12px 28px rgba(37,99,235,0.12), 0 0 0 1.5px #3b82f6 !important;
+          border-color: #3b82f6 !important;
         }
-        .product-card:active { transform: scale(0.97); }
+        .product-card:active { transform: scale(0.98); }
         .qbtn { transition: all 0.15s; }
-        .qbtn:hover { background: rgba(99,102,241,0.35) !important; transform: scale(1.12); }
+        .qbtn:hover { background: #e2e8f0 !important; color: #0f172a !important; transform: scale(1.08); }
         .checkout-btn { transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .checkout-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 12px 35px rgba(16,185,129,0.55) !important; }
-        .checkout-btn:active { transform: scale(0.97); }
+        .checkout-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(16,185,129,0.4) !important; }
+        .checkout-btn:active { transform: scale(0.98); }
         .order-btn { transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .order-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 10px 28px rgba(245,158,11,0.45) !important; }
-        .ref-card:hover { background: rgba(59,130,246,0.18) !important; border-color: rgba(59,130,246,0.6) !important; transform: translateY(-2px); }
+        .order-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245,158,11,0.35) !important; }
+        .ref-card { transition: all 0.15s ease; }
+        .ref-card:hover { background: #eff6ff !important; border-color: #3b82f6 !important; transform: translateY(-2px); }
         .cat-pill { transition: all 0.2s ease; }
-        .cat-pill:hover { transform: scale(1.05); }
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+        .cat-pill:hover { transform: scale(1.04); }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         .cart-item { transition: all 0.15s ease; }
-        .cart-item:hover { background: rgba(255,255,255,0.06) !important; }
+        .cart-item:hover { background: #f8fafc !important; }
       `}</style>
 
       {/* ── TOPBAR HEADER ────────────────────────────────────────── */}
@@ -524,10 +525,10 @@ export default function POS() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "8px 16px",
-          borderBottom: "1px solid rgba(255,255,255,0.08)",
-          background: "rgba(0,0,0,0.35)",
-          backdropFilter: "blur(12px)",
+          padding: "10px 18px",
+          borderBottom: "1px solid #e2e8f0",
+          background: "#ffffff",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
           flexWrap: "wrap",
           gap: 10,
           zIndex: 20,
@@ -541,7 +542,7 @@ export default function POS() {
               width: 38,
               height: 38,
               borderRadius: 10,
-              background: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
+              background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -549,25 +550,25 @@ export default function POS() {
               color: "#fff",
               fontSize: 15,
               letterSpacing: 0.5,
-              boxShadow: "0 4px 14px rgba(59,130,246,0.35)",
+              boxShadow: "0 4px 14px rgba(37,99,235,0.3)",
             }}
           >
             BB
           </div>
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontWeight: 800, fontSize: 16, color: "#ffffff", letterSpacing: 0.3 }}>
+              <span style={{ fontWeight: 800, fontSize: 16, color: "#0f172a", letterSpacing: 0.3 }}>
                 Baba Roti Café
               </span>
               <span
                 style={{
                   fontSize: 10,
-                  fontWeight: 700,
+                  fontWeight: 800,
                   padding: "2px 8px",
                   borderRadius: 20,
-                  background: "rgba(16,185,129,0.18)",
-                  border: "1px solid rgba(16,185,129,0.4)",
-                  color: "#34d399",
+                  background: "#ecfdf5",
+                  border: "1px solid #a7f3d0",
+                  color: "#059669",
                   textTransform: "uppercase",
                   letterSpacing: 0.5,
                 }}
@@ -585,10 +586,10 @@ export default function POS() {
           <div
             style={{
               display: "flex",
-              background: "rgba(255,255,255,0.06)",
+              background: "#f1f5f9",
               padding: 3,
               borderRadius: 12,
-              border: "1px solid rgba(255,255,255,0.08)",
+              border: "1px solid #e2e8f0",
             }}
           >
             {[
@@ -610,13 +611,14 @@ export default function POS() {
                     borderRadius: 9,
                     border: "none",
                     background: active
-                      ? "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)"
+                      ? "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)"
                       : "transparent",
-                    color: active ? "#ffffff" : "#94a3b8",
+                    color: active ? "#ffffff" : "#475569",
                     fontWeight: 700,
                     fontSize: 12,
                     cursor: "pointer",
                     transition: "all 0.15s ease",
+                    boxShadow: active ? "0 2px 8px rgba(37,99,235,0.25)" : "none",
                   }}
                 >
                   {label}
@@ -638,13 +640,14 @@ export default function POS() {
                 borderRadius: 10,
                 border: selectedTable
                   ? "1.5px solid #10b981"
-                  : "1.5px solid rgba(255,255,255,0.12)",
-                background: selectedTable ? "rgba(16,185,129,0.15)" : "rgba(255,255,255,0.05)",
-                color: selectedTable ? "#10b981" : "#cbd5e1",
+                  : "1.5px solid #cbd5e1",
+                background: selectedTable ? "#ecfdf5" : "#ffffff",
+                color: selectedTable ? "#059669" : "#334155",
                 fontWeight: 700,
                 fontSize: 12,
                 cursor: "pointer",
                 transition: "all 0.15s",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
               }}
             >
               <Table2 size={14} />
@@ -665,13 +668,14 @@ export default function POS() {
               borderRadius: 10,
               border: selectedWaiter
                 ? "1.5px solid #8b5cf6"
-                : "1.5px solid rgba(255,255,255,0.12)",
-              background: selectedWaiter ? "rgba(139,92,246,0.15)" : "rgba(255,255,255,0.05)",
-              color: selectedWaiter ? "#a78bfa" : "#cbd5e1",
+                : "1.5px solid #cbd5e1",
+              background: selectedWaiter ? "#f5f3ff" : "#ffffff",
+              color: selectedWaiter ? "#7c3aed" : "#334155",
               fontWeight: 700,
               fontSize: 12,
               cursor: "pointer",
               transition: "all 0.15s",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
             }}
           >
             <User size={14} />
@@ -679,7 +683,7 @@ export default function POS() {
             <ChevronDown size={12} />
           </button>
 
-          {/* ── THE REQUESTED REFERENCE BUTTON ── */}
+          {/* ── REFERENCE BUTTON ── */}
           <button
             type="button"
             onClick={() => {
@@ -693,14 +697,14 @@ export default function POS() {
               gap: 7,
               padding: "7px 14px",
               borderRadius: 10,
-              border: heldOrdersList.length > 0 ? "1.5px solid #3b82f6" : "1.5px solid rgba(255,255,255,0.12)",
-              background: heldOrdersList.length > 0 ? "rgba(59,130,246,0.18)" : "rgba(255,255,255,0.05)",
-              color: heldOrdersList.length > 0 ? "#60a5fa" : "#94a3b8",
+              border: heldOrdersList.length > 0 ? "1.5px solid #93c5fd" : "1.5px solid #cbd5e1",
+              background: heldOrdersList.length > 0 ? "#eff6ff" : "#ffffff",
+              color: heldOrdersList.length > 0 ? "#1d4ed8" : "#64748b",
               fontWeight: 800,
               fontSize: 12,
               cursor: "pointer",
               transition: "all 0.15s",
-              boxShadow: heldOrdersList.length > 0 ? "0 2px 10px rgba(59,130,246,0.25)" : "none",
+              boxShadow: heldOrdersList.length > 0 ? "0 2px 10px rgba(37,99,235,0.12)" : "0 1px 3px rgba(0,0,0,0.02)",
             }}
           >
             <FileText size={14} />
@@ -723,20 +727,20 @@ export default function POS() {
         </div>
 
         {/* Right: Clock & User info */}
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           {/* Live Clock */}
           <div
             style={{
               display: "flex",
               alignItems: "center",
               gap: 6,
-              background: "rgba(255,255,255,0.05)",
-              padding: "5px 12px",
+              background: "#f8fafc",
+              padding: "6px 12px",
               borderRadius: 8,
-              border: "1px solid rgba(255,255,255,0.08)",
+              border: "1px solid #e2e8f0",
               fontSize: 12,
               fontWeight: 700,
-              color: "#38bdf8",
+              color: "#0284c7",
               fontVariantNumeric: "tabular-nums",
             }}
           >
@@ -750,10 +754,10 @@ export default function POS() {
               display: "flex",
               alignItems: "center",
               gap: 8,
-              background: "rgba(59,130,246,0.12)",
+              background: "#eff6ff",
               padding: "4px 10px 4px 6px",
               borderRadius: 20,
-              border: "1px solid rgba(59,130,246,0.3)",
+              border: "1px solid #bfdbfe",
             }}
           >
             <span
@@ -772,7 +776,7 @@ export default function POS() {
             >
               {user?.name?.[0]?.toUpperCase() || "A"}
             </span>
-            <span style={{ fontSize: 12, fontWeight: 700, color: "#93c5fd" }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: "#1e40af" }}>
               {user?.name || "Cashier"}
             </span>
           </div>
@@ -790,33 +794,33 @@ export default function POS() {
             width: 380,
             display: "flex",
             flexDirection: "column",
-            background: "rgba(5, 10, 24, 0.75)",
-            backdropFilter: "blur(16px)",
-            borderRight: "1px solid rgba(255,255,255,0.08)",
+            background: "#ffffff",
+            borderRight: "1px solid #e2e8f0",
             flexShrink: 0,
             zIndex: 10,
             height: "100%",
             maxHeight: "100%",
             minHeight: 0,
             overflow: "hidden",
+            boxShadow: "2px 0 10px rgba(0,0,0,0.02)",
           }}
         >
           {/* Order Header */}
-          <div style={{ padding: "12px 14px 8px", borderBottom: "1px solid rgba(255,255,255,0.07)", flexShrink: 0 }}>
+          <div style={{ padding: "14px 16px 10px", borderBottom: "1px solid #e2e8f0", flexShrink: 0, background: "#ffffff" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <ReceiptText size={16} color="#38bdf8" />
-                <span style={{ fontWeight: 800, fontSize: 14, color: "#ffffff", letterSpacing: 0.5, textTransform: "uppercase" }}>
+                <ReceiptText size={17} color="#2563eb" />
+                <span style={{ fontWeight: 800, fontSize: 14, color: "#0f172a", letterSpacing: 0.5, textTransform: "uppercase" }}>
                   Current Order
                 </span>
                 <span
                   style={{
-                    background: "rgba(59,130,246,0.2)",
-                    border: "1px solid rgba(59,130,246,0.4)",
-                    color: "#60a5fa",
+                    background: "#eff6ff",
+                    border: "1px solid #bfdbfe",
+                    color: "#2563eb",
                     fontSize: 11,
                     fontWeight: 700,
-                    padding: "1px 7px",
+                    padding: "2px 8px",
                     borderRadius: 12,
                   }}
                 >
@@ -837,10 +841,10 @@ export default function POS() {
                     display: "flex",
                     alignItems: "center",
                     gap: 4,
-                    background: "rgba(59,130,246,0.15)",
-                    border: "1px solid rgba(59,130,246,0.35)",
+                    background: "#eff6ff",
+                    border: "1px solid #bfdbfe",
                     borderRadius: 8,
-                    color: "#60a5fa",
+                    color: "#1d4ed8",
                     padding: "4px 8px",
                     fontSize: 11,
                     fontWeight: 700,
@@ -859,13 +863,13 @@ export default function POS() {
                       display: "flex",
                       alignItems: "center",
                       gap: 4,
-                      background: "rgba(239,68,68,0.1)",
-                      border: "1px solid rgba(239,68,68,0.25)",
+                      background: "#fef2f2",
+                      border: "1px solid #fecaca",
                       borderRadius: 8,
-                      color: "#f87171",
+                      color: "#ef4444",
                       padding: "4px 8px",
                       fontSize: 11,
-                      fontWeight: 600,
+                      fontWeight: 700,
                       cursor: "pointer",
                     }}
                   >
@@ -880,8 +884,8 @@ export default function POS() {
             {heldOrderId && (
               <div
                 style={{
-                  background: "rgba(245,158,11,0.15)",
-                  border: "1px solid rgba(245,158,11,0.4)",
+                  background: "#fffbeb",
+                  border: "1px solid #fde68a",
                   borderRadius: 8,
                   padding: "6px 10px",
                   marginBottom: 8,
@@ -889,7 +893,8 @@ export default function POS() {
                   alignItems: "center",
                   justifyContent: "space-between",
                   fontSize: 11,
-                  color: "#fbbf24",
+                  color: "#b45309",
+                  fontWeight: 600,
                 }}
               >
                 <span>
@@ -899,10 +904,10 @@ export default function POS() {
                   type="button"
                   onClick={releaseRetrievedOrder}
                   style={{
-                    background: "rgba(245,158,11,0.2)",
-                    border: "none",
+                    background: "#fef3c7",
+                    border: "1px solid #fde68a",
                     borderRadius: 5,
-                    color: "#fbbf24",
+                    color: "#b45309",
                     padding: "2px 6px",
                     fontSize: 10,
                     fontWeight: 700,
@@ -929,19 +934,19 @@ export default function POS() {
                 style={{
                   width: "100%",
                   boxSizing: "border-box",
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.08)",
+                  background: "#f8fafc",
+                  border: "1.5px solid #e2e8f0",
                   borderRadius: 8,
                   padding: "7px 10px 7px 30px",
                   fontSize: 12,
-                  color: "#e2e8f0",
+                  color: "#0f172a",
                   outline: "none",
                 }}
               />
             </div>
 
             {/* Quick Table & Waiter Selectors directly inside Cart Sidebar */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 8 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 4 }}>
               <button
                 type="button"
                 onClick={() => setShowTablePicker(true)}
@@ -952,9 +957,9 @@ export default function POS() {
                   gap: 6,
                   padding: "7px 10px",
                   borderRadius: 8,
-                  border: selectedTable ? "1.5px solid #10b981" : "1.5px solid rgba(255,255,255,0.12)",
-                  background: selectedTable ? "rgba(16,185,129,0.18)" : "rgba(255,255,255,0.05)",
-                  color: selectedTable ? "#10b981" : "#cbd5e1",
+                  border: selectedTable ? "1.5px solid #10b981" : "1.5px solid #e2e8f0",
+                  background: selectedTable ? "#ecfdf5" : "#f8fafc",
+                  color: selectedTable ? "#059669" : "#334155",
                   fontSize: 12,
                   fontWeight: 700,
                   cursor: "pointer",
@@ -981,9 +986,9 @@ export default function POS() {
                   gap: 6,
                   padding: "7px 10px",
                   borderRadius: 8,
-                  border: selectedWaiter ? "1.5px solid #8b5cf6" : "1.5px solid rgba(255,255,255,0.12)",
-                  background: selectedWaiter ? "rgba(139,92,246,0.18)" : "rgba(255,255,255,0.05)",
-                  color: selectedWaiter ? "#a78bfa" : "#cbd5e1",
+                  border: selectedWaiter ? "1.5px solid #8b5cf6" : "1.5px solid #e2e8f0",
+                  background: selectedWaiter ? "#f5f3ff" : "#f8fafc",
+                  color: selectedWaiter ? "#7c3aed" : "#334155",
                   fontSize: 12,
                   fontWeight: 700,
                   cursor: "pointer",
@@ -1003,7 +1008,7 @@ export default function POS() {
           </div>
 
           {/* Cart Items List */}
-          <div style={{ flex: 1, overflowY: "auto", minHeight: 0, padding: "8px 12px" }}>
+          <div style={{ flex: 1, overflowY: "auto", minHeight: 0, padding: "10px 14px", background: "#f8fafc" }}>
             {items.length === 0 ? (
               <div
                 style={{
@@ -1014,41 +1019,44 @@ export default function POS() {
                   alignItems: "center",
                   justifyContent: "center",
                   textAlign: "center",
-                  padding: "20px 16px",
+                  padding: "24px 16px",
                   color: "#64748b",
                 }}
               >
                 <div
                   style={{
-                    width: 48,
-                    height: 48,
+                    width: 52,
+                    height: 52,
                     borderRadius: "50%",
-                    background: "rgba(255,255,255,0.03)",
-                    border: "1px dashed rgba(255,255,255,0.12)",
+                    background: "#ffffff",
+                    border: "1.5px dashed #cbd5e1",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    marginBottom: 10,
+                    marginBottom: 12,
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.03)",
                   }}
                 >
-                  <ShoppingBag size={22} style={{ opacity: 0.35, color: "#94a3b8" }} />
+                  <ShoppingBag size={24} style={{ opacity: 0.6, color: "#94a3b8" }} />
                 </div>
-                <p style={{ fontSize: 13, fontWeight: 700, color: "#cbd5e1" }}>Your cart is empty</p>
+                <p style={{ fontSize: 14, fontWeight: 700, color: "#1e293b" }}>Your cart is empty</p>
                 <p style={{ fontSize: 11, color: "#64748b", marginTop: 4, maxWidth: 220, lineHeight: 1.4 }}>
-                  Click items from the menu or click <strong style={{ color: "#60a5fa" }}>Reference</strong> to recall a held order
+                  Click items from the menu or click <strong style={{ color: "#2563eb" }}>Reference</strong> to recall a held order
                 </p>
               </div>
             ) : (
               items.map((item, idx) => (
                 <div
                   key={item.product + idx}
+                  className="cart-item"
                   style={{
-                    background: "rgba(255,255,255,0.03)",
-                    border: "1px solid rgba(255,255,255,0.06)",
+                    background: "#ffffff",
+                    border: "1px solid #e2e8f0",
                     borderRadius: 12,
-                    padding: "10px 12px",
+                    padding: "11px 13px",
                     marginBottom: 8,
                     transition: "all 0.15s",
+                    boxShadow: "0 1px 4px rgba(0,0,0,0.02)",
                   }}
                 >
                   {/* Top row: Name + Line Total */}
@@ -1058,20 +1066,21 @@ export default function POS() {
                         style={{
                           fontWeight: 700,
                           fontSize: 13,
-                          color: "#ffffff",
+                          color: "#0f172a",
                           whiteSpace: "nowrap",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
+                          margin: 0,
                         }}
                       >
                         {item.productName}
                       </p>
-                      <p style={{ fontSize: 11, color: "#94a3b8", marginTop: 1 }}>
+                      <p style={{ fontSize: 11, color: "#64748b", marginTop: 2, margin: 0 }}>
                         {ETB(item.unitPrice)} / unit
                       </p>
                     </div>
                     <div style={{ textAlign: "right" }}>
-                      <span style={{ fontWeight: 800, fontSize: 14, color: "#38bdf8" }}>
+                      <span style={{ fontWeight: 800, fontSize: 14, color: "#0284c7" }}>
                         {ETB(item.totalPrice)}
                       </span>
                     </div>
@@ -1082,8 +1091,9 @@ export default function POS() {
                     <div
                       style={{
                         fontSize: 11,
-                        color: "#f59e0b",
-                        background: "rgba(245,158,11,0.1)",
+                        color: "#b45309",
+                        background: "#fffbeb",
+                        border: "1px solid #fde68a",
                         padding: "3px 8px",
                         borderRadius: 6,
                         marginTop: 6,
@@ -1099,7 +1109,7 @@ export default function POS() {
                           setEditingNoteIdx(idx);
                           setNoteText(item.notes);
                         }}
-                        style={{ background: "none", border: "none", color: "#f59e0b", cursor: "pointer", marginLeft: "auto", fontSize: 10 }}
+                        style={{ background: "none", border: "none", color: "#b45309", cursor: "pointer", marginLeft: "auto", fontSize: 10, fontWeight: 700 }}
                       >
                         Edit
                       </button>
@@ -1115,12 +1125,12 @@ export default function POS() {
                         placeholder="Add kitchen note (e.g. less spicy)..."
                         style={{
                           flex: 1,
-                          background: "rgba(0,0,0,0.4)",
-                          border: "1px solid rgba(245,158,11,0.5)",
+                          background: "#ffffff",
+                          border: "1.5px solid #f59e0b",
                           borderRadius: 6,
                           padding: "4px 8px",
                           fontSize: 11,
-                          color: "#fff",
+                          color: "#0f172a",
                           outline: "none",
                         }}
                       />
@@ -1131,10 +1141,10 @@ export default function POS() {
                           background: "#f59e0b",
                           border: "none",
                           borderRadius: 6,
-                          color: "#000",
+                          color: "#fff",
                           fontWeight: 700,
                           fontSize: 11,
-                          padding: "4px 8px",
+                          padding: "4px 10px",
                           cursor: "pointer",
                         }}
                       >
@@ -1151,7 +1161,7 @@ export default function POS() {
                       justifyContent: "space-between",
                       marginTop: 8,
                       paddingTop: 6,
-                      borderTop: "1px solid rgba(255,255,255,0.04)",
+                      borderTop: "1px solid #f1f5f9",
                     }}
                   >
                     {!item.notes && editingNoteIdx !== idx ? (
@@ -1171,6 +1181,7 @@ export default function POS() {
                           alignItems: "center",
                           gap: 3,
                           padding: 0,
+                          fontWeight: 600,
                         }}
                       >
                         <Plus size={11} /> Add note
@@ -1189,9 +1200,9 @@ export default function POS() {
                           width: 24,
                           height: 24,
                           borderRadius: 6,
-                          border: "none",
-                          background: "rgba(255,255,255,0.08)",
-                          color: "#fff",
+                          border: "1px solid #e2e8f0",
+                          background: "#f1f5f9",
+                          color: "#0f172a",
                           cursor: "pointer",
                           display: "flex",
                           alignItems: "center",
@@ -1200,7 +1211,7 @@ export default function POS() {
                       >
                         <Minus size={11} />
                       </button>
-                      <span style={{ fontSize: 13, fontWeight: 800, color: "#fff", minWidth: 20, textAlign: "center" }}>
+                      <span style={{ fontSize: 13, fontWeight: 800, color: "#0f172a", minWidth: 20, textAlign: "center" }}>
                         {item.quantity}
                       </span>
                       <button
@@ -1211,9 +1222,9 @@ export default function POS() {
                           width: 24,
                           height: 24,
                           borderRadius: 6,
-                          border: "none",
-                          background: "rgba(255,255,255,0.08)",
-                          color: "#fff",
+                          border: "1px solid #e2e8f0",
+                          background: "#f1f5f9",
+                          color: "#0f172a",
                           cursor: "pointer",
                           display: "flex",
                           alignItems: "center",
@@ -1230,7 +1241,7 @@ export default function POS() {
                           border: "none",
                           color: "#ef4444",
                           cursor: "pointer",
-                          opacity: 0.7,
+                          opacity: 0.8,
                           padding: "2px 4px",
                           marginLeft: 4,
                         }}
@@ -1247,15 +1258,16 @@ export default function POS() {
           {/* ── CART FOOTER: TOTALS & SIDE-TO-SIDE BUTTONS [ Order ] & [ Checkout > ] ── */}
           <div
             style={{
-              borderTop: "1px solid rgba(255,255,255,0.08)",
-              background: "rgba(0,0,0,0.38)",
-              padding: "12px 14px",
+              borderTop: "1px solid #e2e8f0",
+              background: "#ffffff",
+              padding: "14px 16px",
               flexShrink: 0,
+              boxShadow: "0 -2px 10px rgba(0,0,0,0.02)",
             }}
           >
             {/* Discount selector */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-              <span style={{ fontSize: 11, color: "#94a3b8", fontWeight: 700, textTransform: "uppercase" }}>
+              <span style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase" }}>
                 Discount:
               </span>
               <div style={{ display: "flex", gap: 5 }}>
@@ -1269,12 +1281,13 @@ export default function POS() {
                       style={{
                         padding: "3px 10px",
                         borderRadius: 6,
-                        border: active ? "1.5px solid #6366f1" : "1px solid rgba(255,255,255,0.1)",
-                        background: active ? "rgba(99,102,241,0.25)" : "rgba(255,255,255,0.04)",
-                        color: active ? "#a5b4fc" : "#64748b",
+                        border: active ? "1.5px solid #2563eb" : "1px solid #e2e8f0",
+                        background: active ? "#2563eb" : "#f8fafc",
+                        color: active ? "#ffffff" : "#64748b",
                         fontSize: 11,
                         fontWeight: 700,
                         cursor: "pointer",
+                        transition: "all 0.15s ease",
                       }}
                     >
                       {d === 0 ? "None" : `${d}%`}
@@ -1285,25 +1298,25 @@ export default function POS() {
             </div>
 
             {/* Line calculations */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 5, fontSize: 12, marginBottom: 8 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", color: "#94a3b8" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 5, fontSize: 12, marginBottom: 10 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", color: "#64748b" }}>
                 <span>Subtotal</span>
-                <span style={{ fontVariantNumeric: "tabular-nums" }}>{ETB(subtotal)}</span>
+                <span style={{ fontVariantNumeric: "tabular-nums", color: "#0f172a", fontWeight: 600 }}>{ETB(subtotal)}</span>
               </div>
               {discountAmt > 0 && (
-                <div style={{ display: "flex", justifyContent: "space-between", color: "#fbbf24" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", color: "#b45309" }}>
                   <span>Discount ({discountPct}%)</span>
-                  <span style={{ fontVariantNumeric: "tabular-nums" }}>- {ETB(discountAmt)}</span>
+                  <span style={{ fontVariantNumeric: "tabular-nums", fontWeight: 700 }}>- {ETB(discountAmt)}</span>
                 </div>
               )}
-              <div style={{ display: "flex", justifyContent: "space-between", color: "#94a3b8" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", color: "#64748b" }}>
                 <span>VAT / Tax ({settings.taxRate}%)</span>
-                <span style={{ fontVariantNumeric: "tabular-nums" }}>{ETB(taxAmt)}</span>
+                <span style={{ fontVariantNumeric: "tabular-nums", color: "#0f172a", fontWeight: 600 }}>{ETB(taxAmt)}</span>
               </div>
               {serviceCharge > 0 && (
-                <div style={{ display: "flex", justifyContent: "space-between", color: "#94a3b8" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", color: "#64748b" }}>
                   <span>Service Charge</span>
-                  <span style={{ fontVariantNumeric: "tabular-nums" }}>{ETB(serviceCharge)}</span>
+                  <span style={{ fontVariantNumeric: "tabular-nums", color: "#0f172a", fontWeight: 600 }}>{ETB(serviceCharge)}</span>
                 </div>
               )}
             </div>
@@ -1315,12 +1328,12 @@ export default function POS() {
                 justifyContent: "space-between",
                 alignItems: "flex-end",
                 paddingTop: 8,
-                borderTop: "1px solid rgba(255,255,255,0.08)",
+                borderTop: "1.5px dashed #e2e8f0",
                 marginBottom: 12,
               }}
             >
               <div>
-                <div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 0.5, color: "#10b981", textTransform: "uppercase" }}>
+                <div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 0.5, color: "#059669", textTransform: "uppercase" }}>
                   TOTAL PAYABLE
                 </div>
                 <div style={{ fontSize: 10, color: "#64748b" }}>Tax &amp; Service Included</div>
@@ -1329,7 +1342,7 @@ export default function POS() {
                 style={{
                   fontSize: 22,
                   fontWeight: 900,
-                  color: "#ffffff",
+                  color: "#0f172a",
                   fontVariantNumeric: "tabular-nums",
                   letterSpacing: -0.5,
                 }}
@@ -1338,7 +1351,7 @@ export default function POS() {
               </div>
             </div>
 
-            {/* ── THE REQUESTED SIDE-TO-SIDE BUTTONS ── */}
+            {/* ── SIDE-TO-SIDE BUTTONS ── */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
               <button
                 type="button"
@@ -1347,19 +1360,19 @@ export default function POS() {
                 onClick={handleOrder}
                 title="Save order as held and print KOT for kitchen"
                 style={{
-                  padding: "14px 12px",
-                  borderRadius: 14,
-                  border: "1.5px solid rgba(245,158,11,0.45)",
-                  background: "linear-gradient(135deg, rgba(245,158,11,0.2) 0%, rgba(217,119,6,0.15) 100%)",
-                  color: "#fbbf24",
-                  fontWeight: 900,
+                  padding: "13px 12px",
+                  borderRadius: 12,
+                  border: "none",
+                  background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+                  color: "#ffffff",
+                  fontWeight: 800,
                   fontSize: 13,
                   cursor: placing ? "not-allowed" : "pointer",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   gap: 7,
-                  boxShadow: "0 4px 16px rgba(245,158,11,0.2), inset 0 1px 0 rgba(255,255,255,0.08)",
+                  boxShadow: "0 4px 14px rgba(245,158,11,0.25)",
                   letterSpacing: 0.3,
                 }}
               >
@@ -1377,19 +1390,19 @@ export default function POS() {
                 }}
                 title="Pay now and automatically convert to Cash Sales"
                 style={{
-                  padding: "14px 12px",
-                  borderRadius: 14,
+                  padding: "13px 12px",
+                  borderRadius: 12,
                   border: "none",
-                  background: "linear-gradient(135deg, #10b981 0%, #059669 60%, #047857 100%)",
+                  background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
                   color: "#ffffff",
-                  fontWeight: 900,
+                  fontWeight: 800,
                   fontSize: 13,
                   cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   gap: 7,
-                  boxShadow: "0 6px 20px rgba(16,185,129,0.4), inset 0 1px 0 rgba(255,255,255,0.15)",
+                  boxShadow: "0 6px 18px rgba(16,185,129,0.35)",
                   letterSpacing: 0.3,
                 }}
               >
@@ -1400,7 +1413,7 @@ export default function POS() {
 
             {/* Reprint actions if lastOrder exists */}
             {lastOrder && (
-              <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+              <div style={{ display: "flex", gap: 6, marginTop: 10 }}>
                 <button
                   type="button"
                   onClick={() =>
@@ -1411,12 +1424,12 @@ export default function POS() {
                   }
                   style={{
                     flex: 1,
-                    padding: "6px",
-                    background: "rgba(99,102,241,0.15)",
-                    border: "1px solid rgba(99,102,241,0.3)",
+                    padding: "7px",
+                    background: "#eff6ff",
+                    border: "1px solid #bfdbfe",
                     borderRadius: 8,
-                    color: "#818cf8",
-                    fontWeight: 600,
+                    color: "#2563eb",
+                    fontWeight: 700,
                     fontSize: 11,
                     cursor: "pointer",
                     display: "flex",
@@ -1433,12 +1446,12 @@ export default function POS() {
                   onClick={() => posPrint.printKOT(lastOrder, { businessName: "Baba Roti Café" })}
                   style={{
                     flex: 1,
-                    padding: "6px",
-                    background: "rgba(245,158,11,0.1)",
-                    border: "1px solid rgba(245,158,11,0.3)",
+                    padding: "7px",
+                    background: "#fffbeb",
+                    border: "1px solid #fde68a",
                     borderRadius: 8,
-                    color: "#f59e0b",
-                    fontWeight: 600,
+                    color: "#d97706",
+                    fontWeight: 700,
                     fontSize: 11,
                     cursor: "pointer",
                     display: "flex",
@@ -1464,19 +1477,19 @@ export default function POS() {
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            background: "transparent",
+            background: "#f8fafc",
             height: "100%",
             maxHeight: "100%",
             minHeight: 0,
           }}
         >
           {/* Search bar */}
-          <div style={{ padding: "10px 16px 0", display: "flex", gap: 10, alignItems: "center", flexShrink: 0 }}>
+          <div style={{ padding: "12px 18px 6px", display: "flex", gap: 10, alignItems: "center", flexShrink: 0 }}>
             <div style={{ flex: 1, position: "relative" }}>
               <Search
                 size={16}
                 color="#64748b"
-                style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)" }}
+                style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }}
               />
               <input
                 ref={searchRef}
@@ -1486,13 +1499,15 @@ export default function POS() {
                 style={{
                   width: "100%",
                   boxSizing: "border-box",
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1.5px solid rgba(255,255,255,0.1)",
+                  background: "#ffffff",
+                  border: "1.5px solid #cbd5e1",
                   borderRadius: 12,
-                  padding: "9px 12px 9px 38px",
-                  color: "#ffffff",
+                  padding: "10px 14px 10px 42px",
+                  color: "#0f172a",
                   fontSize: 13,
                   outline: "none",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
+                  fontWeight: 500,
                 }}
               />
             </div>
@@ -1500,7 +1515,7 @@ export default function POS() {
               <button
                 type="button"
                 onClick={() => setSearchQ("")}
-                style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer" }}
+                style={{ background: "#f1f5f9", border: "1px solid #cbd5e1", borderRadius: 8, padding: 6, color: "#64748b", cursor: "pointer" }}
               >
                 <X size={16} />
               </button>
@@ -1512,20 +1527,16 @@ export default function POS() {
             style={{
               display: "flex",
               gap: 8,
-              padding: "10px 16px",
+              padding: "8px 18px",
               overflowX: "auto",
-              borderBottom: "1px solid rgba(255,255,255,0.07)",
+              borderBottom: "1px solid #e2e8f0",
               scrollbarWidth: "none",
               flexShrink: 0,
-              background: "rgba(0,0,0,0.2)",
+              background: "#ffffff",
             }}
           >
-            {categories.map((cat, ci) => {
+            {categories.map((cat) => {
               const active = activeCategory === cat;
-              const catColors = [
-                "#3b82f6","#10b981","#f59e0b","#8b5cf6","#ef4444","#06b6d4","#ec4899","#14b8a6",
-              ];
-              const c = catColors[ci % catColors.length];
               return (
                 <button
                   key={cat}
@@ -1533,18 +1544,18 @@ export default function POS() {
                   className="cat-pill"
                   onClick={() => setActiveCategory(cat)}
                   style={{
-                    padding: "7px 18px",
-                    borderRadius: 50,
-                    border: active ? `1.5px solid ${c}` : "1px solid rgba(255,255,255,0.1)",
+                    padding: "6px 16px",
+                    borderRadius: 20,
+                    border: active ? "1.5px solid #2563eb" : "1px solid #e2e8f0",
                     background: active
-                      ? `linear-gradient(135deg, ${c}33 0%, ${c}22 100%)`
-                      : "rgba(255,255,255,0.04)",
-                    color: active ? c : "#94a3b8",
+                      ? "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)"
+                      : "#f8fafc",
+                    color: active ? "#ffffff" : "#475569",
                     fontWeight: active ? 800 : 600,
                     fontSize: 12,
                     cursor: "pointer",
                     whiteSpace: "nowrap",
-                    boxShadow: active ? `0 0 16px ${c}44, 0 2px 8px rgba(0,0,0,0.3)` : "none",
+                    boxShadow: active ? "0 2px 10px rgba(37,99,235,0.25)" : "none",
                     letterSpacing: 0.3,
                   }}
                 >
@@ -1559,9 +1570,9 @@ export default function POS() {
             style={{
               flex: 1,
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(175px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
               gap: 14,
-              padding: "16px",
+              padding: "16px 18px",
               overflowY: "auto",
               alignContent: "start",
               minHeight: 0,
@@ -1569,9 +1580,9 @@ export default function POS() {
           >
             {filteredProducts.length === 0 ? (
               <div style={{ gridColumn: "1/-1", textAlign: "center", padding: "60px 20px", color: "#64748b" }}>
-                <UtensilsCrossed size={36} style={{ marginBottom: 10, opacity: 0.35 }} />
-                <p style={{ fontSize: 14, fontWeight: 600 }}>No products found</p>
-                <p style={{ fontSize: 12, color: "#475569", marginTop: 4 }}>
+                <UtensilsCrossed size={36} style={{ marginBottom: 10, opacity: 0.4 }} />
+                <p style={{ fontSize: 14, fontWeight: 700, color: "#1e293b" }}>No products found</p>
+                <p style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>
                   Try a different search term or category
                 </p>
               </div>
@@ -1587,13 +1598,9 @@ export default function POS() {
                     className="product-card"
                     onClick={() => addItem(p)}
                     style={{
-                      background: isSelected
-                        ? "linear-gradient(135deg, rgba(59,130,246,0.2) 0%, rgba(99,102,241,0.15) 100%)"
-                        : "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.03) 100%)",
-                      border: isSelected
-                        ? "1.5px solid rgba(99,102,241,0.6)"
-                        : "1.5px solid rgba(255,255,255,0.09)",
-                      borderRadius: 18,
+                      background: isSelected ? "#eff6ff" : "#ffffff",
+                      border: isSelected ? "1.5px solid #3b82f6" : "1.5px solid #e2e8f0",
+                      borderRadius: 16,
                       padding: "14px 14px 12px",
                       cursor: "pointer",
                       display: "flex",
@@ -1601,42 +1608,41 @@ export default function POS() {
                       gap: 0,
                       position: "relative",
                       overflow: "hidden",
-                      backdropFilter: "blur(6px)",
                       boxShadow: isSelected
-                        ? "0 8px 30px rgba(99,102,241,0.25), inset 0 1px 0 rgba(255,255,255,0.1)"
-                        : "0 4px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.06)",
+                        ? "0 6px 20px rgba(37,99,235,0.15)"
+                        : "0 2px 8px rgba(0,0,0,0.03)",
                     }}
                   >
-                    {/* Top shimmer line */}
+                    {/* Top shimmer/accent line */}
                     <div style={{
-                      position: "absolute", top: 0, left: 0, right: 0, height: 2,
+                      position: "absolute", top: 0, left: 0, right: 0, height: 3,
                       background: isSelected
-                        ? "linear-gradient(90deg, #6366f1, #3b82f6)"
-                        : "linear-gradient(90deg, rgba(255,255,255,0.15), transparent)",
-                      borderRadius: "18px 18px 0 0",
+                        ? "linear-gradient(90deg, #3b82f6, #2563eb)"
+                        : "linear-gradient(90deg, #e2e8f0, transparent)",
+                      borderRadius: "16px 16px 0 0",
                     }} />
 
                     {/* Category icon area */}
                     {(() => {
                       const catColorMap = {
-                        "Dinner": { bg: "rgba(245,158,11,0.18)", color: "#fbbf24", emoji: "🍽️" },
-                        "Break Fast": { bg: "rgba(16,185,129,0.18)", color: "#34d399", emoji: "☀️" },
-                        "Breakfast": { bg: "rgba(16,185,129,0.18)", color: "#34d399", emoji: "☀️" },
-                        "Lunch": { bg: "rgba(251,146,60,0.18)", color: "#fb923c", emoji: "🌤️" },
-                        "Drinks": { bg: "rgba(6,182,212,0.18)", color: "#22d3ee", emoji: "🥤" },
-                        "Beverages": { bg: "rgba(6,182,212,0.18)", color: "#22d3ee", emoji: "☕" },
-                        "Desserts": { bg: "rgba(236,72,153,0.18)", color: "#f472b6", emoji: "🍰" },
-                        "Starters": { bg: "rgba(139,92,246,0.18)", color: "#a78bfa", emoji: "🥗" },
-                        "Snacks": { bg: "rgba(234,179,8,0.18)", color: "#facc15", emoji: "🥨" },
-                        "General": { bg: "rgba(99,102,241,0.18)", color: "#818cf8", emoji: "⭐" },
+                        "Dinner": { bg: "#fffbeb", border: "#fde68a", color: "#d97706", emoji: "🍽️" },
+                        "Break Fast": { bg: "#ecfdf5", border: "#a7f3d0", color: "#059669", emoji: "☀️" },
+                        "Breakfast": { bg: "#ecfdf5", border: "#a7f3d0", color: "#059669", emoji: "☀️" },
+                        "Lunch": { bg: "#fff7ed", border: "#fed7aa", color: "#c2410c", emoji: "🌤️" },
+                        "Drinks": { bg: "#ecfeff", border: "#a5f3fc", color: "#0891b2", emoji: "🥤" },
+                        "Beverages": { bg: "#ecfeff", border: "#a5f3fc", color: "#0891b2", emoji: "☕" },
+                        "Desserts": { bg: "#fdf2f8", border: "#fbcfe8", color: "#db2777", emoji: "🍰" },
+                        "Starters": { bg: "#f5f3ff", border: "#ddd6fe", color: "#7c3aed", emoji: "🥗" },
+                        "Snacks": { bg: "#fefce8", border: "#fef08a", color: "#ca8a04", emoji: "🥨" },
+                        "General": { bg: "#eff6ff", border: "#bfdbfe", color: "#2563eb", emoji: "⭐" },
                       };
-                      const cc = catColorMap[p.category] || { bg: "rgba(99,102,241,0.18)", color: "#818cf8", emoji: "🍴" };
+                      const cc = catColorMap[p.category] || { bg: "#f1f5f9", border: "#e2e8f0", color: "#475569", emoji: "🍴" };
                       return (
                         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                           <div style={{
                             width: 36, height: 36, borderRadius: 10,
                             background: cc.bg,
-                            border: `1px solid ${cc.color}33`,
+                            border: `1px solid ${cc.border}`,
                             display: "flex", alignItems: "center", justifyContent: "center",
                             fontSize: 18, flexShrink: 0,
                           }}>
@@ -1644,8 +1650,8 @@ export default function POS() {
                           </div>
                           <span style={{
                             fontSize: 9, fontWeight: 800, textTransform: "uppercase",
-                            color: cc.color, letterSpacing: 1,
-                            background: cc.bg, padding: "2px 7px", borderRadius: 20,
+                            color: cc.color, letterSpacing: 0.5,
+                            background: cc.bg, border: `1px solid ${cc.border}`, padding: "2px 7px", borderRadius: 20,
                           }}>
                             {p.category || "General"}
                           </span>
@@ -1655,15 +1661,15 @@ export default function POS() {
 
                     {/* Product Name */}
                     <div style={{
-                      fontWeight: 800, fontSize: 15, color: "#ffffff",
-                      lineHeight: 1.25, paddingRight: isSelected ? 22 : 0,
-                      marginBottom: 4, flex: 1,
+                      fontWeight: 800, fontSize: 14, color: "#0f172a",
+                      lineHeight: 1.3, paddingRight: isSelected ? 22 : 0,
+                      marginBottom: 3, flex: 1,
                     }}>
                       {p.name}
                     </div>
 
                     {/* Product Code */}
-                    <div style={{ fontSize: 10, color: "#475569", marginBottom: 10, fontFamily: "monospace" }}>
+                    <div style={{ fontSize: 10, color: "#64748b", marginBottom: 10, fontFamily: "monospace" }}>
                       #{p.code || "—"}
                     </div>
 
@@ -1672,27 +1678,27 @@ export default function POS() {
                       display: "flex", alignItems: "center",
                       justifyContent: "space-between",
                       paddingTop: 8,
-                      borderTop: "1px solid rgba(255,255,255,0.07)",
+                      borderTop: "1px solid #f1f5f9",
                     }}>
                       <span style={{
-                        fontWeight: 900, fontSize: 15, color: "#10b981",
-                        background: "rgba(16,185,129,0.12)",
-                        padding: "3px 10px", borderRadius: 20,
-                        border: "1px solid rgba(16,185,129,0.25)",
+                        fontWeight: 900, fontSize: 14, color: "#059669",
+                        background: "#ecfdf5",
+                        padding: "3px 9px", borderRadius: 20,
+                        border: "1px solid #a7f3d0",
                         letterSpacing: -0.3,
                       }}>
                         {Number(p.sellingPrice || 0).toFixed(0)} ETB
                       </span>
                       {(p.ingredients?.length || 0) > 0 ? (
                         <span style={{
-                          fontSize: 9, color: "#fbbf24", fontWeight: 800,
-                          background: "rgba(245,158,11,0.15)", padding: "2px 7px",
-                          borderRadius: 20, border: "1px solid rgba(245,158,11,0.3)",
+                          fontSize: 9, color: "#b45309", fontWeight: 800,
+                          background: "#fffbeb", padding: "2px 7px",
+                          borderRadius: 20, border: "1px solid #fde68a",
                         }}>⚡ Recipe</span>
                       ) : (
                         <span style={{
                           fontSize: 9, color: "#64748b", fontWeight: 600,
-                          background: "rgba(255,255,255,0.05)", padding: "2px 7px", borderRadius: 20,
+                          background: "#f1f5f9", border: "1px solid #e2e8f0", padding: "2px 7px", borderRadius: 20,
                         }}>Direct</span>
                       )}
                     </div>
@@ -1702,10 +1708,10 @@ export default function POS() {
                       <span style={{
                         position: "absolute", top: 10, right: 10,
                         width: 24, height: 24, borderRadius: "50%",
-                        background: "linear-gradient(135deg, #6366f1, #3b82f6)",
+                        background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
                         color: "#fff", fontSize: 11, fontWeight: 900,
                         display: "flex", alignItems: "center", justifyContent: "center",
-                        boxShadow: "0 4px 12px rgba(99,102,241,0.6)",
+                        boxShadow: "0 3px 10px rgba(37,99,235,0.4)",
                         animation: "pulse-glow 2s infinite",
                       }}>
                         {inCart.quantity}
@@ -1728,8 +1734,8 @@ export default function POS() {
             position: "fixed",
             inset: 0,
             zIndex: 600,
-            background: "rgba(0,0,0,0.75)",
-            backdropFilter: "blur(8px)",
+            background: "rgba(15, 23, 42, 0.6)",
+            backdropFilter: "blur(6px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -1739,16 +1745,16 @@ export default function POS() {
         >
           <div
             style={{
-              background: "linear-gradient(135deg,#0c1533,#0f1f4d)",
-              border: "1.5px solid rgba(59,130,246,0.35)",
+              background: "#ffffff",
+              border: "1px solid #e2e8f0",
               borderRadius: 20,
-              padding: 26,
+              padding: 24,
               width: "100%",
               maxWidth: 700,
               maxHeight: "85vh",
               display: "flex",
               flexDirection: "column",
-              boxShadow: "0 30px 80px rgba(0,0,0,0.6)",
+              boxShadow: "0 25px 60px rgba(0,0,0,0.18)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -1756,19 +1762,19 @@ export default function POS() {
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <FileText size={18} color="#60a5fa" />
-                  <h3 style={{ fontSize: 18, fontWeight: 900, color: "#ffffff", margin: 0 }}>
+                  <FileText size={18} color="#2563eb" />
+                  <h3 style={{ fontSize: 18, fontWeight: 900, color: "#0f172a", margin: 0 }}>
                     Active &amp; Held Table Orders (Reference)
                   </h3>
                 </div>
-                <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 4 }}>
+                <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>
                   Click any table order below to retrieve it into the sidebar cart for billing / checkout.
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setShowRefModal(false)}
-                style={{ background: "rgba(255,255,255,0.08)", border: "none", borderRadius: 8, color: "#94a3b8", cursor: "pointer", padding: 6 }}
+                style={{ background: "#f1f5f9", border: "1px solid #e2e8f0", borderRadius: 8, color: "#64748b", cursor: "pointer", padding: 6 }}
               >
                 <X size={16} />
               </button>
@@ -1784,11 +1790,11 @@ export default function POS() {
                 style={{
                   width: "100%",
                   boxSizing: "border-box",
-                  padding: "8px 12px 8px 34px",
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.1)",
+                  padding: "9px 12px 9px 36px",
+                  background: "#f8fafc",
+                  border: "1.5px solid #cbd5e1",
                   borderRadius: 10,
-                  color: "#fff",
+                  color: "#0f172a",
                   fontSize: 12,
                   outline: "none",
                 }}
@@ -1799,8 +1805,8 @@ export default function POS() {
             <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 10 }}>
               {filteredRefOrders.length === 0 ? (
                 <div style={{ textAlign: "center", padding: "40px 0", color: "#64748b" }}>
-                  <UtensilsCrossed size={36} style={{ opacity: 0.3, marginBottom: 8 }} />
-                  <p style={{ fontSize: 13, fontWeight: 600 }}>No active held orders found</p>
+                  <UtensilsCrossed size={36} style={{ opacity: 0.4, marginBottom: 8 }} />
+                  <p style={{ fontSize: 13, fontWeight: 700, color: "#1e293b" }}>No active held orders found</p>
                 </div>
               ) : (
                 filteredRefOrders.map((o) => (
@@ -1809,8 +1815,8 @@ export default function POS() {
                     className="ref-card"
                     onClick={() => retrieveOrderToSidebar(o)}
                     style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1.5px solid rgba(255,255,255,0.08)",
+                      background: "#ffffff",
+                      border: "1.5px solid #e2e8f0",
                       borderRadius: 14,
                       padding: "12px 16px",
                       cursor: "pointer",
@@ -1818,17 +1824,17 @@ export default function POS() {
                       alignItems: "center",
                       justifyContent: "space-between",
                       gap: 12,
-                      transition: "all 0.15s ease",
+                      boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
                     }}
                   >
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                        <span style={{ fontWeight: 800, fontSize: 13, color: "#60a5fa" }}>#{o.orderNo}</span>
+                        <span style={{ fontWeight: 800, fontSize: 13, color: "#1e40af" }}>#{o.orderNo}</span>
                         <span
                           style={{
-                            background: "rgba(16,185,129,0.15)",
-                            border: "1px solid rgba(16,185,129,0.3)",
-                            color: "#34d399",
+                            background: "#ecfdf5",
+                            border: "1px solid #a7f3d0",
+                            color: "#059669",
                             padding: "2px 8px",
                             borderRadius: 6,
                             fontSize: 11,
@@ -1838,35 +1844,36 @@ export default function POS() {
                           🪑 {o.tableNo || "Counter"}
                         </span>
                         {o.waiterName && (
-                          <span style={{ fontSize: 11, color: "#c084fc", fontWeight: 600 }}>
+                          <span style={{ fontSize: 11, color: "#7c3aed", fontWeight: 700, background: "#f5f3ff", padding: "2px 6px", borderRadius: 6 }}>
                             👤 {o.waiterName}
                           </span>
                         )}
                         <span
                           style={{
-                            background: o.status === "held" ? "rgba(139,92,246,0.15)" : "rgba(245,158,11,0.15)",
-                            color: o.status === "held" ? "#c084fc" : "#fbbf24",
-                            padding: "1px 6px",
-                            borderRadius: 4,
+                            background: o.status === "held" ? "#f5f3ff" : "#fffbeb",
+                            border: o.status === "held" ? "1px solid #ddd6fe" : "1px solid #fde68a",
+                            color: o.status === "held" ? "#7c3aed" : "#b45309",
+                            padding: "2px 7px",
+                            borderRadius: 6,
                             fontSize: 10,
-                            fontWeight: 700,
+                            fontWeight: 800,
                             textTransform: "uppercase",
                           }}
                         >
                           {o.status}
                         </span>
                       </div>
-                      <div style={{ fontSize: 11, color: "#94a3b8", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      <div style={{ fontSize: 12, color: "#475569", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                         {(o.items || []).map((it) => `${it.productName} (x${it.quantity})`).join(", ")}
                       </div>
                     </div>
 
                     <div style={{ textAlign: "right", display: "flex", alignItems: "center", gap: 14 }}>
                       <div>
-                        <div style={{ fontWeight: 900, fontSize: 16, color: "#10b981" }}>
+                        <div style={{ fontWeight: 900, fontSize: 16, color: "#059669" }}>
                           {ETB(o.grandTotal)}
                         </div>
-                        <div style={{ fontSize: 10, color: "#64748b" }}>
+                        <div style={{ fontSize: 11, color: "#64748b" }}>
                           {new Date(o.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                         </div>
                       </div>
@@ -1884,12 +1891,13 @@ export default function POS() {
                           padding: "8px 14px",
                           borderRadius: 8,
                           border: "none",
-                          background: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
+                          background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
                           color: "#fff",
                           fontWeight: 700,
                           fontSize: 12,
                           cursor: "pointer",
                           whiteSpace: "nowrap",
+                          boxShadow: "0 2px 8px rgba(37,99,235,0.25)",
                         }}
                       >
                         <ArrowDownLeft size={13} />
@@ -1911,8 +1919,8 @@ export default function POS() {
             position: "fixed",
             inset: 0,
             zIndex: 500,
-            background: "rgba(0,0,0,0.75)",
-            backdropFilter: "blur(8px)",
+            background: "rgba(15, 23, 42, 0.6)",
+            backdropFilter: "blur(6px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -1922,23 +1930,23 @@ export default function POS() {
         >
           <div
             style={{
-              background: "linear-gradient(135deg,#0c1533,#0f1f4d)",
-              border: "1.5px solid rgba(99,102,241,0.35)",
+              background: "#ffffff",
+              border: "1px solid #e2e8f0",
               borderRadius: 20,
               padding: 26,
               width: "100%",
               maxWidth: 420,
-              boxShadow: "0 30px 80px rgba(0,0,0,0.6)",
+              boxShadow: "0 25px 60px rgba(0,0,0,0.18)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
               <div>
-                <h3 style={{ fontWeight: 800, fontSize: 18, color: "#ffffff", margin: 0 }}>
+                <h3 style={{ fontWeight: 800, fontSize: 18, color: "#0f172a", margin: 0 }}>
                   Payment &amp; Settlement
                 </h3>
                 {heldOrderId && (
-                  <span style={{ fontSize: 11, color: "#fbbf24", fontWeight: 700 }}>
+                  <span style={{ fontSize: 11, color: "#b45309", fontWeight: 700, background: "#fffbeb", padding: "2px 6px", borderRadius: 6, display: "inline-block", marginTop: 4 }}>
                     Converting #{heldOrderNo} to Cash Sales
                   </span>
                 )}
@@ -1947,10 +1955,10 @@ export default function POS() {
                 type="button"
                 onClick={() => setShowPayModal(false)}
                 style={{
-                  background: "rgba(255,255,255,0.08)",
-                  border: "none",
+                  background: "#f1f5f9",
+                  border: "1px solid #e2e8f0",
                   borderRadius: 8,
-                  color: "#94a3b8",
+                  color: "#64748b",
                   cursor: "pointer",
                   padding: 6,
                 }}
@@ -1962,18 +1970,18 @@ export default function POS() {
             {/* Total display */}
             <div
               style={{
-                background: "rgba(16,185,129,0.12)",
-                border: "1.5px solid rgba(16,185,129,0.25)",
+                background: "#ecfdf5",
+                border: "1.5px solid #a7f3d0",
                 borderRadius: 14,
-                padding: "12px 16px",
+                padding: "14px 16px",
                 marginBottom: 18,
                 textAlign: "center",
               }}
             >
-              <p style={{ color: "#94a3b8", fontSize: 11, marginBottom: 4, textTransform: "uppercase", fontWeight: 700 }}>
+              <p style={{ color: "#047857", fontSize: 11, marginBottom: 4, textTransform: "uppercase", fontWeight: 800 }}>
                 Total Payable
               </p>
-              <p style={{ fontWeight: 900, fontSize: 28, color: "#10b981", margin: 0 }}>
+              <p style={{ fontWeight: 900, fontSize: 30, color: "#059669", margin: 0 }}>
                 {ETB(grandTotal)}
               </p>
             </div>
@@ -1981,42 +1989,43 @@ export default function POS() {
             {/* Payment Methods */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8, marginBottom: 18 }}>
               {[
-                ["Cash", Banknote, "#10b981"],
-                ["Telebirr", Smartphone, "#6366f1"],
-                ["Card", CreditCard, "#f59e0b"],
-              ].map(([m, Icon, clr]) => (
-                <button
-                  key={m}
-                  type="button"
-                  style={{
-                    padding: "10px 6px",
-                    borderRadius: 12,
-                    border: payMethod === m ? `2px solid ${clr}` : "1.5px solid rgba(255,255,255,0.1)",
-                    background:
-                      payMethod === m
-                        ? `rgba(${clr === "#10b981" ? "16,185,129" : clr === "#6366f1" ? "99,102,241" : "245,158,11"},0.15)`
-                        : "rgba(255,255,255,0.04)",
-                    color: payMethod === m ? clr : "#94a3b8",
-                    fontWeight: 700,
-                    fontSize: 12,
-                    cursor: "pointer",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: 5,
-                  }}
-                  onClick={() => setPayMethod(m)}
-                >
-                  <Icon size={18} />
-                  {m}
-                </button>
-              ))}
+                ["Cash", Banknote, "#059669"],
+                ["Telebirr", Smartphone, "#2563eb"],
+                ["Card", CreditCard, "#d97706"],
+              ].map(([m, Icon, clr]) => {
+                const active = payMethod === m;
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    style={{
+                      padding: "10px 6px",
+                      borderRadius: 12,
+                      border: active ? `2px solid ${clr}` : "1.5px solid #e2e8f0",
+                      background: active ? `${clr}15` : "#f8fafc",
+                      color: active ? clr : "#64748b",
+                      fontWeight: 800,
+                      fontSize: 12,
+                      cursor: "pointer",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: 5,
+                      transition: "all 0.15s ease",
+                    }}
+                    onClick={() => setPayMethod(m)}
+                  >
+                    <Icon size={18} />
+                    {m}
+                  </button>
+                );
+              })}
             </div>
 
             {/* Cash Tender Input */}
             {payMethod === "Cash" && (
               <div style={{ marginBottom: 18 }}>
-                <p style={{ fontSize: 11, color: "#94a3b8", marginBottom: 6, fontWeight: 700, textTransform: "uppercase" }}>
+                <p style={{ fontSize: 11, color: "#475569", marginBottom: 6, fontWeight: 700, textTransform: "uppercase" }}>
                   Cash Tendered (ETB)
                 </p>
                 <input
@@ -2028,10 +2037,10 @@ export default function POS() {
                     width: "100%",
                     boxSizing: "border-box",
                     padding: "10px 14px",
-                    background: "rgba(255,255,255,0.06)",
-                    border: "1.5px solid rgba(255,255,255,0.12)",
+                    background: "#ffffff",
+                    border: "1.5px solid #cbd5e1",
                     borderRadius: 10,
-                    color: "#fff",
+                    color: "#0f172a",
                     fontSize: 16,
                     fontWeight: 700,
                     outline: "none",
@@ -2044,11 +2053,12 @@ export default function POS() {
                       justifyContent: "space-between",
                       marginTop: 8,
                       padding: "8px 12px",
-                      background: "rgba(59,130,246,0.15)",
+                      background: "#eff6ff",
+                      border: "1px solid #bfdbfe",
                       borderRadius: 8,
                       fontSize: 13,
-                      fontWeight: 700,
-                      color: "#60a5fa",
+                      fontWeight: 800,
+                      color: "#1d4ed8",
                     }}
                   >
                     <span>Change Due:</span>
@@ -2066,7 +2076,7 @@ export default function POS() {
               style={{
                 width: "100%",
                 padding: 14,
-                background: placing ? "#374151" : "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                background: placing ? "#cbd5e1" : "linear-gradient(135deg, #10b981 0%, #059669 100%)",
                 border: "none",
                 borderRadius: 14,
                 color: "#fff",
@@ -2075,7 +2085,7 @@ export default function POS() {
                 cursor: placing ? "not-allowed" : "pointer",
                 letterSpacing: 0.3,
                 transition: "all 0.2s",
-                boxShadow: "0 6px 20px rgba(16,185,129,0.4)",
+                boxShadow: "0 6px 20px rgba(16,185,129,0.35)",
               }}
             >
               {placing ? "Processing Sale & Deducting Stock..." : "Confirm & Complete Cash Sale"}
@@ -2093,8 +2103,8 @@ export default function POS() {
             position: "fixed",
             inset: 0,
             zIndex: 900,
-            background: "rgba(0, 0, 0, 0.75)",
-            backdropFilter: "blur(8px)",
+            background: "rgba(15, 23, 42, 0.6)",
+            backdropFilter: "blur(6px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -2104,8 +2114,8 @@ export default function POS() {
         >
           <div
             style={{
-              background: "linear-gradient(135deg, #0c1533 0%, #0f1f4d 100%)",
-              border: "1.5px solid rgba(99,102,241,0.4)",
+              background: "#ffffff",
+              border: "1px solid #e2e8f0",
               borderRadius: 20,
               padding: 24,
               width: "100%",
@@ -2113,8 +2123,8 @@ export default function POS() {
               maxHeight: "85vh",
               display: "flex",
               flexDirection: "column",
-              boxShadow: "0 25px 70px rgba(0,0,0,0.8)",
-              color: "#e2e8f0",
+              boxShadow: "0 25px 60px rgba(0,0,0,0.18)",
+              color: "#0f172a",
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -2126,19 +2136,19 @@ export default function POS() {
                     width: 36,
                     height: 36,
                     borderRadius: 10,
-                    background: "rgba(16,185,129,0.2)",
-                    border: "1px solid rgba(16,185,129,0.4)",
+                    background: "#ecfdf5",
+                    border: "1px solid #a7f3d0",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    color: "#10b981",
+                    color: "#059669",
                   }}
                 >
                   <Table2 size={20} />
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: "#fff" }}>Select Dining Table</h3>
-                  <p style={{ margin: 0, fontSize: 11, color: "#94a3b8", marginTop: 2 }}>
+                  <h3 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: "#0f172a" }}>Select Dining Table</h3>
+                  <p style={{ margin: 0, fontSize: 11, color: "#64748b", marginTop: 2 }}>
                     Click table to assign. If it has a held order, it will be recalled automatically.
                   </p>
                 </div>
@@ -2147,10 +2157,10 @@ export default function POS() {
                 type="button"
                 onClick={() => setShowTablePicker(false)}
                 style={{
-                  background: "rgba(255,255,255,0.06)",
-                  border: "none",
+                  background: "#f1f5f9",
+                  border: "1px solid #e2e8f0",
                   borderRadius: 8,
-                  color: "#94a3b8",
+                  color: "#64748b",
                   cursor: "pointer",
                   padding: 7,
                 }}
@@ -2173,9 +2183,9 @@ export default function POS() {
                       borderRadius: 16,
                       fontSize: 11,
                       fontWeight: 700,
-                      border: active ? "1.5px solid #10b981" : "1px solid rgba(255,255,255,0.1)",
-                      background: active ? "rgba(16,185,129,0.2)" : "rgba(255,255,255,0.04)",
-                      color: active ? "#34d399" : "#94a3b8",
+                      border: active ? "1.5px solid #10b981" : "1px solid #e2e8f0",
+                      background: active ? "#ecfdf5" : "#f8fafc",
+                      color: active ? "#059669" : "#64748b",
                       cursor: "pointer",
                       whiteSpace: "nowrap",
                     }}
@@ -2221,14 +2231,14 @@ export default function POS() {
                       border: isSel
                         ? "2px solid #10b981"
                         : busy
-                        ? "1.5px solid rgba(245,158,11,0.6)"
-                        : "1.5px solid rgba(255,255,255,0.08)",
+                        ? "1.5px solid #fde68a"
+                        : "1.5px solid #e2e8f0",
                       background: isSel
-                        ? "rgba(16,185,129,0.25)"
+                        ? "#ecfdf5"
                         : busy
-                        ? "rgba(245,158,11,0.15)"
-                        : "rgba(255,255,255,0.04)",
-                      color: isSel ? "#10b981" : busy ? "#fbbf24" : "#e2e8f0",
+                        ? "#fffbeb"
+                        : "#ffffff",
+                      color: isSel ? "#059669" : busy ? "#d97706" : "#0f172a",
                       fontWeight: 800,
                       fontSize: 13,
                       cursor: "pointer",
@@ -2238,7 +2248,7 @@ export default function POS() {
                       alignItems: "center",
                       gap: 4,
                       transition: "all 0.15s ease",
-                      boxShadow: isSel ? "0 0 14px rgba(16,185,129,0.35)" : "none",
+                      boxShadow: isSel ? "0 2px 10px rgba(16,185,129,0.2)" : "0 1px 3px rgba(0,0,0,0.02)",
                     }}
                   >
                     <Table2 size={16} />
@@ -2250,11 +2260,11 @@ export default function POS() {
                         padding: "1px 5px",
                         borderRadius: 4,
                         background: isSel
-                          ? "rgba(16,185,129,0.3)"
+                          ? "#a7f3d0"
                           : busy
-                          ? "rgba(245,158,11,0.25)"
-                          : "rgba(255,255,255,0.06)",
-                        color: isSel ? "#34d399" : busy ? "#fbbf24" : "#64748b",
+                          ? "#fde68a"
+                          : "#f1f5f9",
+                        color: isSel ? "#047857" : busy ? "#b45309" : "#64748b",
                       }}
                     >
                       {isSel ? "Selected" : busy ? "Held Order" : "Free"}
@@ -2272,7 +2282,7 @@ export default function POS() {
                 alignItems: "center",
                 marginTop: 14,
                 paddingTop: 12,
-                borderTop: "1px solid rgba(255,255,255,0.08)",
+                borderTop: "1px solid #e2e8f0",
               }}
             >
               <button
@@ -2282,13 +2292,13 @@ export default function POS() {
                   setShowTablePicker(false);
                 }}
                 style={{
-                  background: "rgba(239,68,68,0.1)",
-                  border: "1px solid rgba(239,68,68,0.3)",
+                  background: "#fef2f2",
+                  border: "1px solid #fecaca",
                   borderRadius: 8,
                   padding: "6px 12px",
-                  color: "#f87171",
+                  color: "#ef4444",
                   fontSize: 12,
-                  fontWeight: 600,
+                  fontWeight: 700,
                   cursor: "pointer",
                 }}
               >
@@ -2299,11 +2309,11 @@ export default function POS() {
                 type="button"
                 onClick={() => setShowTablePicker(false)}
                 style={{
-                  background: "rgba(255,255,255,0.08)",
-                  border: "1px solid rgba(255,255,255,0.15)",
+                  background: "#f1f5f9",
+                  border: "1px solid #cbd5e1",
                   borderRadius: 8,
                   padding: "6px 16px",
-                  color: "#fff",
+                  color: "#0f172a",
                   fontSize: 12,
                   fontWeight: 700,
                   cursor: "pointer",
@@ -2325,8 +2335,8 @@ export default function POS() {
             position: "fixed",
             inset: 0,
             zIndex: 900,
-            background: "rgba(0, 0, 0, 0.75)",
-            backdropFilter: "blur(8px)",
+            background: "rgba(15, 23, 42, 0.6)",
+            backdropFilter: "blur(6px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -2336,8 +2346,8 @@ export default function POS() {
         >
           <div
             style={{
-              background: "linear-gradient(135deg, #0c1533 0%, #15113d 100%)",
-              border: "1.5px solid rgba(139,92,246,0.4)",
+              background: "#ffffff",
+              border: "1px solid #e2e8f0",
               borderRadius: 20,
               padding: 24,
               width: "100%",
@@ -2345,8 +2355,8 @@ export default function POS() {
               maxHeight: "85vh",
               display: "flex",
               flexDirection: "column",
-              boxShadow: "0 25px 70px rgba(0,0,0,0.8)",
-              color: "#e2e8f0",
+              boxShadow: "0 25px 60px rgba(0,0,0,0.18)",
+              color: "#0f172a",
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -2358,19 +2368,19 @@ export default function POS() {
                     width: 36,
                     height: 36,
                     borderRadius: 10,
-                    background: "rgba(139,92,246,0.2)",
-                    border: "1px solid rgba(139,92,246,0.4)",
+                    background: "#f5f3ff",
+                    border: "1px solid #ddd6fe",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    color: "#a78bfa",
+                    color: "#7c3aed",
                   }}
                 >
                   <User size={20} />
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: "#fff" }}>Assign Waiter / Server</h3>
-                  <p style={{ margin: 0, fontSize: 11, color: "#94a3b8", marginTop: 2 }}>
+                  <h3 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: "#0f172a" }}>Assign Waiter / Server</h3>
+                  <p style={{ margin: 0, fontSize: 11, color: "#64748b", marginTop: 2 }}>
                     Select staff handling this table or order.
                   </p>
                 </div>
@@ -2379,10 +2389,10 @@ export default function POS() {
                 type="button"
                 onClick={() => setShowWaiterPicker(false)}
                 style={{
-                  background: "rgba(255,255,255,0.06)",
-                  border: "none",
+                  background: "#f1f5f9",
+                  border: "1px solid #e2e8f0",
                   borderRadius: 8,
-                  color: "#94a3b8",
+                  color: "#64748b",
                   cursor: "pointer",
                   padding: 7,
                 }}
@@ -2405,12 +2415,12 @@ export default function POS() {
                 style={{
                   width: "100%",
                   boxSizing: "border-box",
-                  padding: "8px 12px 8px 34px",
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.12)",
+                  padding: "9px 12px 9px 36px",
+                  background: "#f8fafc",
+                  border: "1.5px solid #cbd5e1",
                   borderRadius: 10,
                   fontSize: 12,
-                  color: "#fff",
+                  color: "#0f172a",
                   outline: "none",
                 }}
               />
@@ -2428,11 +2438,11 @@ export default function POS() {
                 style={{
                   width: "100%",
                   textAlign: "left",
-                  padding: "9px 12px",
+                  padding: "10px 14px",
                   borderRadius: 10,
-                  border: !selectedWaiter ? "1.5px solid #8b5cf6" : "1px solid rgba(255,255,255,0.06)",
-                  background: !selectedWaiter ? "rgba(139,92,246,0.2)" : "rgba(255,255,255,0.03)",
-                  color: !selectedWaiter ? "#a78bfa" : "#94a3b8",
+                  border: !selectedWaiter ? "1.5px solid #8b5cf6" : "1px solid #e2e8f0",
+                  background: !selectedWaiter ? "#f5f3ff" : "#f8fafc",
+                  color: !selectedWaiter ? "#7c3aed" : "#64748b",
                   cursor: "pointer",
                   fontSize: 12,
                   fontWeight: 700,
@@ -2460,11 +2470,11 @@ export default function POS() {
                       style={{
                         width: "100%",
                         textAlign: "left",
-                        padding: "9px 12px",
+                        padding: "10px 14px",
                         borderRadius: 10,
-                        border: isSel ? "1.5px solid #8b5cf6" : "1px solid rgba(255,255,255,0.06)",
-                        background: isSel ? "rgba(139,92,246,0.25)" : "rgba(255,255,255,0.03)",
-                        color: "#e2e8f0",
+                        border: isSel ? "1.5px solid #8b5cf6" : "1px solid #e2e8f0",
+                        background: isSel ? "#f5f3ff" : "#ffffff",
+                        color: "#0f172a",
                         cursor: "pointer",
                         fontSize: 13,
                         display: "flex",
@@ -2478,7 +2488,7 @@ export default function POS() {
                           width: 30,
                           height: 30,
                           borderRadius: "50%",
-                          background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                          background: "linear-gradient(135deg, #2563eb, #8b5cf6)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
@@ -2491,12 +2501,12 @@ export default function POS() {
                         {w.name?.[0]?.toUpperCase()}
                       </span>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: 700, fontSize: 13, color: isSel ? "#c4b5fd" : "#fff" }}>
+                        <div style={{ fontWeight: 700, fontSize: 13, color: isSel ? "#7c3aed" : "#0f172a" }}>
                           {w.name}
                         </div>
-                        <div style={{ fontSize: 10, color: "#94a3b8" }}>{w.role || "Staff"}</div>
+                        <div style={{ fontSize: 10, color: "#64748b" }}>{w.role || "Staff"}</div>
                       </div>
-                      {isSel && <Check size={16} color="#a78bfa" />}
+                      {isSel && <Check size={16} color="#7c3aed" />}
                     </button>
                   );
                 })}
