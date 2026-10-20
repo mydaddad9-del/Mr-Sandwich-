@@ -56,7 +56,11 @@ const printKOTEndpoint = asyncHandler(async (req, res) => {
   let query = { enabled: true, type: { $in: ['kitchen', 'both'] } };
   if (printerId) query = { _id: printerId };
 
-  const printers = await PrinterSettings.find(query);
+  let printers = await PrinterSettings.find(query);
+  if (!printers.length && !printerId) {
+    // Fallback to any enabled printer (e.g. single-printer restaurant setup)
+    printers = await PrinterSettings.find({ enabled: true });
+  }
   if (!printers.length) {
     return res.status(404).json({ message: 'No kitchen printer configured or enabled' });
   }
@@ -83,7 +87,11 @@ const printReceiptEndpoint = asyncHandler(async (req, res) => {
   let query = { enabled: true, type: { $in: ['receipt', 'both'] } };
   if (printerId) query = { _id: printerId };
 
-  const printers = await PrinterSettings.find(query);
+  let printers = await PrinterSettings.find(query);
+  if (!printers.length && !printerId) {
+    // Fallback to any enabled printer (e.g. single-printer restaurant setup)
+    printers = await PrinterSettings.find({ enabled: true });
+  }
   if (!printers.length) {
     return res.status(404).json({ message: 'No receipt printer configured or enabled' });
   }

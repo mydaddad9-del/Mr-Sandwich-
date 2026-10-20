@@ -1,13 +1,15 @@
 @echo off
-title Baba Roti Cafe - Local POS Server
+title Baba Roti Cafe - POS Server
 cls
 echo ========================================================
-echo   Baba Roti Cafe - Local Network POS Server
+echo   Baba Roti Cafe - Restaurant POS Server
 echo ========================================================
 echo.
-echo Starting local server on port 5000...
-echo This connects directly to your local printer at 10.241.18.48:9100
+echo Starting restaurant server on port 5000...
+echo Network Printer IP Mode (Port 9100) is ACTIVE.
 echo.
 cd /d "%~dp0"
+timeout /t 2 /nobreak >nul
+start "" http://localhost:5000
 node server/server.js
 pause
