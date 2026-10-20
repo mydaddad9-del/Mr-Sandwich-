@@ -1,12 +1,14 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import api from "../api/axios";
 import { posPrint } from "../utils/posPrint";
+import { exportToExcel, exportToCSV, exportToPDF } from "../utils/exportUtils";
 import {
   Search, X, Clock, Printer, CreditCard, Smartphone, Banknote,
   ReceiptText, RefreshCw, CheckCircle2, AlertCircle, Eye,
   ArrowRight, ShoppingBag, ChevronDown, Layers, Filter,
   BadgeDollarSign, UtensilsCrossed, Calendar, FileText, Ban,
   User, Table2, ArrowUpRight, DollarSign, RotateCcw,
+  Download, FileSpreadsheet,
 } from "lucide-react";
 
 const ETB = (n) => `ETB ${Number(n || 0).toFixed(2)}`;
@@ -60,8 +62,20 @@ export default function CashSales() {
 
   const [toast, setToast] = useState(null);
   const [clock, setClock] = useState(new Date());
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const exportRef = useRef(null);
 
   const showToast = (msg, type = "success") => setToast({ msg, type });
+
+  useEffect(() => {
+    const handleOutside = (e) => {
+      if (exportRef.current && !exportRef.current.contains(e.target)) {
+        setShowExportMenu(false);
+      }
+    };
+    if (showExportMenu) document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, [showExportMenu]);
 
   useEffect(() => {
     const t = setInterval(() => setClock(new Date()), 1000);
@@ -179,6 +193,78 @@ export default function CashSales() {
   const totalTelebirr = filteredSales.filter((o) => o.paymentMethod === "Telebirr").reduce((s, o) => s + (o.grandTotal || 0), 0);
   const totalCard = filteredSales.filter((o) => o.paymentMethod === "Card").reduce((s, o) => s + (o.grandTotal || 0), 0);
   const totalTxnCount = filteredSales.length;
+
+  // Export handlers
+  const handleExportExcel = () => {
+    if (!filteredSales.length) { showToast("No sales to export", "info"); return; }
+    const rows = filteredSales.map((s) => ({
+      "Order No": s.orderNo,
+      "Date": new Date(s.createdAt).toLocaleDateString(),
+      "Time": new Date(s.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      "Payment Method": s.paymentMethod || "Cash",
+      "Table": s.tableNo || "Counter",
+      "Cashier": s.cashierName || "—",
+      "Waiter": s.waiterName || "—",
+      "Customer": s.customerName || "Walk-in Guest",
+      "Items Count": (s.items || []).reduce((sum, it) => sum + (it.quantity || 1), 0),
+      "Items Detail": (s.items || []).map((it) => `${it.productName} (x${it.quantity})`).join("; "),
+      "Subtotal (ETB)": Number(s.subtotal || 0).toFixed(2),
+      "Tax 15% (ETB)": Number(s.taxAmount || 0).toFixed(2),
+      "Discount (ETB)": Number(s.discountAmount || 0).toFixed(2),
+      "Grand Total (ETB)": Number(s.grandTotal || 0).toFixed(2),
+      "Amount Paid (ETB)": Number(s.amountPaid || s.grandTotal || 0).toFixed(2),
+    }));
+    exportToExcel(rows, `cash_sales_${dateVal || "report"}`, "Cash Sales");
+    showToast("Exported to Excel successfully!");
+  };
+
+  const handleExportCSV = () => {
+    if (!filteredSales.length) { showToast("No sales to export", "info"); return; }
+    const rows = filteredSales.map((s) => ({
+      "Order No": s.orderNo,
+      "Date": new Date(s.createdAt).toLocaleDateString(),
+      "Time": new Date(s.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      "Payment Method": s.paymentMethod || "Cash",
+      "Table": s.tableNo || "Counter",
+      "Cashier": s.cashierName || "—",
+      "Waiter": s.waiterName || "—",
+      "Customer": s.customerName || "Walk-in Guest",
+      "Items Count": (s.items || []).reduce((sum, it) => sum + (it.quantity || 1), 0),
+      "Items Detail": (s.items || []).map((it) => `${it.productName} (x${it.quantity})`).join("; "),
+      "Subtotal (ETB)": Number(s.subtotal || 0).toFixed(2),
+      "Tax 15% (ETB)": Number(s.taxAmount || 0).toFixed(2),
+      "Discount (ETB)": Number(s.discountAmount || 0).toFixed(2),
+      "Grand Total (ETB)": Number(s.grandTotal || 0).toFixed(2),
+      "Amount Paid (ETB)": Number(s.amountPaid || s.grandTotal || 0).toFixed(2),
+    }));
+    exportToCSV(rows, `cash_sales_${dateVal || "report"}`);
+    showToast("Exported to CSV successfully!");
+  };
+
+  const handleExportPDF = () => {
+    if (!filteredSales.length) { showToast("No sales to export", "info"); return; }
+    const columns = [
+      { header: "Order #", accessor: "orderNo" },
+      { header: "Time", accessor: (r) => new Date(r.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) },
+      { header: "Method", accessor: "paymentMethod" },
+      { header: "Table", accessor: (r) => r.tableNo || "Counter" },
+      { header: "Cashier", accessor: (r) => r.cashierName || "—" },
+      { header: "Items", accessor: (r) => (r.items || []).map((it) => `${it.productName} x${it.quantity}`).join(", ") },
+      { header: "Grand Total", accessor: (r) => ETB(r.grandTotal), align: "right" },
+    ];
+    exportToPDF({
+      title: `Cash Sales & Revenue Report (${dateVal || "All Dates"})`,
+      columns,
+      data: filteredSales,
+      hotelName: "Baba Roti Café",
+      summary: [
+        { label: "Total Paid Sales", value: filteredSales.length },
+        { label: "Total Revenue", value: ETB(totalRevenue) },
+        { label: "Cash Sales", value: ETB(totalCash) },
+        { label: "Telebirr Sales", value: ETB(totalTelebirr) },
+      ],
+    });
+  };
 
   const settleChange = settleOrder
     ? Math.max(0, (Number(settleAmountPaid) || 0) - (settleOrder.grandTotal || 0))
@@ -370,6 +456,138 @@ export default function CashSales() {
             <RefreshCw size={13} />
             Refresh
           </button>
+
+          {/* Export Dropdown */}
+          <div ref={exportRef} style={{ position: "relative" }}>
+            <button
+              type="button"
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "7px 14px",
+                borderRadius: 10,
+                border: "1.5px solid #bfdbfe",
+                background: "#eff6ff",
+                color: "#1d4ed8",
+                fontWeight: 700,
+                fontSize: 12,
+                cursor: "pointer",
+                transition: "all 0.15s",
+                boxShadow: "0 1px 3px rgba(37,99,235,0.08)",
+              }}
+              title="Export Cash Sales Report"
+            >
+              <Download size={13} />
+              <span>Export</span>
+              <ChevronDown size={12} style={{ transform: showExportMenu ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
+            </button>
+
+            {showExportMenu && (
+              <div
+                style={{
+                  position: "absolute",
+                  right: 0,
+                  top: "calc(100% + 6px)",
+                  background: "#ffffff",
+                  border: "1px solid #e2e8f0",
+                  borderRadius: 12,
+                  boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+                  padding: "6px",
+                  zIndex: 100,
+                  minWidth: 175,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 2,
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowExportMenu(false);
+                    handleExportExcel();
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "8px 10px",
+                    borderRadius: 8,
+                    border: "none",
+                    background: "transparent",
+                    color: "#0f172a",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    textAlign: "left",
+                    transition: "all 0.12s",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "#f1f5f9")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                >
+                  <FileSpreadsheet size={15} color="#059669" />
+                  <span>Export to Excel (.xlsx)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowExportMenu(false);
+                    handleExportPDF();
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "8px 10px",
+                    borderRadius: 8,
+                    border: "none",
+                    background: "transparent",
+                    color: "#0f172a",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    textAlign: "left",
+                    transition: "all 0.12s",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "#f1f5f9")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                >
+                  <FileText size={15} color="#dc2626" />
+                  <span>Export to PDF (.pdf)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowExportMenu(false);
+                    handleExportCSV();
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "8px 10px",
+                    borderRadius: 8,
+                    border: "none",
+                    background: "transparent",
+                    color: "#0f172a",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    textAlign: "left",
+                    transition: "all 0.12s",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "#f1f5f9")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                >
+                  <Download size={15} color="#2563eb" />
+                  <span>Export to CSV (.csv)</span>
+                </button>
+              </div>
+            )}
+          </div>
 
           <div style={{
             fontSize: 13,

@@ -64,9 +64,18 @@ function calcRecipeCostBreakdown(ingredients, settings = {}) {
 
 // GET /api/products
 const getProducts = asyncHandler(async (req, res) => {
-  const { search } = req.query;
+  const { search, pos } = req.query;
   const filter = { isActive: true };
   if (search) filter.name = { $regex: search, $options: 'i' };
+
+  // Fast POS Mode: lightweight query, no deep populate/cost calculation needed for cashier terminal
+  if (pos === 'true' || pos === '1') {
+    const products = await Product.find(filter)
+      .select('name code category parentCategory sellingPrice ingredients isActive uom')
+      .sort({ name: 1 })
+      .lean();
+    return res.json(products);
+  }
 
   const [products, settings] = await Promise.all([
     Product.find(filter)

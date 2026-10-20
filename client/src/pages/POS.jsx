@@ -50,8 +50,24 @@ function Toast({ msg, type = "success", onDone }) {
 
 export default function POS() {
   const { user } = useAuth();
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
+  // Instant Cache Restoration (0ms initial load)
+  const [products, setProducts] = useState(() => {
+    try {
+      const cached = localStorage.getItem("baba_roti_pos_products_cache");
+      return cached ? JSON.parse(cached) : [];
+    } catch (_) {
+      return [];
+    }
+  });
+  const [categories, setCategories] = useState(() => {
+    try {
+      const cached = localStorage.getItem("baba_roti_pos_categories_cache");
+      return cached ? JSON.parse(cached) : [];
+    } catch (_) {
+      return [];
+    }
+  });
+
   const [activeCategory, setActiveCategory] = useState("All");
   const [items, setItems] = useState([]);
   const [orderType, setOrderType] = useState("dine_in");
@@ -63,8 +79,26 @@ export default function POS() {
   const [serviceCharge, setServiceCharge] = useState(0);
   const [editingNoteIdx, setEditingNoteIdx] = useState(null);
   const [noteText, setNoteText] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [settings, setSettings] = useState({ taxRate: 15, currency: "ETB" });
+
+  // If we have cached products, start with loading=false so the UI appears instantly
+  const [loading, setLoading] = useState(() => {
+    try {
+      const cached = localStorage.getItem("baba_roti_pos_products_cache");
+      return !cached || JSON.parse(cached).length === 0;
+    } catch (_) {
+      return true;
+    }
+  });
+
+  const [settings, setSettings] = useState(() => {
+    try {
+      const cached = localStorage.getItem("baba_roti_pos_settings_cache");
+      return cached ? JSON.parse(cached) : { taxRate: 15, currency: "ETB" };
+    } catch (_) {
+      return { taxRate: 15, currency: "ETB" };
+    }
+  });
+
   const [searchQ, setSearchQ] = useState("");
 
   // Retrieval & Held Order tracking
@@ -102,28 +136,42 @@ export default function POS() {
     [heldOrdersList]
   );
 
-  // Load products, settings, waiters (both from Users and Employees)
+  // Load products, settings, waiters (Fast POS queries, non-blocking)
   const loadData = useCallback(async () => {
     try {
-      setLoading(true);
-      const [prodRes, settRes, usersRes, empRes] = await Promise.all([
-        api.get("/products?limit=500&status=active").catch(() => ({ data: [] })),
+      // Use lightweight pos=true endpoint and avoid unauthorized calls
+      const [prodRes, settRes, empRes] = await Promise.all([
+        api.get("/products?pos=true").catch(() => ({ data: [] })),
         api.get("/settings").catch(() => ({ data: {} })),
-        api.get("/users?limit=200").catch(() => ({ data: [] })),
         api.get("/employees?status=Active").catch(() => ({ data: [] })),
       ]);
-      const prods = prodRes.data?.products || prodRes.data || [];
-      setProducts(prods);
-      const cats = ["All", ...new Set(prods.map((p) => p.category || "General").filter(Boolean))];
-      setCategories(cats);
-      setSettings({
-        taxRate: Number(settRes.data?.taxRate ?? 15),
-        currency: settRes.data?.currencySymbol || "ETB",
-      });
 
-      const allUsers = usersRes.data?.users || usersRes.data || [];
+      const prods = Array.isArray(prodRes.data)
+        ? prodRes.data
+        : prodRes.data?.products || [];
+
+      if (prods.length > 0) {
+        setProducts(prods);
+        const cats = ["All", ...new Set(prods.map((p) => p.category || "General").filter(Boolean))];
+        setCategories(cats);
+        try {
+          localStorage.setItem("baba_roti_pos_products_cache", JSON.stringify(prods));
+          localStorage.setItem("baba_roti_pos_categories_cache", JSON.stringify(cats));
+        } catch (_) { }
+      }
+
+      if (settRes.data) {
+        const newSettings = {
+          taxRate: Number(settRes.data?.taxRate ?? 15),
+          currency: settRes.data?.currencySymbol || "ETB",
+        };
+        setSettings(newSettings);
+        try {
+          localStorage.setItem("baba_roti_pos_settings_cache", JSON.stringify(newSettings));
+        } catch (_) { }
+      }
+
       const allEmployees = Array.isArray(empRes.data) ? empRes.data : [];
-
       const parsedWaiters = [];
       const seen = new Set();
 
@@ -141,19 +189,6 @@ export default function POS() {
         }
       });
 
-      // From User accounts
-      allUsers.forEach((u) => {
-        if (u.name && !seen.has(u.name.toLowerCase())) {
-          seen.add(u.name.toLowerCase());
-          parsedWaiters.push({
-            _id: u._id,
-            name: u.name,
-            role: u.role || "Staff",
-            code: u.username || "",
-          });
-        }
-      });
-
       // Default quick waiters fallback
       if (parsedWaiters.length === 0) {
         parsedWaiters.push(
@@ -164,7 +199,7 @@ export default function POS() {
       }
       setWaiters(parsedWaiters);
     } catch (e) {
-      showToast("Failed to load POS data", "error");
+      // Soft fail: cached data remains intact
     } finally {
       setLoading(false);
     }
@@ -179,7 +214,7 @@ export default function POS() {
       // Only open/held/sent_to_kitchen/ready orders
       const active = all.filter((o) => ["held", "open", "sent_to_kitchen", "ready", "billed"].includes(o.status));
       setHeldOrdersList(active);
-    } catch (_) {}
+    } catch (_) { }
   }, []);
 
   useEffect(() => {
@@ -410,7 +445,7 @@ export default function POS() {
             status: "paid",
             cashSaleRef: savedSale._id,
           });
-        } catch (_) {}
+        } catch (_) { }
       }
 
       showToast(`Sale #${savedSale.orderNo} completed & converted to Cash Sales! Stock deducted.`);
@@ -438,7 +473,7 @@ export default function POS() {
     }
   };
 
-  if (loading) {
+  if (loading && products.length === 0) {
     return (
       <div
         style={{
@@ -2231,13 +2266,13 @@ export default function POS() {
                       border: isSel
                         ? "2px solid #10b981"
                         : busy
-                        ? "1.5px solid #fde68a"
-                        : "1.5px solid #e2e8f0",
+                          ? "1.5px solid #fde68a"
+                          : "1.5px solid #e2e8f0",
                       background: isSel
                         ? "#ecfdf5"
                         : busy
-                        ? "#fffbeb"
-                        : "#ffffff",
+                          ? "#fffbeb"
+                          : "#ffffff",
                       color: isSel ? "#059669" : busy ? "#d97706" : "#0f172a",
                       fontWeight: 800,
                       fontSize: 13,
@@ -2262,8 +2297,8 @@ export default function POS() {
                         background: isSel
                           ? "#a7f3d0"
                           : busy
-                          ? "#fde68a"
-                          : "#f1f5f9",
+                            ? "#fde68a"
+                            : "#f1f5f9",
                         color: isSel ? "#047857" : busy ? "#b45309" : "#64748b",
                       }}
                     >

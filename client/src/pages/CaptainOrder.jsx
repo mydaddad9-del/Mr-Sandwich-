@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import api from "../api/axios";
 import { posPrint } from "../utils/posPrint";
+import { exportToExcel, exportToCSV, exportToPDF } from "../utils/exportUtils";
 import {
   Search, Plus, Minus, Trash2, ChevronDown, X, Clock,
   UtensilsCrossed, ShoppingBag, Printer, User, TableProperties,
   RefreshCw, Send, AlertCircle, CheckCircle2, Eye, Edit3,
   ChevronRight, Coffee, Users, Hash, Layers, ReceiptText,
   Calendar, Filter, FileText, Ban, ArrowUpRight, DollarSign,
+  Download, FileSpreadsheet,
 } from "lucide-react";
 
 const ETB = (n) => `ETB ${Number(n || 0).toFixed(2)}`;
@@ -63,8 +65,20 @@ export default function CaptainOrder() {
   const [voiding, setVoiding] = useState(false);
   const [toast, setToast] = useState(null);
   const [clock, setClock] = useState(new Date());
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const exportRef = useRef(null);
 
   const showToast = (msg, type = "success") => setToast({ msg, type });
+
+  useEffect(() => {
+    const handleOutside = (e) => {
+      if (exportRef.current && !exportRef.current.contains(e.target)) {
+        setShowExportMenu(false);
+      }
+    };
+    if (showExportMenu) document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, [showExportMenu]);
 
   useEffect(() => {
     const t = setInterval(() => setClock(new Date()), 1000);
@@ -150,6 +164,70 @@ export default function CaptainOrder() {
   const readyCount = orders.filter((o) => o.status === "ready").length;
   const voidCount = orders.filter((o) => o.status === "voided").length;
   const totalValue = orders.reduce((s, o) => s + (o.grandTotal || 0), 0);
+
+  // Export handlers
+  const handleExportExcel = () => {
+    if (!filteredOrders.length) { showToast("No orders to export", "info"); return; }
+    const rows = filteredOrders.map((o) => ({
+      "Order No": o.orderNo,
+      "Date": new Date(o.createdAt).toLocaleDateString(),
+      "Time": new Date(o.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      "Table": o.tableNo || "Counter",
+      "Waiter": o.waiterName || "—",
+      "Customer": o.customerName || "Walk-in Guest",
+      "Status": (o.status || "").toUpperCase(),
+      "Items Count": (o.items || []).reduce((sum, it) => sum + (it.quantity || 1), 0),
+      "Items Detail": (o.items || []).map((it) => `${it.productName} (x${it.quantity})`).join("; "),
+      "Subtotal (ETB)": Number(o.subtotal || 0).toFixed(2),
+      "Discount (ETB)": Number(o.discountAmount || 0).toFixed(2),
+      "Grand Total (ETB)": Number(o.grandTotal || 0).toFixed(2),
+    }));
+    exportToExcel(rows, `captain_orders_${dateVal || "report"}`, "Captain Orders");
+    showToast("Exported to Excel successfully!");
+  };
+
+  const handleExportCSV = () => {
+    if (!filteredOrders.length) { showToast("No orders to export", "info"); return; }
+    const rows = filteredOrders.map((o) => ({
+      "Order No": o.orderNo,
+      "Date": new Date(o.createdAt).toLocaleDateString(),
+      "Time": new Date(o.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      "Table": o.tableNo || "Counter",
+      "Waiter": o.waiterName || "—",
+      "Customer": o.customerName || "Walk-in Guest",
+      "Status": (o.status || "").toUpperCase(),
+      "Items Count": (o.items || []).reduce((sum, it) => sum + (it.quantity || 1), 0),
+      "Items Detail": (o.items || []).map((it) => `${it.productName} (x${it.quantity})`).join("; "),
+      "Subtotal (ETB)": Number(o.subtotal || 0).toFixed(2),
+      "Discount (ETB)": Number(o.discountAmount || 0).toFixed(2),
+      "Grand Total (ETB)": Number(o.grandTotal || 0).toFixed(2),
+    }));
+    exportToCSV(rows, `captain_orders_${dateVal || "report"}`);
+    showToast("Exported to CSV successfully!");
+  };
+
+  const handleExportPDF = () => {
+    if (!filteredOrders.length) { showToast("No orders to export", "info"); return; }
+    const columns = [
+      { header: "Order #", accessor: "orderNo" },
+      { header: "Time", accessor: (r) => new Date(r.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) },
+      { header: "Table", accessor: (r) => r.tableNo || "Counter" },
+      { header: "Waiter", accessor: (r) => r.waiterName || "—" },
+      { header: "Status", accessor: (r) => (r.status || "").toUpperCase() },
+      { header: "Items", accessor: (r) => (r.items || []).map((it) => `${it.productName} x${it.quantity}`).join(", ") },
+      { header: "Grand Total", accessor: (r) => ETB(r.grandTotal), align: "right" },
+    ];
+    exportToPDF({
+      title: `Captain Orders Report (${dateVal || "All Dates"})`,
+      columns,
+      data: filteredOrders,
+      hotelName: "Baba Roti Café",
+      summary: [
+        { label: "Total Orders", value: filteredOrders.length },
+        { label: "Total Revenue", value: ETB(totalValue) },
+      ],
+    });
+  };
 
   return (
     <div
@@ -291,6 +369,138 @@ export default function CaptainOrder() {
             <RefreshCw size={13} />
             Refresh
           </button>
+
+          {/* Export Dropdown */}
+          <div ref={exportRef} style={{ position: "relative" }}>
+            <button
+              type="button"
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "7px 14px",
+                borderRadius: 10,
+                border: "1.5px solid #bfdbfe",
+                background: "#eff6ff",
+                color: "#1d4ed8",
+                fontWeight: 700,
+                fontSize: 12,
+                cursor: "pointer",
+                transition: "all 0.15s",
+                boxShadow: "0 1px 3px rgba(37,99,235,0.08)",
+              }}
+              title="Export Captain Orders"
+            >
+              <Download size={13} />
+              <span>Export</span>
+              <ChevronDown size={12} style={{ transform: showExportMenu ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
+            </button>
+
+            {showExportMenu && (
+              <div
+                style={{
+                  position: "absolute",
+                  right: 0,
+                  top: "calc(100% + 6px)",
+                  background: "#ffffff",
+                  border: "1px solid #e2e8f0",
+                  borderRadius: 12,
+                  boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+                  padding: "6px",
+                  zIndex: 100,
+                  minWidth: 175,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 2,
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowExportMenu(false);
+                    handleExportExcel();
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "8px 10px",
+                    borderRadius: 8,
+                    border: "none",
+                    background: "transparent",
+                    color: "#0f172a",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    textAlign: "left",
+                    transition: "all 0.12s",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "#f1f5f9")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                >
+                  <FileSpreadsheet size={15} color="#059669" />
+                  <span>Export to Excel (.xlsx)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowExportMenu(false);
+                    handleExportPDF();
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "8px 10px",
+                    borderRadius: 8,
+                    border: "none",
+                    background: "transparent",
+                    color: "#0f172a",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    textAlign: "left",
+                    transition: "all 0.12s",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "#f1f5f9")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                >
+                  <FileText size={15} color="#dc2626" />
+                  <span>Export to PDF (.pdf)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowExportMenu(false);
+                    handleExportCSV();
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "8px 10px",
+                    borderRadius: 8,
+                    border: "none",
+                    background: "transparent",
+                    color: "#0f172a",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    textAlign: "left",
+                    transition: "all 0.12s",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "#f1f5f9")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                >
+                  <Download size={15} color="#2563eb" />
+                  <span>Export to CSV (.csv)</span>
+                </button>
+              </div>
+            )}
+          </div>
 
           <div style={{
             fontSize: 13,
