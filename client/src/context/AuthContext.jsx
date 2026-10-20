@@ -192,7 +192,8 @@ export const AuthProvider = ({ children }) => {
   const canSeeNav = (navKey) => {
     if (!user) return false;
     // Subsystem master gating: if locked by dev, hide completely from non-dev users!
-    if (['pos', 'captainOrder', 'cashSales'].includes(navKey)) {
+    // This gates the parent 'subsystem' key AND its children (pos, captainOrder, cashSales)
+    if (['subsystem', 'pos', 'captainOrder', 'cashSales'].includes(navKey)) {
       if (licensedModules?.subsystem === false && user.role !== 'dev') {
         return false;
       }
@@ -206,14 +207,17 @@ export const AuthProvider = ({ children }) => {
 
   const refreshPermissions = async (newSettings) => {
     if (newSettings) {
-      const rp = newSettings.rolePermissions ?? newSettings;
+      // Handle full settings object OR the developer-license API response
+      // { message, licensedModules } — only update what is present
+      const rp = newSettings.rolePermissions ?? null;
       const nv = newSettings.navVisibility ?? null;
       const cp = newSettings.crudPermissions ?? null;
       const lm = newSettings.licensedModules ?? null;
 
-      setRolePermissions(rp);
-      localStorage.setItem('hotelStockPermissions', JSON.stringify(rp));
-
+      if (rp) {
+        setRolePermissions(rp);
+        localStorage.setItem('hotelStockPermissions', JSON.stringify(rp));
+      }
       if (nv) {
         setNavVisibility(nv);
         localStorage.setItem('hotelStockNavVisibility', JSON.stringify(nv));

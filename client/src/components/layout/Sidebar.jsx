@@ -333,7 +333,8 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
           {canSeeNav('dashboard') && navLink('/', LayoutDashboard, 'Dashboard', true)}
 
           {/* ── Subsystem (POS + Captain Order + Cash Sales) ── */}
-          {(canSeeNav('pos') || canSeeNav('captainOrder') || canSeeNav('cashSales')) && (
+          {/* canSeeNav('subsystem') returns false for non-dev users when the module is disabled by the developer */}
+          {canSeeNav('subsystem') && (
             collapsed ? (
               <NavLink to="/pos" onClick={onClose} title="Subsystem"
                 className={({ isActive }) => linkCls(isActive || onSubsystem)}>
