@@ -73,7 +73,15 @@ export default function POS() {
   const [orderType, setOrderType] = useState("dine_in");
   const [selectedTable, setSelectedTable] = useState("");
   const [selectedWaiter, setSelectedWaiter] = useState(null);
-  const [waiters, setWaiters] = useState([]);
+  const [waiters, setWaiters] = useState(() => {
+    try {
+      const cached = localStorage.getItem("baba_roti_pos_waiters_cache");
+      return cached ? JSON.parse(cached) : [];
+    } catch (_) {
+      return [];
+    }
+  });
+  const [refreshingWaiters, setRefreshingWaiters] = useState(false);
   const [customerName, setCustomerName] = useState("");
   const [discountPct, setDiscountPct] = useState(0);
   const [serviceCharge, setServiceCharge] = useState(0);
@@ -136,6 +144,64 @@ export default function POS() {
     [heldOrdersList]
   );
 
+  // Parse active waiters from raw employee directory
+  const parseWaitersFromEmployees = useCallback((allEmployees) => {
+    const parsedWaiters = [];
+    const seen = new Set();
+    allEmployees.forEach((emp) => {
+      const isActive = !emp.status || String(emp.status).toLowerCase() === "active";
+      if (!isActive) return;
+
+      const dept = String(emp.department || "").trim().toLowerCase();
+      const pos = String(emp.position || "").trim().toLowerCase();
+      const isWaiter =
+        dept === "waiter" ||
+        pos === "waiter" ||
+        dept.includes("waiter") ||
+        pos.includes("waiter");
+      if (!isWaiter) return;
+
+      const fullName = `${emp.firstName || ""} ${emp.lastName || ""}`.trim();
+      if (fullName && !seen.has(fullName.toLowerCase())) {
+        seen.add(fullName.toLowerCase());
+        parsedWaiters.push({
+          _id: emp._id,
+          name: fullName,
+          role: emp.position || emp.department || "Waiter",
+          code: emp.employeeId || "",
+        });
+      }
+    });
+    return parsedWaiters;
+  }, []);
+
+  // Dedicated function to refresh waiters list
+  const refreshWaiters = useCallback(async (notify = false) => {
+    try {
+      setRefreshingWaiters(true);
+      const empRes = await api.get("/employees");
+      const allEmployees = Array.isArray(empRes.data) ? empRes.data : [];
+      const parsedWaiters = parseWaitersFromEmployees(allEmployees);
+      setWaiters(parsedWaiters);
+      try {
+        localStorage.setItem("baba_roti_pos_waiters_cache", JSON.stringify(parsedWaiters));
+      } catch (_) { }
+      if (notify) showToast(`Found ${parsedWaiters.length} waiter(s)`);
+      return parsedWaiters;
+    } catch (_) {
+      if (notify) showToast("Failed to refresh waiters", "error");
+    } finally {
+      setRefreshingWaiters(false);
+    }
+  }, [parseWaitersFromEmployees]);
+
+  // Auto-refresh waiters whenever picker opens to capture freshly added staff
+  useEffect(() => {
+    if (showWaiterPicker) {
+      refreshWaiters(false);
+    }
+  }, [showWaiterPicker, refreshWaiters]);
+
   // Load products, settings, waiters (Fast POS queries, non-blocking)
   const loadData = useCallback(async () => {
     try {
@@ -143,7 +209,7 @@ export default function POS() {
       const [prodRes, settRes, empRes] = await Promise.all([
         api.get("/products?pos=true").catch(() => ({ data: [] })),
         api.get("/settings").catch(() => ({ data: {} })),
-        api.get("/employees?status=Active").catch(() => ({ data: [] })),
+        api.get("/employees").catch(() => ({ data: [] })),
       ]);
 
       const prods = Array.isArray(prodRes.data)
@@ -172,35 +238,17 @@ export default function POS() {
       }
 
       const allEmployees = Array.isArray(empRes.data) ? empRes.data : [];
-      const parsedWaiters = [];
-      const seen = new Set();
-
-      // ONLY employees registered in Department: 'Waiter' (or Position: 'Waiter')
-      allEmployees.forEach((emp) => {
-        const isWaiter =
-          (emp.department && emp.department.trim().toLowerCase() === "waiter") ||
-          (emp.position && emp.position.trim().toLowerCase() === "waiter");
-        if (!isWaiter) return;
-
-        const fullName = `${emp.firstName || ""} ${emp.lastName || ""}`.trim();
-        if (fullName && !seen.has(fullName.toLowerCase())) {
-          seen.add(fullName.toLowerCase());
-          parsedWaiters.push({
-            _id: emp._id,
-            name: fullName,
-            role: emp.position || emp.department || "Waiter",
-            code: emp.employeeId || "",
-          });
-        }
-      });
-
+      const parsedWaiters = parseWaitersFromEmployees(allEmployees);
       setWaiters(parsedWaiters);
+      try {
+        localStorage.setItem("baba_roti_pos_waiters_cache", JSON.stringify(parsedWaiters));
+      } catch (_) { }
     } catch (e) {
       // Soft fail: cached data remains intact
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [parseWaitersFromEmployees]);
 
   // Load active held orders
   const loadHeldOrders = useCallback(async () => {
@@ -2417,20 +2465,40 @@ export default function POS() {
                   </p>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setShowWaiterPicker(false)}
-                style={{
-                  background: "#f1f5f9",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: 8,
-                  color: "#64748b",
-                  cursor: "pointer",
-                  padding: 7,
-                }}
-              >
-                <X size={16} />
-              </button>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <button
+                  type="button"
+                  onClick={() => refreshWaiters(true)}
+                  title="Refresh Waiters from Employee Directory"
+                  style={{
+                    background: "#f1f5f9",
+                    border: "1px solid #e2e8f0",
+                    borderRadius: 8,
+                    color: "#64748b",
+                    cursor: "pointer",
+                    padding: 7,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <RefreshCw size={15} style={{ transform: refreshingWaiters ? "rotate(180deg)" : "none", transition: "transform 0.3s" }} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowWaiterPicker(false)}
+                  style={{
+                    background: "#f1f5f9",
+                    border: "1px solid #e2e8f0",
+                    borderRadius: 8,
+                    color: "#64748b",
+                    cursor: "pointer",
+                    padding: 7,
+                  }}
+                >
+                  <X size={16} />
+                </button>
+              </div>
             </div>
 
             {/* Waiter Search Box */}

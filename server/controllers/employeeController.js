@@ -14,8 +14,8 @@ const getEmployees = asyncHandler(async (req, res) => {
   const { department, status, search } = req.query;
   const filter = { deletedAt: null };
 
-  if (department) filter.department = department;
-  if (status)     filter.status     = status;
+  if (department) filter.department = { $regex: new RegExp(`^${department.trim()}$`, 'i') };
+  if (status)     filter.status     = { $regex: new RegExp(`^${status.trim()}$`, 'i') };
   if (search) {
     const q = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
     filter.$or = [{ firstName: q }, { lastName: q }, { employeeId: q }, { position: q }];
