@@ -34,7 +34,7 @@ const printerSchema = new mongoose.Schema(
     },
     connectionType: {
       type: String,
-      enum: ['network', 'usb', 'serial'],
+      enum: ['network', 'system', 'usb', 'serial'],
       default: 'network',
     },
     ipAddress: {
