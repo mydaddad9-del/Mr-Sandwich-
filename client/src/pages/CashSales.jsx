@@ -191,8 +191,8 @@ export default function CashSales() {
         flexDirection: "column",
         height: "100%",
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #070c1e 0%, #0a1128 50%, #0d173d 100%)",
-        color: "#e2e8f0",
+        background: "transparent",
+        color: "#0f172a",
         fontFamily: "'Inter', -apple-system, sans-serif",
       }}
     >
@@ -203,14 +203,14 @@ export default function CashSales() {
         @keyframes fadeInUp { from { transform: translateY(10px); opacity:0 } to { transform: translateY(0); opacity:1 } }
         @keyframes shimmer { 0% { background-position: -200% center } 100% { background-position: 200% center } }
         .sale-row { transition: all 0.15s ease; }
-        .sale-row:hover { background: rgba(16,185,129,0.09) !important; transform: translateX(2px); }
+        .sale-row:hover { background: #f8fafc !important; transform: translateX(2px); }
         .kpi-card { animation: fadeInUp 0.3s ease both; transition: all 0.2s ease; }
-        .kpi-card:hover { transform: translateY(-3px); }
-        .ref-btn:hover { background: rgba(16,185,129,0.3) !important; border-color: rgba(16,185,129,0.7) !important; transform: scale(1.02); }
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+        .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,0.08) !important; }
+        .ref-btn:hover { background: #d1fae5 !important; border-color: #059669 !important; transform: scale(1.02); }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
       `}</style>
 
       {/* ── TOPBAR HEADER ────────────────────────────────────────── */}
@@ -219,52 +219,55 @@ export default function CashSales() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "12px 20px",
-          borderBottom: "1px solid rgba(255,255,255,0.08)",
-          background: "rgba(0,0,0,0.35)",
-          backdropFilter: "blur(12px)",
+          padding: "16px 22px",
+          border: "1px solid #e2e8f0",
+          borderRadius: 18,
+          background: "#ffffff",
+          boxShadow: "0 2px 10px rgba(0,0,0,0.03)",
+          margin: "12px 20px 0",
           flexWrap: "wrap",
           gap: 12,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <div
             style={{
-              width: 36,
-              height: 36,
-              borderRadius: 10,
+              width: 42,
+              height: 42,
+              borderRadius: 12,
               background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               color: "#fff",
               fontWeight: 900,
-              boxShadow: "0 4px 14px rgba(16,185,129,0.35)",
+              boxShadow: "0 6px 16px rgba(16,185,129,0.3)",
             }}
           >
-            <BadgeDollarSign size={20} />
+            <BadgeDollarSign size={22} />
           </div>
           <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <h2 style={{ fontSize: 16, fontWeight: 800, color: "#ffffff", margin: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <h2 style={{ fontSize: 17, fontWeight: 800, color: "#0f172a", margin: 0 }}>
                 Cash Sales &amp; Revenue Report
               </h2>
               <span
                 style={{
                   fontSize: 10,
-                  fontWeight: 700,
-                  padding: "2px 8px",
+                  fontWeight: 800,
+                  padding: "3px 10px",
                   borderRadius: 20,
-                  background: "rgba(16,185,129,0.18)",
-                  border: "1px solid rgba(16,185,129,0.4)",
-                  color: "#34d399",
+                  background: "#ecfdf5",
+                  border: "1px solid #a7f3d0",
+                  color: "#059669",
                   textTransform: "uppercase",
+                  letterSpacing: 0.5,
                 }}
               >
                 ● Paid Sales Only
               </span>
             </div>
-            <div style={{ fontSize: 11, color: "#64748b" }}>
+            <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
               Settled revenue records, tender breakdown, stock deduction history, and receipt audit
             </div>
           </div>
@@ -276,23 +279,24 @@ export default function CashSales() {
           <div
             style={{
               display: "flex",
-              background: "rgba(255,255,255,0.06)",
-              padding: 3,
-              borderRadius: 10,
-              border: "1px solid rgba(255,255,255,0.08)",
+              background: "#f1f5f9",
+              padding: 4,
+              borderRadius: 12,
+              border: "1px solid #e2e8f0",
             }}
           >
             <button
               onClick={() => setActiveTab("report")}
               style={{
-                padding: "6px 14px",
-                borderRadius: 8,
+                padding: "7px 15px",
+                borderRadius: 9,
                 border: "none",
                 background: activeTab === "report" ? "linear-gradient(135deg, #10b981 0%, #059669 100%)" : "transparent",
-                color: activeTab === "report" ? "#fff" : "#94a3b8",
+                color: activeTab === "report" ? "#fff" : "#475569",
                 fontWeight: 700,
                 fontSize: 12,
                 cursor: "pointer",
+                boxShadow: activeTab === "report" ? "0 2px 6px rgba(16,185,129,0.25)" : "none",
               }}
             >
               Sales Report ({filteredSales.length})
@@ -300,14 +304,15 @@ export default function CashSales() {
             <button
               onClick={() => setActiveTab("settle")}
               style={{
-                padding: "6px 14px",
-                borderRadius: 8,
+                padding: "7px 15px",
+                borderRadius: 9,
                 border: "none",
                 background: activeTab === "settle" ? "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)" : "transparent",
-                color: activeTab === "settle" ? "#fff" : "#94a3b8",
+                color: activeTab === "settle" ? "#fff" : "#475569",
                 fontWeight: 700,
                 fontSize: 12,
                 cursor: "pointer",
+                boxShadow: activeTab === "settle" ? "0 2px 6px rgba(217,119,6,0.25)" : "none",
               }}
             >
               Settle Pending Orders ({pendingOrders.length})
@@ -319,14 +324,14 @@ export default function CashSales() {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 6,
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              padding: "4px 10px",
-              borderRadius: 8,
+              gap: 8,
+              background: "#f8fafc",
+              border: "1.5px solid #e2e8f0",
+              padding: "6px 12px",
+              borderRadius: 10,
             }}
           >
-            <Calendar size={13} color="#94a3b8" />
+            <Calendar size={14} color="#64748b" />
             <input
               type="date"
               value={dateVal}
@@ -334,8 +339,9 @@ export default function CashSales() {
               style={{
                 background: "transparent",
                 border: "none",
-                color: "#e2e8f0",
+                color: "#0f172a",
                 fontSize: 12,
+                fontWeight: 600,
                 outline: "none",
                 cursor: "pointer",
               }}
@@ -351,21 +357,30 @@ export default function CashSales() {
               display: "flex",
               alignItems: "center",
               gap: 6,
-              padding: "6px 12px",
-              borderRadius: 8,
-              border: "1px solid rgba(255,255,255,0.1)",
-              background: "rgba(255,255,255,0.05)",
-              color: "#94a3b8",
-              fontWeight: 600,
+              padding: "7px 14px",
+              borderRadius: 10,
+              border: "1.5px solid #e2e8f0",
+              background: "#f8fafc",
+              color: "#475569",
+              fontWeight: 700,
               fontSize: 12,
               cursor: "pointer",
             }}
           >
-            <RefreshCw size={12} />
+            <RefreshCw size={13} />
             Refresh
           </button>
 
-          <div style={{ fontSize: 13, fontWeight: 700, color: "#10b981", fontVariantNumeric: "tabular-nums" }}>
+          <div style={{
+            fontSize: 13,
+            fontWeight: 800,
+            color: "#059669",
+            background: "#ecfdf5",
+            border: "1px solid #a7f3d0",
+            padding: "5px 12px",
+            borderRadius: 8,
+            fontVariantNumeric: "tabular-nums",
+          }}>
             {clock.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
           </div>
         </div>
@@ -385,30 +400,34 @@ export default function CashSales() {
             {
               label: "Total Cash Sales", value: ETB(totalRevenue),
               sub: `${totalTxnCount} completed sales`,
-              color: "#10b981", glow: "rgba(16,185,129,0.3)",
-              bg: "linear-gradient(135deg, rgba(16,185,129,0.18) 0%, rgba(5,150,105,0.1) 100%)",
-              border: "rgba(16,185,129,0.35)", icon: "💰",
+              color: "#059669", glow: "rgba(5,150,105,0.12)",
+              bg: "#ffffff",
+              border: "#e2e8f0", icon: "💰",
+              stripe: "linear-gradient(90deg, #10b981, #047857)",
             },
             {
               label: "Cash Tendered", value: ETB(totalCash),
               sub: "Physical cash in drawer",
-              color: "#34d399", glow: "rgba(52,211,153,0.25)",
-              bg: "linear-gradient(135deg, rgba(52,211,153,0.16) 0%, rgba(16,185,129,0.08) 100%)",
-              border: "rgba(52,211,153,0.3)", icon: "💵",
+              color: "#0d9488", glow: "rgba(13,148,136,0.12)",
+              bg: "#ffffff",
+              border: "#e2e8f0", icon: "💵",
+              stripe: "linear-gradient(90deg, #14b8a6, #0f766e)",
             },
             {
               label: "Telebirr Sales", value: ETB(totalTelebirr),
               sub: "Digital wallet settlement",
-              color: "#60a5fa", glow: "rgba(96,165,250,0.25)",
-              bg: "linear-gradient(135deg, rgba(96,165,250,0.16) 0%, rgba(59,130,246,0.08) 100%)",
-              border: "rgba(96,165,250,0.3)", icon: "📱",
+              color: "#2563eb", glow: "rgba(37,99,235,0.12)",
+              bg: "#ffffff",
+              border: "#e2e8f0", icon: "📱",
+              stripe: "linear-gradient(90deg, #3b82f6, #1d4ed8)",
             },
             {
               label: "Card / POS Terminal", value: ETB(totalCard),
               sub: "Bank credit/debit card",
-              color: "#fbbf24", glow: "rgba(251,191,36,0.25)",
-              bg: "linear-gradient(135deg, rgba(251,191,36,0.16) 0%, rgba(245,158,11,0.08) 100%)",
-              border: "rgba(251,191,36,0.3)", icon: "💳",
+              color: "#d97706", glow: "rgba(217,119,6,0.12)",
+              bg: "#ffffff",
+              border: "#e2e8f0", icon: "💳",
+              stripe: "linear-gradient(90deg, #f59e0b, #b45309)",
             },
           ].map((k, i) => (
             <div
@@ -424,18 +443,18 @@ export default function CashSales() {
                 gap: 6,
                 position: "relative",
                 overflow: "hidden",
-                boxShadow: `0 8px 30px ${k.glow}, inset 0 1px 0 rgba(255,255,255,0.08)`,
+                boxShadow: `0 4px 18px ${k.glow}, 0 1px 3px rgba(0,0,0,0.03)`,
                 animationDelay: `${i * 0.07}s`,
               }}
             >
               {/* Top shimmer line */}
               <div style={{
-                position: "absolute", top: 0, left: 0, right: 0, height: 2,
-                background: `linear-gradient(90deg, transparent, ${k.color}, transparent)`,
+                position: "absolute", top: 0, left: 0, right: 0, height: 3,
+                background: k.stripe,
                 borderRadius: "18px 18px 0 0",
               }} />
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.8 }}>
+                <span style={{ fontSize: 11, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.8 }}>
                   {k.label}
                 </span>
                 <span style={{ fontSize: 22 }}>{k.icon}</span>
@@ -444,10 +463,10 @@ export default function CashSales() {
                 {k.value}
               </div>
               <span style={{
-                fontSize: 11, color: "#64748b",
-                display: "flex", alignItems: "center", gap: 4,
+                fontSize: 11.5, color: "#64748b",
+                display: "flex", alignItems: "center", gap: 5,
               }}>
-                <span style={{ width: 6, height: 6, borderRadius: "50%", background: k.color, display: "inline-block", opacity: 0.7 }} />
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: k.color, display: "inline-block" }} />
                 {k.sub}
               </span>
             </div>
@@ -461,9 +480,9 @@ export default function CashSales() {
           {/* Search */}
           <div style={{ flex: 1, minWidth: 260, position: "relative" }}>
             <Search
-              size={15}
-              color="#64748b"
-              style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)" }}
+              size={16}
+              color="#94a3b8"
+              style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }}
             />
             <input
               value={searchQ}
@@ -472,21 +491,22 @@ export default function CashSales() {
               style={{
                 width: "100%",
                 boxSizing: "border-box",
-                padding: "8px 12px 8px 36px",
-                background: "rgba(255,255,255,0.05)",
-                border: "1.5px solid rgba(255,255,255,0.1)",
-                borderRadius: 10,
-                color: "#fff",
-                fontSize: 12,
+                padding: "10px 14px 10px 40px",
+                background: "#ffffff",
+                border: "1.5px solid #cbd5e1",
+                borderRadius: 12,
+                color: "#0f172a",
+                fontSize: 13,
                 outline: "none",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
               }}
             />
             {searchQ && (
               <button
                 onClick={() => setSearchQ("")}
-                style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "#64748b", cursor: "pointer" }}
+                style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "#94a3b8", cursor: "pointer" }}
               >
-                <X size={14} />
+                <X size={15} />
               </button>
             )}
           </div>
@@ -500,14 +520,15 @@ export default function CashSales() {
                   key={m}
                   onClick={() => setPayMethodFilter(m)}
                   style={{
-                    padding: "6px 12px",
-                    borderRadius: 8,
-                    border: active ? "1.5px solid #10b981" : "1px solid rgba(255,255,255,0.08)",
-                    background: active ? "rgba(16,185,129,0.2)" : "rgba(255,255,255,0.03)",
-                    color: active ? "#34d399" : "#94a3b8",
-                    fontWeight: 700,
-                    fontSize: 11,
+                    padding: "7px 14px",
+                    borderRadius: 50,
+                    border: active ? "1.5px solid #059669" : "1.5px solid #e2e8f0",
+                    background: active ? "linear-gradient(135deg, #10b981 0%, #059669 100%)" : "#ffffff",
+                    color: active ? "#ffffff" : "#475569",
+                    fontWeight: active ? 800 : 600,
+                    fontSize: 11.5,
                     cursor: "pointer",
+                    boxShadow: active ? "0 2px 8px rgba(16,185,129,0.25)" : "none",
                   }}
                 >
                   {m === "all" ? "All Methods" : m}
@@ -525,59 +546,77 @@ export default function CashSales() {
            ══════════════════════════════════════════════════════════ */}
         {activeTab === "report" && (
           loading ? (
-            <div style={{ textAlign: "center", padding: "60px 0" }}>
-              <RefreshCw size={32} color="#10b981" style={{ animation: "spin 1s linear infinite" }} />
-              <p style={{ marginTop: 12, color: "#94a3b8", fontSize: 13 }}>Loading Sales Report...</p>
+            <div style={{ textAlign: "center", padding: "70px 0" }}>
+              <RefreshCw size={34} color="#10b981" style={{ animation: "spin 1s linear infinite" }} />
+              <p style={{ marginTop: 12, color: "#64748b", fontSize: 13, fontWeight: 600 }}>Loading Sales Report...</p>
             </div>
           ) : filteredSales.length === 0 ? (
             <div
               style={{
                 textAlign: "center",
-                padding: "60px 20px",
-                background: "rgba(255,255,255,0.02)",
-                borderRadius: 16,
-                border: "1px dashed rgba(255,255,255,0.08)",
+                padding: "64px 20px",
+                background: "#ffffff",
+                borderRadius: 20,
+                border: "2px dashed #cbd5e1",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.03)",
               }}
             >
-              <ReceiptText size={40} color="#64748b" style={{ opacity: 0.4, marginBottom: 10 }} />
-              <p style={{ fontSize: 14, fontWeight: 700, color: "#94a3b8" }}>No Completed Sales Found</p>
-              <p style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>
+              <div
+                style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: "50%",
+                  background: "#ecfdf5",
+                  border: "1px solid #a7f3d0",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: 14,
+                }}
+              >
+                <ReceiptText size={30} color="#059669" />
+              </div>
+              <p style={{ fontSize: 16, fontWeight: 800, color: "#0f172a", margin: 0 }}>
+                No Completed Sales Found
+              </p>
+              <p style={{ fontSize: 13, color: "#64748b", marginTop: 6, maxWidth: 460, marginLeft: "auto", marginRight: "auto" }}>
                 This report only includes paid/completed sales. Held or voided orders are excluded.
               </p>
             </div>
           ) : (
             <div
               style={{
-                background: "rgba(0,0,0,0.25)",
-                border: "1.5px solid rgba(255,255,255,0.08)",
-                borderRadius: 16,
+                background: "#ffffff",
+                border: "1.5px solid #e2e8f0",
+                borderRadius: 18,
                 overflow: "hidden",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.04)",
               }}
             >
               <div style={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: 12 }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: 12.5 }}>
                   <thead>
                     <tr
                       style={{
-                        background: "rgba(255,255,255,0.04)",
-                        borderBottom: "1.5px solid rgba(255,255,255,0.08)",
-                        color: "#94a3b8",
+                        background: "#f8fafc",
+                        borderBottom: "2px solid #e2e8f0",
+                        color: "#475569",
                         fontWeight: 800,
                         textTransform: "uppercase",
-                        letterSpacing: 0.5,
+                        letterSpacing: 0.6,
                         fontSize: 11,
                       }}
                     >
-                      <th style={{ padding: "12px 14px" }}>Reference #</th>
-                      <th style={{ padding: "12px 14px" }}>Products Sold (Code &amp; Name)</th>
-                      <th style={{ padding: "12px 14px" }}>Table</th>
-                      <th style={{ padding: "12px 14px" }}>Waiter</th>
-                      <th style={{ padding: "12px 14px" }}>Cashier</th>
-                      <th style={{ padding: "12px 14px" }}>Time</th>
-                      <th style={{ padding: "12px 14px" }}>Method</th>
-                      <th style={{ padding: "12px 14px", textAlign: "right" }}>Total</th>
-                      <th style={{ padding: "12px 14px", textAlign: "center" }}>Sales Status</th>
-                      <th style={{ padding: "12px 14px", textAlign: "center" }}>Actions</th>
+                      <th style={{ padding: "13px 16px" }}>Reference #</th>
+                      <th style={{ padding: "13px 16px" }}>Products Sold (Code &amp; Name)</th>
+                      <th style={{ padding: "13px 16px" }}>Table</th>
+                      <th style={{ padding: "13px 16px" }}>Waiter</th>
+                      <th style={{ padding: "13px 16px" }}>Cashier</th>
+                      <th style={{ padding: "13px 16px" }}>Time</th>
+                      <th style={{ padding: "13px 16px" }}>Method</th>
+                      <th style={{ padding: "13px 16px", textAlign: "right" }}>Total</th>
+                      <th style={{ padding: "13px 16px", textAlign: "center" }}>Sales Status</th>
+                      <th style={{ padding: "13px 16px", textAlign: "center" }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -588,21 +627,21 @@ export default function CashSales() {
                           style={{
                             display: "inline-flex",
                             alignItems: "center",
-                            gap: 4,
-                            background: "rgba(255,255,255,0.05)",
-                            border: "1px solid rgba(255,255,255,0.08)",
-                            padding: "2px 8px",
-                            borderRadius: 6,
+                            gap: 5,
+                            background: "#f8fafc",
+                            border: "1px solid #e2e8f0",
+                            padding: "3px 9px",
+                            borderRadius: 8,
                             marginRight: 6,
                             marginBottom: 4,
-                            fontSize: 11,
+                            fontSize: 11.5,
                           }}
                         >
                           {it.productCode && (
-                            <span style={{ color: "#38bdf8", fontWeight: 700 }}>#{it.productCode}</span>
+                            <span style={{ color: "#2563eb", fontWeight: 700 }}>#{it.productCode}</span>
                           )}
-                          <span style={{ color: "#ffffff", fontWeight: 600 }}>{it.productName}</span>
-                          <span style={{ color: "#10b981", fontWeight: 800 }}>x{it.quantity}</span>
+                          <span style={{ color: "#0f172a", fontWeight: 600 }}>{it.productName}</span>
+                          <span style={{ color: "#059669", fontWeight: 800 }}>x{it.quantity}</span>
                         </span>
                       ));
 
@@ -611,12 +650,12 @@ export default function CashSales() {
                           key={s._id}
                           className="sale-row"
                           style={{
-                            borderBottom: "1px solid rgba(255,255,255,0.05)",
+                            borderBottom: "1px solid #f1f5f9",
                             transition: "background 0.15s",
                           }}
                         >
                           {/* Reference Button */}
-                          <td style={{ padding: "12px 14px", verticalAlign: "middle" }}>
+                          <td style={{ padding: "13px 16px", verticalAlign: "middle" }}>
                             <button
                               type="button"
                               className="ref-btn"
@@ -625,38 +664,38 @@ export default function CashSales() {
                               style={{
                                 display: "inline-flex",
                                 alignItems: "center",
-                                gap: 5,
-                                padding: "4px 10px",
+                                gap: 6,
+                                padding: "5px 12px",
                                 borderRadius: 8,
-                                background: "rgba(16,185,129,0.15)",
-                                border: "1px solid rgba(16,185,129,0.4)",
-                                color: "#34d399",
+                                background: "#ecfdf5",
+                                border: "1.5px solid #a7f3d0",
+                                color: "#047857",
                                 fontWeight: 800,
                                 fontSize: 12,
                                 cursor: "pointer",
                                 transition: "all 0.15s",
                               }}
                             >
-                              <FileText size={12} />
+                              <FileText size={13} />
                               #{s.orderNo}
                             </button>
                           </td>
 
                           {/* Products Sold */}
-                          <td style={{ padding: "12px 14px", verticalAlign: "middle", maxWidth: 360 }}>
+                          <td style={{ padding: "13px 16px", verticalAlign: "middle", maxWidth: 360 }}>
                             <div style={{ display: "flex", flexWrap: "wrap" }}>{itemsSummary}</div>
                           </td>
 
                           {/* Table */}
-                          <td style={{ padding: "12px 14px", verticalAlign: "middle", whiteSpace: "nowrap" }}>
+                          <td style={{ padding: "13px 16px", verticalAlign: "middle", whiteSpace: "nowrap" }}>
                             <span
                               style={{
-                                background: "rgba(59,130,246,0.12)",
-                                border: "1px solid rgba(59,130,246,0.3)",
-                                color: "#60a5fa",
+                                background: "#eff6ff",
+                                border: "1px solid #bfdbfe",
+                                color: "#1d4ed8",
                                 fontWeight: 700,
-                                fontSize: 11,
-                                padding: "3px 8px",
+                                fontSize: 11.5,
+                                padding: "4px 10px",
                                 borderRadius: 6,
                               }}
                             >
@@ -665,21 +704,21 @@ export default function CashSales() {
                           </td>
 
                           {/* Waiter */}
-                          <td style={{ padding: "12px 14px", verticalAlign: "middle", whiteSpace: "nowrap" }}>
-                            <span style={{ color: "#c084fc", fontWeight: 600 }}>
+                          <td style={{ padding: "13px 16px", verticalAlign: "middle", whiteSpace: "nowrap" }}>
+                            <span style={{ color: "#6d28d9", fontWeight: 700, background: "#f5f3ff", border: "1px solid #ddd6fe", padding: "3px 9px", borderRadius: 6 }}>
                               👤 {s.waiterName || "—"}
                             </span>
                           </td>
 
                           {/* Cashier */}
-                          <td style={{ padding: "12px 14px", verticalAlign: "middle", whiteSpace: "nowrap" }}>
-                            <span style={{ color: "#94a3b8", fontWeight: 600 }}>
+                          <td style={{ padding: "13px 16px", verticalAlign: "middle", whiteSpace: "nowrap" }}>
+                            <span style={{ color: "#475569", fontWeight: 600 }}>
                               {s.cashierName || "Staff"}
                             </span>
                           </td>
 
                           {/* Time */}
-                          <td style={{ padding: "12px 14px", verticalAlign: "middle", whiteSpace: "nowrap", color: "#94a3b8" }}>
+                          <td style={{ padding: "13px 16px", verticalAlign: "middle", whiteSpace: "nowrap", color: "#64748b", fontWeight: 500 }}>
                             {new Date(s.createdAt).toLocaleTimeString("en-US", {
                               hour: "2-digit",
                               minute: "2-digit",
@@ -688,24 +727,31 @@ export default function CashSales() {
                           </td>
 
                           {/* Payment Method */}
-                          <td style={{ padding: "12px 14px", verticalAlign: "middle", whiteSpace: "nowrap" }}>
+                          <td style={{ padding: "13px 16px", verticalAlign: "middle", whiteSpace: "nowrap" }}>
                             <span
                               style={{
                                 background:
                                   s.paymentMethod === "Cash"
-                                    ? "rgba(16,185,129,0.15)"
+                                    ? "#ecfdf5"
                                     : s.paymentMethod === "Telebirr"
-                                    ? "rgba(59,130,246,0.15)"
-                                    : "rgba(245,158,11,0.15)",
+                                    ? "#eff6ff"
+                                    : "#fffbeb",
+                                border: `1px solid ${
+                                  s.paymentMethod === "Cash"
+                                    ? "#a7f3d0"
+                                    : s.paymentMethod === "Telebirr"
+                                    ? "#bfdbfe"
+                                    : "#fde68a"
+                                }`,
                                 color:
                                   s.paymentMethod === "Cash"
-                                    ? "#34d399"
+                                    ? "#047857"
                                     : s.paymentMethod === "Telebirr"
-                                    ? "#60a5fa"
-                                    : "#fbbf24",
-                                fontWeight: 700,
+                                    ? "#1d4ed8"
+                                    : "#b45309",
+                                fontWeight: 800,
                                 fontSize: 11,
-                                padding: "2px 8px",
+                                padding: "3px 9px",
                                 borderRadius: 6,
                               }}
                             >
@@ -714,55 +760,56 @@ export default function CashSales() {
                           </td>
 
                           {/* Grand Total */}
-                          <td style={{ padding: "12px 14px", verticalAlign: "middle", textAlign: "right", whiteSpace: "nowrap" }}>
-                            <span style={{ fontWeight: 900, color: "#10b981", fontSize: 13 }}>
+                          <td style={{ padding: "13px 16px", verticalAlign: "middle", textAlign: "right", whiteSpace: "nowrap" }}>
+                            <span style={{ fontWeight: 900, color: "#059669", fontSize: 13.5 }}>
                               {ETB(s.grandTotal)}
                             </span>
                           </td>
 
                           {/* Sales Status (Only Paid/Completed) */}
-                          <td style={{ padding: "12px 14px", verticalAlign: "middle", textAlign: "center", whiteSpace: "nowrap" }}>
+                          <td style={{ padding: "13px 16px", verticalAlign: "middle", textAlign: "center", whiteSpace: "nowrap" }}>
                             <span
                               style={{
-                                background: "rgba(16,185,129,0.15)",
-                                border: "1px solid rgba(16,185,129,0.4)",
-                                color: "#34d399",
-                                padding: "3px 10px",
+                                background: "#ecfdf5",
+                                border: "1.5px solid #a7f3d0",
+                                color: "#047857",
+                                padding: "4px 12px",
                                 borderRadius: 20,
                                 fontSize: 11,
                                 fontWeight: 800,
                                 display: "inline-flex",
                                 alignItems: "center",
-                                gap: 4,
+                                gap: 5,
                               }}
                             >
-                              <CheckCircle2 size={11} />
+                              <CheckCircle2 size={12} />
                               Paid / Sold
                             </span>
                           </td>
 
                           {/* Action Buttons */}
-                          <td style={{ padding: "12px 14px", verticalAlign: "middle", textAlign: "center", whiteSpace: "nowrap" }}>
+                          <td style={{ padding: "13px 16px", verticalAlign: "middle", textAlign: "center", whiteSpace: "nowrap" }}>
                             <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
                               <button
                                 type="button"
                                 onClick={() => setRefOrder(s)}
                                 title="View Reference Details"
                                 style={{
-                                  padding: "5px 10px",
+                                  padding: "6px 11px",
                                   borderRadius: 8,
-                                  border: "1px solid rgba(255,255,255,0.12)",
-                                  background: "rgba(255,255,255,0.05)",
-                                  color: "#e2e8f0",
+                                  border: "1px solid #cbd5e1",
+                                  background: "#ffffff",
+                                  color: "#334155",
                                   fontWeight: 600,
-                                  fontSize: 11,
+                                  fontSize: 11.5,
                                   cursor: "pointer",
                                   display: "flex",
                                   alignItems: "center",
                                   gap: 4,
+                                  boxShadow: "0 1px 2px rgba(0,0,0,0.02)",
                                 }}
                               >
-                                <Eye size={12} />
+                                <Eye size={13} />
                                 Ref
                               </button>
 
@@ -777,17 +824,17 @@ export default function CashSales() {
                                 }
                                 title="Reprint Thermal Receipt"
                                 style={{
-                                  padding: "5px 8px",
+                                  padding: "6px 9px",
                                   borderRadius: 8,
-                                  border: "1px solid rgba(59,130,246,0.3)",
-                                  background: "rgba(59,130,246,0.12)",
-                                  color: "#60a5fa",
+                                  border: "1px solid #bfdbfe",
+                                  background: "#eff6ff",
+                                  color: "#1d4ed8",
                                   fontWeight: 600,
-                                  fontSize: 11,
+                                  fontSize: 11.5,
                                   cursor: "pointer",
                                 }}
                               >
-                                <Printer size={12} />
+                                <Printer size={13} />
                               </button>
                             </div>
                           </td>
@@ -809,15 +856,30 @@ export default function CashSales() {
             <div
               style={{
                 textAlign: "center",
-                padding: "60px 20px",
-                background: "rgba(255,255,255,0.02)",
-                borderRadius: 16,
-                border: "1px dashed rgba(255,255,255,0.08)",
+                padding: "64px 20px",
+                background: "#ffffff",
+                borderRadius: 20,
+                border: "2px dashed #cbd5e1",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.03)",
               }}
             >
-              <CheckCircle2 size={40} color="#10b981" style={{ opacity: 0.6, marginBottom: 10 }} />
-              <p style={{ fontSize: 14, fontWeight: 700, color: "#e2e8f0" }}>All Orders Settled</p>
-              <p style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>
+              <div
+                style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: "50%",
+                  background: "#ecfdf5",
+                  border: "1px solid #a7f3d0",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: 14,
+                }}
+              >
+                <CheckCircle2 size={30} color="#059669" />
+              </div>
+              <p style={{ fontSize: 16, fontWeight: 800, color: "#0f172a", margin: 0 }}>All Orders Settled</p>
+              <p style={{ fontSize: 13, color: "#64748b", marginTop: 6 }}>
                 No active held or open dining table orders awaiting payment.
               </p>
             </div>
@@ -833,25 +895,26 @@ export default function CashSales() {
                 <div
                   key={o._id}
                   style={{
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1.5px solid rgba(255,255,255,0.08)",
-                    borderRadius: 16,
-                    padding: 16,
+                    background: "#ffffff",
+                    border: "1.5px solid #e2e8f0",
+                    borderRadius: 18,
+                    padding: 18,
                     display: "flex",
                     flexDirection: "column",
-                    gap: 10,
+                    gap: 12,
+                    boxShadow: "0 4px 18px rgba(0,0,0,0.03)",
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <span style={{ fontWeight: 800, fontSize: 14, color: "#38bdf8" }}>#{o.orderNo}</span>
+                    <span style={{ fontWeight: 800, fontSize: 15, color: "#2563eb" }}>#{o.orderNo}</span>
                     <span
                       style={{
-                        background: o.status === "held" ? "rgba(139,92,246,0.15)" : "rgba(245,158,11,0.15)",
-                        border: `1px solid ${o.status === "held" ? "#a855f7" : "#f59e0b"}`,
-                        color: o.status === "held" ? "#c084fc" : "#fbbf24",
-                        padding: "2px 8px",
+                        background: o.status === "held" ? "#f5f3ff" : "#fffbeb",
+                        border: `1px solid ${o.status === "held" ? "#ddd6fe" : "#fde68a"}`,
+                        color: o.status === "held" ? "#7c3aed" : "#d97706",
+                        padding: "3px 9px",
                         borderRadius: 6,
-                        fontSize: 10,
+                        fontSize: 10.5,
                         fontWeight: 800,
                         textTransform: "uppercase",
                       }}
@@ -860,7 +923,7 @@ export default function CashSales() {
                     </span>
                   </div>
 
-                  <div style={{ display: "flex", gap: 10, fontSize: 12, color: "#94a3b8" }}>
+                  <div style={{ display: "flex", gap: 12, fontSize: 12, color: "#64748b", fontWeight: 500 }}>
                     <span>🪑 {o.tableNo || "Counter"}</span>
                     <span>👤 {o.waiterName || "Staff"}</span>
                     <span>👥 {o.guestCount || 1} Guests</span>
@@ -869,31 +932,32 @@ export default function CashSales() {
                   {/* Items list */}
                   <div
                     style={{
-                      background: "rgba(0,0,0,0.25)",
-                      borderRadius: 10,
-                      padding: "8px 10px",
+                      background: "#f8fafc",
+                      border: "1px solid #e2e8f0",
+                      borderRadius: 12,
+                      padding: "10px 12px",
                       display: "flex",
                       flexDirection: "column",
-                      gap: 4,
+                      gap: 5,
                       maxHeight: 120,
                       overflowY: "auto",
-                      fontSize: 11,
+                      fontSize: 11.5,
                     }}
                   >
                     {(o.items || []).map((it, i) => (
                       <div key={i} style={{ display: "flex", justifyContent: "space-between" }}>
-                        <span style={{ color: "#e2e8f0" }}>
-                          {it.productCode && <span style={{ color: "#38bdf8", marginRight: 4 }}>#{it.productCode}</span>}
-                          {it.productName} x{it.quantity}
+                        <span style={{ color: "#0f172a" }}>
+                          {it.productCode && <span style={{ color: "#2563eb", marginRight: 5, fontWeight: 700 }}>#{it.productCode}</span>}
+                          {it.productName} <strong style={{ color: "#b45309" }}>x{it.quantity}</strong>
                         </span>
-                        <span style={{ color: "#94a3b8" }}>{ETB(it.totalPrice)}</span>
+                        <span style={{ color: "#64748b", fontWeight: 600 }}>{ETB(it.totalPrice)}</span>
                       </div>
                     ))}
                   </div>
 
                   <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", paddingTop: 4 }}>
-                    <span style={{ fontSize: 11, color: "#94a3b8" }}>Payable Amount:</span>
-                    <span style={{ fontSize: 18, fontWeight: 900, color: "#10b981" }}>{ETB(o.grandTotal)}</span>
+                    <span style={{ fontSize: 11.5, color: "#64748b", fontWeight: 600 }}>Payable Amount:</span>
+                    <span style={{ fontSize: 19, fontWeight: 900, color: "#059669" }}>{ETB(o.grandTotal)}</span>
                   </div>
 
                   <button
@@ -905,8 +969,8 @@ export default function CashSales() {
                     }}
                     style={{
                       width: "100%",
-                      padding: 10,
-                      borderRadius: 10,
+                      padding: 12,
+                      borderRadius: 12,
                       border: "none",
                       background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
                       color: "#fff",
@@ -917,9 +981,10 @@ export default function CashSales() {
                       alignItems: "center",
                       justifyContent: "center",
                       gap: 6,
+                      boxShadow: "0 4px 14px rgba(16,185,129,0.3)",
                     }}
                   >
-                    <BadgeDollarSign size={15} />
+                    <BadgeDollarSign size={16} />
                     Settle &amp; Convert to Cash Sale
                   </button>
                 </div>
@@ -938,8 +1003,8 @@ export default function CashSales() {
             position: "fixed",
             inset: 0,
             zIndex: 600,
-            background: "rgba(0,0,0,0.75)",
-            backdropFilter: "blur(8px)",
+            background: "rgba(15,23,42,0.55)",
+            backdropFilter: "blur(6px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -949,16 +1014,16 @@ export default function CashSales() {
         >
           <div
             style={{
-              background: "linear-gradient(135deg,#0c1533,#0f1f4d)",
-              border: "1.5px solid rgba(16,185,129,0.35)",
-              borderRadius: 20,
+              background: "#ffffff",
+              border: "1px solid #e2e8f0",
+              borderRadius: 22,
               padding: 26,
               width: "100%",
               maxWidth: 640,
               maxHeight: "90vh",
               display: "flex",
               flexDirection: "column",
-              boxShadow: "0 30px 80px rgba(0,0,0,0.6)",
+              boxShadow: "0 25px 60px rgba(15,23,42,0.18)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -966,16 +1031,16 @@ export default function CashSales() {
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <h3 style={{ fontSize: 18, fontWeight: 900, color: "#fff", margin: 0 }}>
+                  <h3 style={{ fontSize: 18, fontWeight: 900, color: "#0f172a", margin: 0 }}>
                     Sale Reference #{refOrder.orderNo}
                   </h3>
                   <span
                     style={{
-                      background: "rgba(16,185,129,0.15)",
-                      border: "1px solid rgba(16,185,129,0.4)",
-                      color: "#34d399",
-                      padding: "2px 10px",
-                      borderRadius: 12,
+                      background: "#ecfdf5",
+                      border: "1px solid #a7f3d0",
+                      color: "#059669",
+                      padding: "3px 10px",
+                      borderRadius: 14,
                       fontSize: 11,
                       fontWeight: 800,
                     }}
@@ -983,11 +1048,11 @@ export default function CashSales() {
                     ✓ Paid / Completed
                   </span>
                 </div>
-                <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 4 }}>
-                  Table: <strong style={{ color: "#38bdf8" }}>{refOrder.tableNo || "Counter"}</strong> | Waiter:{" "}
-                  <strong style={{ color: "#c084fc" }}>{refOrder.waiterName || "—"}</strong> | Cashier:{" "}
-                  <strong style={{ color: "#fff" }}>{refOrder.cashierName}</strong> | Method:{" "}
-                  <strong style={{ color: "#fbbf24" }}>{refOrder.paymentMethod}</strong>
+                <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>
+                  Table: <strong style={{ color: "#2563eb" }}>{refOrder.tableNo || "Counter"}</strong> | Waiter:{" "}
+                  <strong style={{ color: "#7c3aed" }}>{refOrder.waiterName || "—"}</strong> | Cashier:{" "}
+                  <strong style={{ color: "#0f172a" }}>{refOrder.cashierName}</strong> | Method:{" "}
+                  <strong style={{ color: "#d97706" }}>{refOrder.paymentMethod}</strong>
                 </div>
               </div>
 
@@ -995,12 +1060,12 @@ export default function CashSales() {
                 type="button"
                 onClick={() => setRefOrder(null)}
                 style={{
-                  background: "rgba(255,255,255,0.08)",
+                  background: "#f1f5f9",
                   border: "none",
-                  borderRadius: 8,
-                  color: "#94a3b8",
+                  borderRadius: 10,
+                  color: "#64748b",
                   cursor: "pointer",
-                  padding: 6,
+                  padding: 8,
                 }}
               >
                 <X size={16} />
@@ -1012,42 +1077,42 @@ export default function CashSales() {
               style={{
                 flex: 1,
                 overflowY: "auto",
-                border: "1px solid rgba(255,255,255,0.08)",
-                borderRadius: 12,
+                border: "1px solid #e2e8f0",
+                borderRadius: 14,
                 marginBottom: 16,
               }}
             >
-              <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: 12 }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: 12.5 }}>
                 <thead>
-                  <tr style={{ background: "rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.08)", color: "#94a3b8" }}>
-                    <th style={{ padding: "8px 12px" }}>Product Code</th>
-                    <th style={{ padding: "8px 12px" }}>Product Name</th>
-                    <th style={{ padding: "8px 12px", textAlign: "center" }}>Qty</th>
-                    <th style={{ padding: "8px 12px", textAlign: "right" }}>Unit Price</th>
-                    <th style={{ padding: "8px 12px", textAlign: "right" }}>Line Total</th>
+                  <tr style={{ background: "#f8fafc", borderBottom: "1.5px solid #e2e8f0", color: "#475569", fontWeight: 700 }}>
+                    <th style={{ padding: "10px 14px" }}>Product Code</th>
+                    <th style={{ padding: "10px 14px" }}>Product Name</th>
+                    <th style={{ padding: "10px 14px", textAlign: "center" }}>Qty</th>
+                    <th style={{ padding: "10px 14px", textAlign: "right" }}>Unit Price</th>
+                    <th style={{ padding: "10px 14px", textAlign: "right" }}>Line Total</th>
                   </tr>
                 </thead>
                 <tbody>
                   {(refOrder.items || []).map((it, idx) => (
-                    <tr key={idx} style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-                      <td style={{ padding: "8px 12px", color: "#38bdf8", fontWeight: 700 }}>
+                    <tr key={idx} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                      <td style={{ padding: "10px 14px", color: "#2563eb", fontWeight: 700 }}>
                         #{it.productCode || "—"}
                       </td>
-                      <td style={{ padding: "8px 12px", color: "#ffffff", fontWeight: 600 }}>
+                      <td style={{ padding: "10px 14px", color: "#0f172a", fontWeight: 600 }}>
                         {it.productName}
                         {it.notes && (
-                          <div style={{ fontSize: 10, color: "#fbbf24", fontStyle: "italic", marginTop: 2 }}>
+                          <div style={{ fontSize: 11, color: "#d97706", fontStyle: "italic", marginTop: 2 }}>
                             ↳ {it.notes}
                           </div>
                         )}
                       </td>
-                      <td style={{ padding: "8px 12px", textAlign: "center", fontWeight: 800, color: "#e2e8f0" }}>
+                      <td style={{ padding: "10px 14px", textAlign: "center", fontWeight: 800, color: "#0f172a" }}>
                         {it.quantity}
                       </td>
-                      <td style={{ padding: "8px 12px", textAlign: "right", color: "#94a3b8" }}>
+                      <td style={{ padding: "10px 14px", textAlign: "right", color: "#64748b" }}>
                         {ETB(it.unitPrice)}
                       </td>
-                      <td style={{ padding: "8px 12px", textAlign: "right", fontWeight: 800, color: "#10b981" }}>
+                      <td style={{ padding: "10px 14px", textAlign: "right", fontWeight: 800, color: "#059669" }}>
                         {ETB(it.totalPrice)}
                       </td>
                     </tr>
@@ -1062,23 +1127,24 @@ export default function CashSales() {
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                padding: "10px 14px",
-                background: "rgba(0,0,0,0.3)",
-                borderRadius: 12,
+                padding: "12px 16px",
+                background: "#f8fafc",
+                border: "1px solid #e2e8f0",
+                borderRadius: 14,
                 marginBottom: 16,
               }}
             >
-              <div style={{ fontSize: 12, color: "#94a3b8" }}>
-                <span>Subtotal: {ETB(refOrder.subtotal)}</span>
+              <div style={{ fontSize: 12.5, color: "#64748b" }}>
+                <span>Subtotal: <strong style={{ color: "#0f172a" }}>{ETB(refOrder.subtotal)}</strong></span>
                 {refOrder.discountAmount > 0 && (
-                  <span style={{ marginLeft: 10, color: "#fbbf24" }}>Discount: -{ETB(refOrder.discountAmount)}</span>
+                  <span style={{ marginLeft: 12, color: "#d97706" }}>Discount: -{ETB(refOrder.discountAmount)}</span>
                 )}
-                <span style={{ marginLeft: 10 }}>Tax: {ETB(refOrder.taxAmount)}</span>
+                <span style={{ marginLeft: 12 }}>Tax: <strong style={{ color: "#0f172a" }}>{ETB(refOrder.taxAmount)}</strong></span>
                 {refOrder.amountPaid > 0 && (
-                  <span style={{ marginLeft: 10, color: "#60a5fa" }}>Tendered: {ETB(refOrder.amountPaid)}</span>
+                  <span style={{ marginLeft: 12, color: "#2563eb" }}>Tendered: <strong style={{ color: "#0f172a" }}>{ETB(refOrder.amountPaid)}</strong></span>
                 )}
               </div>
-              <div style={{ fontSize: 20, fontWeight: 900, color: "#10b981" }}>
+              <div style={{ fontSize: 20, fontWeight: 900, color: "#059669" }}>
                 TOTAL: {ETB(refOrder.grandTotal)}
               </div>
             </div>
@@ -1095,17 +1161,18 @@ export default function CashSales() {
                   })
                 }
                 style={{
-                  padding: "10px 16px",
+                  padding: "9px 16px",
                   borderRadius: 10,
-                  border: "1px solid rgba(59,130,246,0.5)",
-                  background: "rgba(59,130,246,0.15)",
-                  color: "#60a5fa",
+                  border: "none",
+                  background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                  color: "#ffffff",
                   fontWeight: 700,
                   fontSize: 12,
                   cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
                   gap: 6,
+                  boxShadow: "0 2px 6px rgba(16,185,129,0.3)",
                 }}
               >
                 <Printer size={14} />
@@ -1116,11 +1183,11 @@ export default function CashSales() {
                 type="button"
                 onClick={() => setRefOrder(null)}
                 style={{
-                  padding: "10px 18px",
+                  padding: "9px 18px",
                   borderRadius: 10,
-                  border: "1px solid rgba(255,255,255,0.15)",
-                  background: "rgba(255,255,255,0.06)",
-                  color: "#e2e8f0",
+                  border: "1.5px solid #cbd5e1",
+                  background: "#ffffff",
+                  color: "#334155",
                   fontWeight: 700,
                   fontSize: 12,
                   cursor: "pointer",
@@ -1142,8 +1209,8 @@ export default function CashSales() {
             position: "fixed",
             inset: 0,
             zIndex: 600,
-            background: "rgba(0,0,0,0.75)",
-            backdropFilter: "blur(8px)",
+            background: "rgba(15,23,42,0.55)",
+            backdropFilter: "blur(6px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -1153,29 +1220,29 @@ export default function CashSales() {
         >
           <div
             style={{
-              background: "linear-gradient(135deg,#0c1533,#0f1f4d)",
-              border: "1.5px solid rgba(16,185,129,0.35)",
-              borderRadius: 20,
+              background: "#ffffff",
+              border: "1px solid #e2e8f0",
+              borderRadius: 22,
               padding: 26,
               width: "100%",
-              maxWidth: 420,
-              boxShadow: "0 30px 80px rgba(0,0,0,0.6)",
+              maxWidth: 440,
+              boxShadow: "0 25px 60px rgba(15,23,42,0.18)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
               <div>
-                <h3 style={{ fontSize: 18, fontWeight: 900, color: "#fff", margin: 0 }}>
+                <h3 style={{ fontSize: 18, fontWeight: 900, color: "#0f172a", margin: 0 }}>
                   Settle Order #{settleOrder.orderNo}
                 </h3>
-                <div style={{ fontSize: 11, color: "#64748b", marginTop: 2 }}>
-                  Table: {settleOrder.tableNo || "Counter"} | Waiter: {settleOrder.waiterName || "Staff"}
+                <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
+                  Table: <strong style={{ color: "#2563eb" }}>{settleOrder.tableNo || "Counter"}</strong> | Waiter: <strong style={{ color: "#7c3aed" }}>{settleOrder.waiterName || "Staff"}</strong>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setSettleOrder(null)}
-                style={{ background: "rgba(255,255,255,0.08)", border: "none", borderRadius: 8, color: "#94a3b8", cursor: "pointer", padding: 6 }}
+                style={{ background: "#f1f5f9", border: "none", borderRadius: 8, color: "#64748b", cursor: "pointer", padding: 6 }}
               >
                 <X size={16} />
               </button>
@@ -1184,18 +1251,18 @@ export default function CashSales() {
             {/* Total */}
             <div
               style={{
-                background: "rgba(16,185,129,0.12)",
-                border: "1.5px solid rgba(16,185,129,0.25)",
-                borderRadius: 14,
-                padding: "12px 16px",
+                background: "#ecfdf5",
+                border: "1.5px solid #a7f3d0",
+                borderRadius: 16,
+                padding: "14px 18px",
                 marginBottom: 16,
                 textAlign: "center",
               }}
             >
-              <p style={{ color: "#94a3b8", fontSize: 11, marginBottom: 4, textTransform: "uppercase", fontWeight: 700 }}>
+              <p style={{ color: "#047857", fontSize: 11, marginBottom: 4, textTransform: "uppercase", fontWeight: 800, letterSpacing: 0.5 }}>
                 Total Payable
               </p>
-              <p style={{ fontWeight: 900, fontSize: 26, color: "#10b981", margin: 0 }}>
+              <p style={{ fontWeight: 900, fontSize: 28, color: "#059669", margin: 0 }}>
                 {ETB(settleOrder.grandTotal)}
               </p>
             </div>
@@ -1203,33 +1270,34 @@ export default function CashSales() {
             {/* Methods */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8, marginBottom: 16 }}>
               {[
-                ["Cash", Banknote, "#10b981"],
-                ["Telebirr", Smartphone, "#6366f1"],
-                ["Card", CreditCard, "#f59e0b"],
+                ["Cash", Banknote, "#059669"],
+                ["Telebirr", Smartphone, "#2563eb"],
+                ["Card", CreditCard, "#d97706"],
               ].map(([m, Icon, clr]) => (
                 <button
                   key={m}
                   type="button"
                   style={{
-                    padding: "10px 6px",
+                    padding: "12px 6px",
                     borderRadius: 12,
-                    border: settleMethod === m ? `2px solid ${clr}` : "1.5px solid rgba(255,255,255,0.1)",
+                    border: settleMethod === m ? `2px solid ${clr}` : "1.5px solid #e2e8f0",
                     background:
                       settleMethod === m
-                        ? `rgba(${clr === "#10b981" ? "16,185,129" : clr === "#6366f1" ? "99,102,241" : "245,158,11"},0.15)`
-                        : "rgba(255,255,255,0.04)",
-                    color: settleMethod === m ? clr : "#94a3b8",
-                    fontWeight: 700,
+                        ? `${clr}14`
+                        : "#ffffff",
+                    color: settleMethod === m ? clr : "#64748b",
+                    fontWeight: 800,
                     fontSize: 12,
                     cursor: "pointer",
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    gap: 5,
+                    gap: 6,
+                    boxShadow: settleMethod === m ? `0 2px 8px ${clr}25` : "none",
                   }}
                   onClick={() => setSettleMethod(m)}
                 >
-                  <Icon size={18} />
+                  <Icon size={19} />
                   {m}
                 </button>
               ))}
@@ -1238,7 +1306,7 @@ export default function CashSales() {
             {/* Cash Tender */}
             {settleMethod === "Cash" && (
               <div style={{ marginBottom: 16 }}>
-                <p style={{ fontSize: 11, color: "#94a3b8", marginBottom: 6, fontWeight: 700, textTransform: "uppercase" }}>
+                <p style={{ fontSize: 11, color: "#475569", marginBottom: 6, fontWeight: 700, textTransform: "uppercase" }}>
                   Cash Tendered (ETB)
                 </p>
                 <input
@@ -1250,10 +1318,10 @@ export default function CashSales() {
                     width: "100%",
                     boxSizing: "border-box",
                     padding: "10px 14px",
-                    background: "rgba(255,255,255,0.06)",
-                    border: "1.5px solid rgba(255,255,255,0.12)",
+                    background: "#f8fafc",
+                    border: "1.5px solid #cbd5e1",
                     borderRadius: 10,
-                    color: "#fff",
+                    color: "#0f172a",
                     fontSize: 16,
                     fontWeight: 700,
                     outline: "none",
@@ -1266,11 +1334,12 @@ export default function CashSales() {
                       justifyContent: "space-between",
                       marginTop: 8,
                       padding: "8px 12px",
-                      background: "rgba(59,130,246,0.15)",
+                      background: "#eff6ff",
+                      border: "1px solid #bfdbfe",
                       borderRadius: 8,
                       fontSize: 13,
                       fontWeight: 700,
-                      color: "#60a5fa",
+                      color: "#1d4ed8",
                     }}
                   >
                     <span>Change Due:</span>
@@ -1289,12 +1358,12 @@ export default function CashSales() {
                 padding: 14,
                 borderRadius: 14,
                 border: "none",
-                background: settling ? "#374151" : "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                background: settling ? "#94a3b8" : "linear-gradient(135deg, #10b981 0%, #059669 100%)",
                 color: "#fff",
                 fontWeight: 800,
                 fontSize: 15,
                 cursor: settling ? "not-allowed" : "pointer",
-                boxShadow: "0 6px 20px rgba(16,185,129,0.4)",
+                boxShadow: "0 6px 20px rgba(16,185,129,0.35)",
               }}
             >
               {settling ? "Deducting Stock & Completing Sale..." : "Confirm & Print Receipt"}

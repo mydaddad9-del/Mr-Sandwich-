@@ -41,14 +41,14 @@ function Toast({ msg, type = "success", onDone }) {
 }
 
 const STATUS_CONFIG = {
-  all: { label: "All Orders", bg: "rgba(255,255,255,0.06)", border: "rgba(255,255,255,0.12)", color: "#cbd5e1" },
-  held: { label: "Held", bg: "rgba(139,92,246,0.15)", border: "rgba(139,92,246,0.35)", color: "#c084fc" },
-  open: { label: "Open", bg: "rgba(59,130,246,0.15)", border: "rgba(59,130,246,0.35)", color: "#60a5fa" },
-  sent_to_kitchen: { label: "In Kitchen", bg: "rgba(245,158,11,0.15)", border: "rgba(245,158,11,0.35)", color: "#fbbf24" },
-  ready: { label: "Ready", bg: "rgba(20,184,166,0.15)", border: "rgba(20,184,166,0.35)", color: "#2dd4bf" },
-  billed: { label: "Billed", bg: "rgba(99,102,241,0.15)", border: "rgba(99,102,241,0.35)", color: "#818cf8" },
-  paid: { label: "Paid", bg: "rgba(16,185,129,0.15)", border: "rgba(16,185,129,0.35)", color: "#34d399" },
-  voided: { label: "Voided", bg: "rgba(239,68,68,0.15)", border: "rgba(239,68,68,0.35)", color: "#f87171" },
+  all: { label: "All Orders", bg: "#f1f5f9", border: "#cbd5e1", color: "#475569" },
+  held: { label: "Held", bg: "#f5f3ff", border: "#ddd6fe", color: "#7c3aed" },
+  open: { label: "Open", bg: "#eff6ff", border: "#bfdbfe", color: "#2563eb" },
+  sent_to_kitchen: { label: "In Kitchen", bg: "#fffbeb", border: "#fde68a", color: "#d97706" },
+  ready: { label: "Ready", bg: "#f0fdf4", border: "#bbf7d0", color: "#16a34a" },
+  billed: { label: "Billed", bg: "#eef2ff", border: "#c7d2fe", color: "#4f46e5" },
+  paid: { label: "Paid", bg: "#ecfdf5", border: "#a7f3d0", color: "#059669" },
+  voided: { label: "Voided", bg: "#fff1f2", border: "#fecdd3", color: "#e11d48" },
 };
 
 export default function CaptainOrder() {
@@ -158,8 +158,8 @@ export default function CaptainOrder() {
         flexDirection: "column",
         height: "100%",
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #070c1e 0%, #0a1128 50%, #0d173d 100%)",
-        color: "#e2e8f0",
+        background: "transparent",
+        color: "#0f172a",
         fontFamily: "'Inter', -apple-system, sans-serif",
       }}
     >
@@ -169,16 +169,16 @@ export default function CaptainOrder() {
         @keyframes spin { to { transform: rotate(360deg) } }
         @keyframes fadeInUp { from { transform: translateY(10px); opacity:0 } to { transform: translateY(0); opacity:1 } }
         .order-row { transition: all 0.15s ease; }
-        .order-row:hover { background: rgba(99,102,241,0.1) !important; transform: translateX(2px); }
+        .order-row:hover { background: #f8fafc !important; transform: translateX(2px); }
         .kpi-card { animation: fadeInUp 0.3s ease both; transition: all 0.2s ease; }
-        .kpi-card:hover { transform: translateY(-3px); }
-        .ref-btn:hover { background: rgba(59,130,246,0.3) !important; border-color: rgba(59,130,246,0.7) !important; transform: scale(1.02); }
+        .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,0.08) !important; }
+        .ref-btn:hover { background: #dbeafe !important; border-color: #3b82f6 !important; transform: scale(1.02); }
         .status-pill { transition: all 0.15s; }
-        .status-pill:hover { transform: scale(1.05); }
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+        .status-pill:hover { transform: scale(1.04); }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
       `}</style>
 
       {/* ── HEADER & TOPBAR ────────────────────────────────────────── */}
@@ -187,52 +187,55 @@ export default function CaptainOrder() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "12px 20px",
-          borderBottom: "1px solid rgba(255,255,255,0.08)",
-          background: "rgba(0,0,0,0.35)",
-          backdropFilter: "blur(12px)",
+          padding: "16px 22px",
+          border: "1px solid #e2e8f0",
+          borderRadius: 18,
+          background: "#ffffff",
+          boxShadow: "0 2px 10px rgba(0,0,0,0.03)",
+          margin: "12px 20px 0",
           flexWrap: "wrap",
           gap: 12,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <div
             style={{
-              width: 36,
-              height: 36,
-              borderRadius: 10,
+              width: 42,
+              height: 42,
+              borderRadius: 12,
               background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               color: "#fff",
               fontWeight: 900,
-              boxShadow: "0 4px 14px rgba(245,158,11,0.35)",
+              boxShadow: "0 6px 16px rgba(245,158,11,0.3)",
             }}
           >
-            <UtensilsCrossed size={18} />
+            <UtensilsCrossed size={20} />
           </div>
           <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <h2 style={{ fontSize: 16, fontWeight: 800, color: "#ffffff", margin: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <h2 style={{ fontSize: 17, fontWeight: 800, color: "#0f172a", margin: 0 }}>
                 Captain Orders Status &amp; Tracking Report
               </h2>
               <span
                 style={{
                   fontSize: 10,
-                  fontWeight: 700,
-                  padding: "2px 8px",
+                  fontWeight: 800,
+                  padding: "3px 10px",
                   borderRadius: 20,
-                  background: "rgba(245,158,11,0.18)",
-                  border: "1px solid rgba(245,158,11,0.4)",
-                  color: "#fbbf24",
+                  background: "#fffbeb",
+                  border: "1px solid #fde68a",
+                  color: "#d97706",
                   textTransform: "uppercase",
+                  letterSpacing: 0.5,
                 }}
               >
                 ● Floor Dispatch
               </span>
             </div>
-            <div style={{ fontSize: 11, color: "#64748b" }}>
+            <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
               Active table orders, KOT status, held tickets, and floor tracking
             </div>
           </div>
@@ -244,14 +247,14 @@ export default function CaptainOrder() {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 6,
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              padding: "4px 10px",
-              borderRadius: 8,
+              gap: 8,
+              background: "#f8fafc",
+              border: "1.5px solid #e2e8f0",
+              padding: "6px 12px",
+              borderRadius: 10,
             }}
           >
-            <Calendar size={13} color="#94a3b8" />
+            <Calendar size={14} color="#64748b" />
             <input
               type="date"
               value={dateVal}
@@ -259,8 +262,9 @@ export default function CaptainOrder() {
               style={{
                 background: "transparent",
                 border: "none",
-                color: "#e2e8f0",
+                color: "#0f172a",
                 fontSize: 12,
+                fontWeight: 600,
                 outline: "none",
                 cursor: "pointer",
               }}
@@ -273,21 +277,31 @@ export default function CaptainOrder() {
               display: "flex",
               alignItems: "center",
               gap: 6,
-              padding: "6px 12px",
-              borderRadius: 8,
-              border: "1px solid rgba(255,255,255,0.1)",
-              background: "rgba(255,255,255,0.05)",
-              color: "#94a3b8",
-              fontWeight: 600,
+              padding: "7px 14px",
+              borderRadius: 10,
+              border: "1.5px solid #e2e8f0",
+              background: "#f8fafc",
+              color: "#475569",
+              fontWeight: 700,
               fontSize: 12,
               cursor: "pointer",
+              transition: "all 0.15s",
             }}
           >
-            <RefreshCw size={12} />
+            <RefreshCw size={13} />
             Refresh
           </button>
 
-          <div style={{ fontSize: 13, fontWeight: 700, color: "#f59e0b", fontVariantNumeric: "tabular-nums" }}>
+          <div style={{
+            fontSize: 13,
+            fontWeight: 800,
+            color: "#d97706",
+            background: "#fffbeb",
+            border: "1px solid #fde68a",
+            padding: "5px 12px",
+            borderRadius: 8,
+            fontVariantNumeric: "tabular-nums",
+          }}>
             {clock.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
           </div>
         </div>
@@ -305,33 +319,38 @@ export default function CaptainOrder() {
         {[
           {
             label: "Total Orders", count: totalCount, extra: ETB(totalValue),
-            color: "#38bdf8", glow: "rgba(56,189,248,0.25)",
-            bg: "linear-gradient(135deg, rgba(56,189,248,0.16) 0%, rgba(14,165,233,0.08) 100%)",
-            border: "rgba(56,189,248,0.35)", icon: "📊",
+            color: "#2563eb", glow: "rgba(37,99,235,0.12)",
+            bg: "#ffffff",
+            border: "#e2e8f0", icon: "📊",
+            stripe: "linear-gradient(90deg, #3b82f6, #1d4ed8)",
           },
           {
             label: "Held Orders", count: heldCount,
-            color: "#c084fc", glow: "rgba(192,132,252,0.25)",
-            bg: "linear-gradient(135deg, rgba(192,132,252,0.16) 0%, rgba(139,92,246,0.08) 100%)",
-            border: "rgba(192,132,252,0.35)", icon: "⏸️",
+            color: "#7c3aed", glow: "rgba(124,58,237,0.12)",
+            bg: "#ffffff",
+            border: "#e2e8f0", icon: "⏸️",
+            stripe: "linear-gradient(90deg, #8b5cf6, #6d28d9)",
           },
           {
             label: "In Kitchen (KOT)", count: kitchenCount,
-            color: "#fbbf24", glow: "rgba(251,191,36,0.25)",
-            bg: "linear-gradient(135deg, rgba(251,191,36,0.16) 0%, rgba(245,158,11,0.08) 100%)",
-            border: "rgba(251,191,36,0.35)", icon: "🔥",
+            color: "#d97706", glow: "rgba(217,119,6,0.12)",
+            bg: "#ffffff",
+            border: "#e2e8f0", icon: "🔥",
+            stripe: "linear-gradient(90deg, #f59e0b, #b45309)",
           },
           {
             label: "Ready to Serve", count: readyCount,
-            color: "#2dd4bf", glow: "rgba(45,212,191,0.25)",
-            bg: "linear-gradient(135deg, rgba(45,212,191,0.16) 0%, rgba(20,184,166,0.08) 100%)",
-            border: "rgba(45,212,191,0.35)", icon: "✅",
+            color: "#059669", glow: "rgba(5,150,105,0.12)",
+            bg: "#ffffff",
+            border: "#e2e8f0", icon: "✅",
+            stripe: "linear-gradient(90deg, #10b981, #047857)",
           },
           {
             label: "Voided Orders", count: voidCount,
-            color: "#f87171", glow: "rgba(248,113,113,0.25)",
-            bg: "linear-gradient(135deg, rgba(248,113,113,0.16) 0%, rgba(239,68,68,0.08) 100%)",
-            border: "rgba(248,113,113,0.35)", icon: "❌",
+            color: "#e11d48", glow: "rgba(225,29,72,0.12)",
+            bg: "#ffffff",
+            border: "#e2e8f0", icon: "❌",
+            stripe: "linear-gradient(90deg, #f43f5e, #be123c)",
           },
         ].map((k, i) => (
           <div
@@ -347,24 +366,24 @@ export default function CaptainOrder() {
               gap: 6,
               position: "relative",
               overflow: "hidden",
-              boxShadow: `0 8px 28px ${k.glow}, inset 0 1px 0 rgba(255,255,255,0.08)`,
+              boxShadow: `0 4px 18px ${k.glow}, 0 1px 3px rgba(0,0,0,0.03)`,
               animationDelay: `${i * 0.06}s`,
             }}
           >
             <div style={{
-              position: "absolute", top: 0, left: 0, right: 0, height: 2,
-              background: `linear-gradient(90deg, transparent, ${k.color}, transparent)`,
+              position: "absolute", top: 0, left: 0, right: 0, height: 3,
+              background: k.stripe,
               borderRadius: "18px 18px 0 0",
             }} />
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontSize: 10, fontWeight: 800, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 1 }}>
+              <span style={{ fontSize: 10.5, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.8 }}>
                 {k.label}
               </span>
               <span style={{ fontSize: 20 }}>{k.icon}</span>
             </div>
             <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
               <span style={{ fontSize: 28, fontWeight: 900, color: k.color, lineHeight: 1 }}>{k.count}</span>
-              {k.extra && <span style={{ fontSize: 12, fontWeight: 700, color: "#e2e8f0", opacity: 0.8 }}>{k.extra}</span>}
+              {k.extra && <span style={{ fontSize: 12, fontWeight: 700, color: "#0f172a", opacity: 0.85 }}>{k.extra}</span>}
             </div>
           </div>
         ))}
@@ -375,9 +394,9 @@ export default function CaptainOrder() {
         {/* Search */}
         <div style={{ flex: 1, minWidth: 260, position: "relative" }}>
           <Search
-            size={15}
-            color="#64748b"
-            style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)" }}
+            size={16}
+            color="#94a3b8"
+            style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }}
           />
           <input
             value={searchQ}
@@ -386,21 +405,22 @@ export default function CaptainOrder() {
             style={{
               width: "100%",
               boxSizing: "border-box",
-              padding: "8px 12px 8px 36px",
-              background: "rgba(255,255,255,0.05)",
-              border: "1.5px solid rgba(255,255,255,0.1)",
-              borderRadius: 10,
-              color: "#fff",
-              fontSize: 12,
+              padding: "10px 14px 10px 40px",
+              background: "#ffffff",
+              border: "1.5px solid #cbd5e1",
+              borderRadius: 12,
+              color: "#0f172a",
+              fontSize: 13,
               outline: "none",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
             }}
           />
           {searchQ && (
             <button
               onClick={() => setSearchQ("")}
-              style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "#64748b", cursor: "pointer" }}
+              style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "#94a3b8", cursor: "pointer" }}
             >
-              <X size={14} />
+              <X size={15} />
             </button>
           )}
         </div>
@@ -416,16 +436,16 @@ export default function CaptainOrder() {
                 className="status-pill"
                 onClick={() => setStatusFilter(s)}
                 style={{
-                  padding: "6px 14px",
+                  padding: "7px 15px",
                   borderRadius: 50,
-                  border: active ? `1.5px solid ${cfg.color}` : "1px solid rgba(255,255,255,0.08)",
-                  background: active ? cfg.bg : "rgba(255,255,255,0.03)",
-                  color: active ? cfg.color : "#94a3b8",
+                  border: active ? "1.5px solid #2563eb" : "1.5px solid #e2e8f0",
+                  background: active ? "linear-gradient(135deg, #2563eb, #1d4ed8)" : "#ffffff",
+                  color: active ? "#ffffff" : "#475569",
                   fontWeight: active ? 800 : 600,
-                  fontSize: 11,
+                  fontSize: 11.5,
                   cursor: "pointer",
                   whiteSpace: "nowrap",
-                  boxShadow: active ? `0 0 12px ${cfg.color}44` : "none",
+                  boxShadow: active ? "0 4px 12px rgba(37,99,235,0.25)" : "0 1px 2px rgba(0,0,0,0.02)",
                 }}
               >
                 {cfg.label}
@@ -438,57 +458,75 @@ export default function CaptainOrder() {
       {/* ── REPORT TABLE ─────────────────────────────────────────── */}
       <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px" }}>
         {loading ? (
-          <div style={{ textAlign: "center", padding: "60px 0" }}>
-            <RefreshCw size={32} color="#f59e0b" style={{ animation: "spin 1s linear infinite" }} />
-            <p style={{ marginTop: 12, color: "#94a3b8", fontSize: 13 }}>Loading Orders Report...</p>
+          <div style={{ textAlign: "center", padding: "70px 0" }}>
+            <RefreshCw size={34} color="#f59e0b" style={{ animation: "spin 1s linear infinite" }} />
+            <p style={{ marginTop: 12, color: "#64748b", fontSize: 13, fontWeight: 600 }}>Loading Orders Report...</p>
           </div>
         ) : filteredOrders.length === 0 ? (
           <div
             style={{
               textAlign: "center",
-              padding: "60px 20px",
-              background: "rgba(255,255,255,0.02)",
-              borderRadius: 16,
-              border: "1px dashed rgba(255,255,255,0.08)",
+              padding: "64px 20px",
+              background: "#ffffff",
+              borderRadius: 20,
+              border: "2px dashed #cbd5e1",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.03)",
             }}
           >
-            <FileText size={40} color="#64748b" style={{ opacity: 0.4, marginBottom: 10 }} />
-            <p style={{ fontSize: 14, fontWeight: 700, color: "#94a3b8" }}>No Captain Orders Found</p>
-            <p style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>
+            <div
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: "50%",
+                background: "#eff6ff",
+                border: "1px solid #bfdbfe",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: 14,
+              }}
+            >
+              <FileText size={30} color="#2563eb" />
+            </div>
+            <p style={{ fontSize: 16, fontWeight: 800, color: "#0f172a", margin: 0 }}>
+              No Captain Orders Found
+            </p>
+            <p style={{ fontSize: 13, color: "#64748b", marginTop: 6, maxWidth: 460, marginLeft: "auto", marginRight: "auto" }}>
               Orders created from POS Ordering or Captain Order will be tracked and displayed here.
             </p>
           </div>
         ) : (
           <div
             style={{
-              background: "rgba(0,0,0,0.25)",
-              border: "1.5px solid rgba(255,255,255,0.08)",
-              borderRadius: 16,
+              background: "#ffffff",
+              border: "1.5px solid #e2e8f0",
+              borderRadius: 18,
               overflow: "hidden",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.04)",
             }}
           >
             <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: 12 }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: 12.5 }}>
                 <thead>
                   <tr
                     style={{
-                      background: "rgba(255,255,255,0.04)",
-                      borderBottom: "1.5px solid rgba(255,255,255,0.08)",
-                      color: "#94a3b8",
+                      background: "#f8fafc",
+                      borderBottom: "2px solid #e2e8f0",
+                      color: "#475569",
                       fontWeight: 800,
                       textTransform: "uppercase",
-                      letterSpacing: 0.5,
+                      letterSpacing: 0.6,
                       fontSize: 11,
                     }}
                   >
-                    <th style={{ padding: "12px 14px" }}>Reference #</th>
-                    <th style={{ padding: "12px 14px" }}>Ordered Products (Code &amp; Name)</th>
-                    <th style={{ padding: "12px 14px" }}>Table</th>
-                    <th style={{ padding: "12px 14px" }}>Waiter</th>
-                    <th style={{ padding: "12px 14px" }}>Time</th>
-                    <th style={{ padding: "12px 14px", textAlign: "right" }}>Total</th>
-                    <th style={{ padding: "12px 14px", textAlign: "center" }}>Status</th>
-                    <th style={{ padding: "12px 14px", textAlign: "center" }}>Actions</th>
+                    <th style={{ padding: "13px 16px" }}>Reference #</th>
+                    <th style={{ padding: "13px 16px" }}>Ordered Products (Code &amp; Name)</th>
+                    <th style={{ padding: "13px 16px" }}>Table</th>
+                    <th style={{ padding: "13px 16px" }}>Waiter</th>
+                    <th style={{ padding: "13px 16px" }}>Time</th>
+                    <th style={{ padding: "13px 16px", textAlign: "right" }}>Total</th>
+                    <th style={{ padding: "13px 16px", textAlign: "center" }}>Status</th>
+                    <th style={{ padding: "13px 16px", textAlign: "center" }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -500,21 +538,21 @@ export default function CaptainOrder() {
                         style={{
                           display: "inline-flex",
                           alignItems: "center",
-                          gap: 4,
-                          background: "rgba(255,255,255,0.05)",
-                          border: "1px solid rgba(255,255,255,0.08)",
-                          padding: "2px 8px",
-                          borderRadius: 6,
+                          gap: 5,
+                          background: "#f8fafc",
+                          border: "1px solid #e2e8f0",
+                          padding: "3px 9px",
+                          borderRadius: 8,
                           marginRight: 6,
                           marginBottom: 4,
-                          fontSize: 11,
+                          fontSize: 11.5,
                         }}
                       >
                         {it.productCode && (
-                          <span style={{ color: "#38bdf8", fontWeight: 700 }}>#{it.productCode}</span>
+                          <span style={{ color: "#2563eb", fontWeight: 700 }}>#{it.productCode}</span>
                         )}
-                        <span style={{ color: "#ffffff", fontWeight: 600 }}>{it.productName}</span>
-                        <span style={{ color: "#fbbf24", fontWeight: 800 }}>x{it.quantity}</span>
+                        <span style={{ color: "#0f172a", fontWeight: 600 }}>{it.productName}</span>
+                        <span style={{ color: "#b45309", fontWeight: 800 }}>x{it.quantity}</span>
                       </span>
                     ));
 
@@ -523,12 +561,12 @@ export default function CaptainOrder() {
                         key={o._id}
                         className="order-row"
                         style={{
-                          borderBottom: "1px solid rgba(255,255,255,0.05)",
+                          borderBottom: "1px solid #f1f5f9",
                           transition: "background 0.15s",
                         }}
                       >
                         {/* Reference Button */}
-                        <td style={{ padding: "12px 14px", verticalAlign: "middle" }}>
+                        <td style={{ padding: "13px 16px", verticalAlign: "middle" }}>
                           <button
                             type="button"
                             className="ref-btn"
@@ -537,38 +575,38 @@ export default function CaptainOrder() {
                             style={{
                               display: "inline-flex",
                               alignItems: "center",
-                              gap: 5,
-                              padding: "4px 10px",
+                              gap: 6,
+                              padding: "5px 12px",
                               borderRadius: 8,
-                              background: "rgba(59,130,246,0.15)",
-                              border: "1px solid rgba(59,130,246,0.4)",
-                              color: "#60a5fa",
+                              background: "#eff6ff",
+                              border: "1.5px solid #bfdbfe",
+                              color: "#1d4ed8",
                               fontWeight: 800,
                               fontSize: 12,
                               cursor: "pointer",
                               transition: "all 0.15s",
                             }}
                           >
-                            <FileText size={12} />
+                            <FileText size={13} />
                             #{o.orderNo}
                           </button>
                         </td>
 
                         {/* Ordered Products (Code & Name) */}
-                        <td style={{ padding: "12px 14px", verticalAlign: "middle", maxWidth: 360 }}>
+                        <td style={{ padding: "13px 16px", verticalAlign: "middle", maxWidth: 360 }}>
                           <div style={{ display: "flex", flexWrap: "wrap" }}>{itemsSummary}</div>
                         </td>
 
                         {/* Table */}
-                        <td style={{ padding: "12px 14px", verticalAlign: "middle", whiteSpace: "nowrap" }}>
+                        <td style={{ padding: "13px 16px", verticalAlign: "middle", whiteSpace: "nowrap" }}>
                           <span
                             style={{
-                              background: "rgba(16,185,129,0.12)",
-                              border: "1px solid rgba(16,185,129,0.3)",
-                              color: "#34d399",
+                              background: "#ecfdf5",
+                              border: "1px solid #a7f3d0",
+                              color: "#047857",
                               fontWeight: 700,
-                              fontSize: 11,
-                              padding: "3px 8px",
+                              fontSize: 11.5,
+                              padding: "4px 10px",
                               borderRadius: 6,
                             }}
                           >
@@ -577,14 +615,14 @@ export default function CaptainOrder() {
                         </td>
 
                         {/* Waiter */}
-                        <td style={{ padding: "12px 14px", verticalAlign: "middle", whiteSpace: "nowrap" }}>
-                          <span style={{ color: "#c084fc", fontWeight: 600 }}>
+                        <td style={{ padding: "13px 16px", verticalAlign: "middle", whiteSpace: "nowrap" }}>
+                          <span style={{ color: "#6d28d9", fontWeight: 700, background: "#f5f3ff", border: "1px solid #ddd6fe", padding: "3px 9px", borderRadius: 6 }}>
                             👤 {o.waiterName || "Staff"}
                           </span>
                         </td>
 
                         {/* Time */}
-                        <td style={{ padding: "12px 14px", verticalAlign: "middle", whiteSpace: "nowrap", color: "#94a3b8" }}>
+                        <td style={{ padding: "13px 16px", verticalAlign: "middle", whiteSpace: "nowrap", color: "#64748b", fontWeight: 500 }}>
                           {new Date(o.createdAt).toLocaleTimeString("en-US", {
                             hour: "2-digit",
                             minute: "2-digit",
@@ -593,20 +631,20 @@ export default function CaptainOrder() {
                         </td>
 
                         {/* Total */}
-                        <td style={{ padding: "12px 14px", verticalAlign: "middle", textAlign: "right", whiteSpace: "nowrap" }}>
-                          <span style={{ fontWeight: 900, color: "#10b981", fontSize: 13 }}>
+                        <td style={{ padding: "13px 16px", verticalAlign: "middle", textAlign: "right", whiteSpace: "nowrap" }}>
+                          <span style={{ fontWeight: 900, color: "#059669", fontSize: 13.5 }}>
                             {ETB(o.grandTotal)}
                           </span>
                         </td>
 
                         {/* Status */}
-                        <td style={{ padding: "12px 14px", verticalAlign: "middle", textAlign: "center", whiteSpace: "nowrap" }}>
+                        <td style={{ padding: "13px 16px", verticalAlign: "middle", textAlign: "center", whiteSpace: "nowrap" }}>
                           <span
                             style={{
                               background: sc.bg,
-                              border: `1px solid ${sc.border}`,
+                              border: `1.5px solid ${sc.border}`,
                               color: sc.color,
-                              padding: "3px 10px",
+                              padding: "4px 12px",
                               borderRadius: 20,
                               fontSize: 11,
                               fontWeight: 800,
@@ -619,7 +657,7 @@ export default function CaptainOrder() {
                         </td>
 
                         {/* Action buttons */}
-                        <td style={{ padding: "12px 14px", verticalAlign: "middle", textAlign: "center", whiteSpace: "nowrap" }}>
+                        <td style={{ padding: "13px 16px", verticalAlign: "middle", textAlign: "center", whiteSpace: "nowrap" }}>
                           <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
                             {/* View Reference Button */}
                             <button
@@ -627,20 +665,21 @@ export default function CaptainOrder() {
                               onClick={() => setRefOrder(o)}
                               title="View Ordered Products & Details"
                               style={{
-                                padding: "5px 10px",
+                                padding: "6px 11px",
                                 borderRadius: 8,
-                                border: "1px solid rgba(255,255,255,0.12)",
-                                background: "rgba(255,255,255,0.05)",
-                                color: "#e2e8f0",
+                                border: "1px solid #cbd5e1",
+                                background: "#ffffff",
+                                color: "#334155",
                                 fontWeight: 600,
-                                fontSize: 11,
+                                fontSize: 11.5,
                                 cursor: "pointer",
                                 display: "flex",
                                 alignItems: "center",
                                 gap: 4,
+                                boxShadow: "0 1px 2px rgba(0,0,0,0.02)",
                               }}
                             >
-                              <Eye size={12} />
+                              <Eye size={13} />
                               Ref
                             </button>
 
@@ -651,17 +690,18 @@ export default function CaptainOrder() {
                                 onClick={() => handleSendToKitchen(o._id)}
                                 title="Send to Kitchen & Print KOT"
                                 style={{
-                                  padding: "5px 10px",
+                                  padding: "6px 11px",
                                   borderRadius: 8,
                                   border: "none",
                                   background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
-                                  color: "#000",
+                                  color: "#ffffff",
                                   fontWeight: 800,
-                                  fontSize: 11,
+                                  fontSize: 11.5,
                                   cursor: "pointer",
                                   display: "flex",
                                   alignItems: "center",
                                   gap: 4,
+                                  boxShadow: "0 2px 6px rgba(217,119,6,0.3)",
                                 }}
                               >
                                 <Send size={11} />
@@ -679,13 +719,13 @@ export default function CaptainOrder() {
                                 }}
                                 title="Void Order"
                                 style={{
-                                  padding: "5px 8px",
+                                  padding: "6px 9px",
                                   borderRadius: 8,
-                                  border: "1px solid rgba(239,68,68,0.3)",
-                                  background: "rgba(239,68,68,0.12)",
-                                  color: "#f87171",
+                                  border: "1px solid #fecdd3",
+                                  background: "#fff1f2",
+                                  color: "#e11d48",
                                   fontWeight: 600,
-                                  fontSize: 11,
+                                  fontSize: 11.5,
                                   cursor: "pointer",
                                 }}
                               >
@@ -713,8 +753,8 @@ export default function CaptainOrder() {
             position: "fixed",
             inset: 0,
             zIndex: 600,
-            background: "rgba(0,0,0,0.75)",
-            backdropFilter: "blur(8px)",
+            background: "rgba(15,23,42,0.55)",
+            backdropFilter: "blur(6px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -724,16 +764,16 @@ export default function CaptainOrder() {
         >
           <div
             style={{
-              background: "linear-gradient(135deg,#0c1533,#0f1f4d)",
-              border: "1.5px solid rgba(99,102,241,0.35)",
-              borderRadius: 20,
+              background: "#ffffff",
+              border: "1px solid #e2e8f0",
+              borderRadius: 22,
               padding: 26,
               width: "100%",
-              maxWidth: 620,
+              maxWidth: 640,
               maxHeight: "90vh",
               display: "flex",
               flexDirection: "column",
-              boxShadow: "0 30px 80px rgba(0,0,0,0.6)",
+              boxShadow: "0 25px 60px rgba(15,23,42,0.18)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -741,16 +781,16 @@ export default function CaptainOrder() {
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <h3 style={{ fontSize: 18, fontWeight: 900, color: "#fff", margin: 0 }}>
+                  <h3 style={{ fontSize: 18, fontWeight: 900, color: "#0f172a", margin: 0 }}>
                     Order Reference #{refOrder.orderNo}
                   </h3>
                   <span
                     style={{
-                      background: STATUS_CONFIG[refOrder.status]?.bg || "rgba(255,255,255,0.1)",
-                      border: `1px solid ${STATUS_CONFIG[refOrder.status]?.border || "transparent"}`,
-                      color: STATUS_CONFIG[refOrder.status]?.color || "#fff",
-                      padding: "2px 10px",
-                      borderRadius: 12,
+                      background: STATUS_CONFIG[refOrder.status]?.bg || "#f1f5f9",
+                      border: `1px solid ${STATUS_CONFIG[refOrder.status]?.border || "#cbd5e1"}`,
+                      color: STATUS_CONFIG[refOrder.status]?.color || "#0f172a",
+                      padding: "3px 10px",
+                      borderRadius: 14,
                       fontSize: 11,
                       fontWeight: 800,
                       textTransform: "uppercase",
@@ -759,9 +799,9 @@ export default function CaptainOrder() {
                     {STATUS_CONFIG[refOrder.status]?.label || refOrder.status}
                   </span>
                 </div>
-                <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 4 }}>
-                  Table: <strong style={{ color: "#34d399" }}>{refOrder.tableNo || "Counter"}</strong> | Waiter:{" "}
-                  <strong style={{ color: "#c084fc" }}>{refOrder.waiterName || "Staff"}</strong> | Created:{" "}
+                <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>
+                  Table: <strong style={{ color: "#047857" }}>{refOrder.tableNo || "Counter"}</strong> | Waiter:{" "}
+                  <strong style={{ color: "#6d28d9" }}>{refOrder.waiterName || "Staff"}</strong> | Created:{" "}
                   {new Date(refOrder.createdAt).toLocaleTimeString()}
                 </div>
               </div>
@@ -770,12 +810,12 @@ export default function CaptainOrder() {
                 type="button"
                 onClick={() => setRefOrder(null)}
                 style={{
-                  background: "rgba(255,255,255,0.08)",
+                  background: "#f1f5f9",
                   border: "none",
-                  borderRadius: 8,
-                  color: "#94a3b8",
+                  borderRadius: 10,
+                  color: "#64748b",
                   cursor: "pointer",
-                  padding: 6,
+                  padding: 8,
                 }}
               >
                 <X size={16} />
@@ -783,38 +823,38 @@ export default function CaptainOrder() {
             </div>
 
             {/* Products Table */}
-            <div style={{ flex: 1, overflowY: "auto", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, marginBottom: 16 }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: 12 }}>
+            <div style={{ flex: 1, overflowY: "auto", border: "1px solid #e2e8f0", borderRadius: 14, marginBottom: 16 }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: 12.5 }}>
                 <thead>
-                  <tr style={{ background: "rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.08)", color: "#94a3b8" }}>
-                    <th style={{ padding: "8px 12px" }}>Product Code</th>
-                    <th style={{ padding: "8px 12px" }}>Product Name</th>
-                    <th style={{ padding: "8px 12px", textAlign: "center" }}>Qty</th>
-                    <th style={{ padding: "8px 12px", textAlign: "right" }}>Unit Price</th>
-                    <th style={{ padding: "8px 12px", textAlign: "right" }}>Total</th>
+                  <tr style={{ background: "#f8fafc", borderBottom: "1.5px solid #e2e8f0", color: "#475569", fontWeight: 700 }}>
+                    <th style={{ padding: "10px 14px" }}>Product Code</th>
+                    <th style={{ padding: "10px 14px" }}>Product Name</th>
+                    <th style={{ padding: "10px 14px", textAlign: "center" }}>Qty</th>
+                    <th style={{ padding: "10px 14px", textAlign: "right" }}>Unit Price</th>
+                    <th style={{ padding: "10px 14px", textAlign: "right" }}>Total</th>
                   </tr>
                 </thead>
                 <tbody>
                   {(refOrder.items || []).map((it, idx) => (
-                    <tr key={idx} style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-                      <td style={{ padding: "8px 12px", color: "#38bdf8", fontWeight: 700 }}>
+                    <tr key={idx} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                      <td style={{ padding: "10px 14px", color: "#2563eb", fontWeight: 700 }}>
                         #{it.productCode || "—"}
                       </td>
-                      <td style={{ padding: "8px 12px", color: "#ffffff", fontWeight: 600 }}>
+                      <td style={{ padding: "10px 14px", color: "#0f172a", fontWeight: 600 }}>
                         {it.productName}
                         {it.notes && (
-                          <div style={{ fontSize: 10, color: "#fbbf24", fontStyle: "italic", marginTop: 2 }}>
+                          <div style={{ fontSize: 11, color: "#d97706", fontStyle: "italic", marginTop: 2 }}>
                             ↳ {it.notes}
                           </div>
                         )}
                       </td>
-                      <td style={{ padding: "8px 12px", textAlign: "center", fontWeight: 800, color: "#e2e8f0" }}>
+                      <td style={{ padding: "10px 14px", textAlign: "center", fontWeight: 800, color: "#0f172a" }}>
                         {it.quantity}
                       </td>
-                      <td style={{ padding: "8px 12px", textAlign: "right", color: "#94a3b8" }}>
+                      <td style={{ padding: "10px 14px", textAlign: "right", color: "#64748b" }}>
                         {ETB(it.unitPrice)}
                       </td>
-                      <td style={{ padding: "8px 12px", textAlign: "right", fontWeight: 800, color: "#10b981" }}>
+                      <td style={{ padding: "10px 14px", textAlign: "right", fontWeight: 800, color: "#059669" }}>
                         {ETB(it.totalPrice)}
                       </td>
                     </tr>
@@ -824,13 +864,13 @@ export default function CaptainOrder() {
             </div>
 
             {/* Financial breakdown */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "rgba(0,0,0,0.3)", borderRadius: 12, marginBottom: 16 }}>
-              <div style={{ fontSize: 12, color: "#94a3b8" }}>
-                <span>Subtotal: {ETB(refOrder.subtotal)}</span>
-                {refOrder.discountAmount > 0 && <span style={{ marginLeft: 10, color: "#fbbf24" }}>Discount: -{ETB(refOrder.discountAmount)}</span>}
-                <span style={{ marginLeft: 10 }}>Tax: {ETB(refOrder.taxAmount)}</span>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 14, marginBottom: 16 }}>
+              <div style={{ fontSize: 12.5, color: "#64748b" }}>
+                <span>Subtotal: <strong style={{ color: "#0f172a" }}>{ETB(refOrder.subtotal)}</strong></span>
+                {refOrder.discountAmount > 0 && <span style={{ marginLeft: 12, color: "#d97706" }}>Discount: -{ETB(refOrder.discountAmount)}</span>}
+                <span style={{ marginLeft: 12 }}>Tax: <strong style={{ color: "#0f172a" }}>{ETB(refOrder.taxAmount)}</strong></span>
               </div>
-              <div style={{ fontSize: 18, fontWeight: 900, color: "#10b981" }}>
+              <div style={{ fontSize: 19, fontWeight: 900, color: "#059669" }}>
                 TOTAL: {ETB(refOrder.grandTotal)}
               </div>
             </div>
@@ -846,11 +886,11 @@ export default function CaptainOrder() {
                     setVoidReason("");
                   }}
                   style={{
-                    padding: "10px 16px",
+                    padding: "9px 16px",
                     borderRadius: 10,
-                    border: "1.5px solid rgba(239,68,68,0.5)",
-                    background: "rgba(239,68,68,0.15)",
-                    color: "#f87171",
+                    border: "1.5px solid #fecdd3",
+                    background: "#fff1f2",
+                    color: "#e11d48",
                     fontWeight: 700,
                     fontSize: 12,
                     cursor: "pointer",
@@ -869,17 +909,18 @@ export default function CaptainOrder() {
                 type="button"
                 onClick={() => posPrint.printKOT(refOrder, { businessName: "Baba Roti Café" })}
                 style={{
-                  padding: "10px 16px",
+                  padding: "9px 16px",
                   borderRadius: 10,
-                  border: "1px solid rgba(245,158,11,0.5)",
-                  background: "rgba(245,158,11,0.15)",
-                  color: "#fbbf24",
+                  border: "none",
+                  background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+                  color: "#ffffff",
                   fontWeight: 700,
                   fontSize: 12,
                   cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
                   gap: 6,
+                  boxShadow: "0 2px 6px rgba(217,119,6,0.3)",
                 }}
               >
                 <Printer size={14} />
@@ -890,11 +931,11 @@ export default function CaptainOrder() {
                 type="button"
                 onClick={() => setRefOrder(null)}
                 style={{
-                  padding: "10px 18px",
+                  padding: "9px 18px",
                   borderRadius: 10,
-                  border: "1px solid rgba(255,255,255,0.15)",
-                  background: "rgba(255,255,255,0.06)",
-                  color: "#e2e8f0",
+                  border: "1.5px solid #cbd5e1",
+                  background: "#ffffff",
+                  color: "#334155",
                   fontWeight: 700,
                   fontSize: 12,
                   cursor: "pointer",
@@ -916,7 +957,7 @@ export default function CaptainOrder() {
             position: "fixed",
             inset: 0,
             zIndex: 700,
-            background: "rgba(0,0,0,0.8)",
+            background: "rgba(15,23,42,0.6)",
             backdropFilter: "blur(6px)",
             display: "flex",
             alignItems: "center",
@@ -927,37 +968,37 @@ export default function CaptainOrder() {
         >
           <div
             style={{
-              background: "#0c1533",
-              border: "1.5px solid rgba(239,68,68,0.4)",
-              borderRadius: 18,
+              background: "#ffffff",
+              border: "1px solid #fecdd3",
+              borderRadius: 20,
               padding: 24,
               width: "100%",
-              maxWidth: 420,
-              boxShadow: "0 25px 70px rgba(0,0,0,0.6)",
+              maxWidth: 440,
+              boxShadow: "0 25px 70px rgba(15,23,42,0.2)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
               <div
                 style={{
-                  width: 32,
-                  height: 32,
+                  width: 36,
+                  height: 36,
                   borderRadius: "50%",
-                  background: "rgba(239,68,68,0.18)",
+                  background: "#fff1f2",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  color: "#ef4444",
+                  color: "#e11d48",
                 }}
               >
                 <Ban size={18} />
               </div>
-              <h4 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: "#fff" }}>
+              <h4 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: "#0f172a" }}>
                 Void Captain Order #{voidModalOrder.orderNo}
               </h4>
             </div>
 
-            <p style={{ fontSize: 12, color: "#94a3b8", marginBottom: 12 }}>
+            <p style={{ fontSize: 12.5, color: "#64748b", marginBottom: 12 }}>
               Are you sure you want to void this order? Please state a reason for restaurant audit logs.
             </p>
 
@@ -969,28 +1010,28 @@ export default function CaptainOrder() {
               style={{
                 width: "100%",
                 boxSizing: "border-box",
-                background: "rgba(255,255,255,0.05)",
-                border: "1.5px solid rgba(255,255,255,0.12)",
+                background: "#f8fafc",
+                border: "1.5px solid #cbd5e1",
                 borderRadius: 10,
-                padding: "8px 12px",
-                color: "#fff",
-                fontSize: 12,
+                padding: "10px 12px",
+                color: "#0f172a",
+                fontSize: 12.5,
                 outline: "none",
                 resize: "none",
                 marginBottom: 16,
               }}
             />
 
-            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
               <button
                 type="button"
                 onClick={() => setVoidModalOrder(null)}
                 style={{
-                  padding: "8px 16px",
-                  borderRadius: 8,
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  background: "transparent",
-                  color: "#94a3b8",
+                  padding: "9px 16px",
+                  borderRadius: 10,
+                  border: "1.5px solid #cbd5e1",
+                  background: "#ffffff",
+                  color: "#64748b",
                   fontWeight: 600,
                   fontSize: 12,
                   cursor: "pointer",
@@ -1003,14 +1044,15 @@ export default function CaptainOrder() {
                 disabled={voiding}
                 onClick={handleVoidOrder}
                 style={{
-                  padding: "8px 16px",
-                  borderRadius: 8,
+                  padding: "9px 18px",
+                  borderRadius: 10,
                   border: "none",
                   background: "linear-gradient(135deg,#ef4444,#dc2626)",
                   color: "#fff",
                   fontWeight: 700,
                   fontSize: 12,
                   cursor: voiding ? "not-allowed" : "pointer",
+                  boxShadow: "0 2px 6px rgba(239,68,68,0.3)",
                 }}
               >
                 {voiding ? "Voiding..." : "Confirm Void"}
