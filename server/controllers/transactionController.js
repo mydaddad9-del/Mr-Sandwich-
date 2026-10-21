@@ -915,7 +915,7 @@ const parseImageSales = asyncHandler(async (req, res) => {
     rawText: ocrText,
     message: rows.length > 0
       ? `Detected ${rows.length} product line(s) from the image.`
-      : 'No product lines detected. The image may be unclear or not in CNET format.',
+      : 'No product lines detected. The image may be unclear or not in supported POS format.',
   });
 });
 

@@ -299,7 +299,7 @@ export default function SalesImport() {
     try {
       const res = await api.post('/transactions/import-sales', {
         sales: salesData,
-        notes: 'Imported via POS Sales Report (CNET format)',
+        notes: 'Imported via POS Sales Report',
         reference: `POS Import — ${new Date().toLocaleDateString()}`,
       });
       setResult({ success: true, data: res.data });
@@ -500,7 +500,7 @@ export default function SalesImport() {
               <p className="text-base font-extrabold text-ink-900 mb-1">Upload POS File</p>
               <p className="text-xs text-ink-500 mb-3 leading-relaxed">
                 Drop your <span className="font-semibold text-ink-700">.xlsx / .xls / .csv</span> POS export here.<br />
-                NOBIR / CNET format auto-detected.
+                Standard POS format auto-detected.
               </p>
               <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-600 text-white px-5 py-2 text-xs font-bold shadow group-hover:bg-blue-700 transition">
                 <UploadCloud size={13} /> Select POS File
@@ -568,7 +568,7 @@ export default function SalesImport() {
             <div className="flex items-center justify-between border-b border-ink-100 pb-4">
               <div className="flex items-center gap-2.5">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800 border border-emerald-300">
-                  <Zap size={12} /> CNET POS Format Auto-Detected
+                  <Zap size={12} /> Standard POS Format Auto-Detected
                 </span>
                 <span className="text-sm font-semibold text-ink-700">
                   {parsed.rows.length} product lines ready to import
