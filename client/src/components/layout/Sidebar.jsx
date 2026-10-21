@@ -245,10 +245,24 @@ const MenuLink = ({
 /* ══════════════════════════════════════════
    SIDEBAR COMPONENT
 ══════════════════════════════════════════ */
-const Sidebar = ({ open, onClose, collapsed = false }) => {
+const Sidebar = ({
+  open,
+  onClose,
+  collapsed = false,
+  onToggleCollapse,
+  onExpand,
+}) => {
   const { user, canSeeNav } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Header click handler: redirect to dashboard & keep / expand sidebar (international standard)
+  const handleHeaderClick = (e) => {
+    if (collapsed && onExpand) {
+      onExpand();
+    }
+    navigate('/');
+  };
 
   // Active route helpers
   const onTransactions =
@@ -383,14 +397,27 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
           />
         </div>
 
-        {/* ── TOP HEADER SECTION (COMPACT) ── */}
-        <div className="relative pt-2.5 pb-2 px-2.5 border-b border-white/[0.07]">
+        {/* ── TOP HEADER SECTION (COMPACT & REDIRECTS TO DASHBOARD) ── */}
+        <div
+          onClick={handleHeaderClick}
+          title="Baba Roti - Go to Dashboard"
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleHeaderClick(e);
+            }
+          }}
+          className="relative pt-2.5 pb-2 px-2.5 border-b border-white/[0.07] cursor-pointer group hover:bg-white/[0.04] transition-all duration-150 select-none"
+        >
+          {/* Subtle Ambient Hover Highlight */}
+          <div className="absolute inset-0 bg-blue-500/0 group-hover:bg-blue-500/[0.06] transition-colors pointer-events-none" />
+
           {/* Row 1: Logo & Quick Action Buttons */}
-          <div className="flex items-center justify-between gap-1.5">
-            <NavLink
-              to="/"
-              onClick={onClose}
-              className={`flex items-center transition-transform hover:scale-[1.02] ${
+          <div className="relative flex items-center justify-between gap-1.5">
+            <div
+              className={`flex items-center transition-transform duration-150 group-hover:scale-[1.02] ${
                 collapsed ? 'mx-auto' : ''
               }`}
             >
@@ -399,17 +426,23 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
                 size={collapsed ? 28 : 32}
                 subtitle="Café & Bakery"
               />
-            </NavLink>
+            </div>
 
             {/* Quick Action Circular Buttons */}
             {!collapsed && (
-              <div className="flex items-center gap-1">
+              <div
+                className="flex items-center gap-1"
+                onClick={(e) => e.stopPropagation()}
+              >
                 {/* Notification Bell Button */}
                 <button
                   type="button"
-                  onClick={() => navigate('/settings?tab=telegram')}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate('/settings?tab=telegram');
+                  }}
                   title="Notifications & Alerts"
-                  className="relative flex h-7 w-7 items-center justify-center rounded-full bg-white/[0.08] hover:bg-white/[0.16] border border-white/10 text-white/90 transition-all cursor-pointer"
+                  className="relative flex h-7 w-7 items-center justify-center rounded-full bg-white/[0.08] hover:bg-white/[0.18] border border-white/10 text-white/90 transition-all cursor-pointer"
                 >
                   <NotificationsNoneRoundedIcon sx={{ fontSize: 15 }} />
                   <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-rose-500 ring-1 ring-[#071233]" />
@@ -418,9 +451,12 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
                 {/* Profile Shortcut Button */}
                 <button
                   type="button"
-                  onClick={() => navigate('/profile')}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate('/profile');
+                  }}
                   title="User Profile"
-                  className="flex h-7 w-7 items-center justify-center rounded-full bg-white/[0.08] hover:bg-white/[0.16] border border-white/10 text-white/90 transition-all cursor-pointer"
+                  className="flex h-7 w-7 items-center justify-center rounded-full bg-white/[0.08] hover:bg-white/[0.18] border border-white/10 text-white/90 transition-all cursor-pointer"
                 >
                   <PersonOutlineRoundedIcon sx={{ fontSize: 15 }} />
                 </button>
@@ -430,11 +466,11 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
 
           {/* Row 2: Dynamic Greeting Text */}
           {!collapsed && (
-            <div className="mt-1.5 select-none">
-              <h3 className="text-[12px] font-bold text-white tracking-tight flex items-center gap-1">
+            <div className="relative mt-1.5">
+              <h3 className="text-[12px] font-bold text-white tracking-tight flex items-center gap-1 group-hover:text-blue-100 transition-colors">
                 {greeting.text} <span>{greeting.emoji}</span>
               </h3>
-              <p className="text-[9.5px] font-medium text-blue-200/50 leading-tight mt-0.5">
+              <p className="text-[9.5px] font-medium text-blue-200/50 leading-tight mt-0.5 group-hover:text-blue-200/80 transition-colors">
                 Manage your restaurant with ease
               </p>
             </div>
@@ -466,7 +502,9 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
                 iconGradient="linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)"
                 end={true}
                 collapsed={collapsed}
-                onClick={onClose}
+                onClick={() => {
+                  if (collapsed && onExpand) onExpand();
+                }}
               />
             </div>
           )}
