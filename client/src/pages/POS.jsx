@@ -656,16 +656,22 @@ export default function POS() {
         @keyframes fadeInUp { from { transform: translateY(10px); opacity:0 } to { transform: translateY(0); opacity:1 } }
         @keyframes spin { to { transform: rotate(360deg) } }
         @keyframes pulse-glow { 0%,100% { box-shadow: 0 0 0 0 rgba(37,99,235,0.4) } 50% { box-shadow: 0 0 0 8px rgba(37,99,235,0) } }
+        .pos-product-grid {
+          scrollbar-gutter: stable;
+        }
         .product-card {
-          transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+          min-height: 154px !important;
+          flex-shrink: 0 !important;
+          transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
           animation: fadeInUp 0.25s ease both;
+          user-select: none;
         }
         .product-card:hover {
           transform: translateY(-3px);
-          box-shadow: 0 12px 28px rgba(37,99,235,0.12), 0 0 0 1.5px #3b82f6 !important;
+          box-shadow: 0 12px 28px rgba(37,99,235,0.14), 0 0 0 1.5px #3b82f6 !important;
           border-color: #3b82f6 !important;
         }
-        .product-card:active { transform: scale(0.98); }
+        .product-card:active { transform: scale(0.97); }
         .qbtn { transition: all 0.15s; }
         .qbtn:hover { background: #e2e8f0 !important; color: #0f172a !important; transform: scale(1.08); }
         .checkout-btn { transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
@@ -1772,12 +1778,14 @@ export default function POS() {
 
           {/* Product Cards Grid */}
           <div
+            className="pos-product-grid"
             style={{
               flex: 1,
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fill, minmax(185px, 1fr))",
+              gridAutoRows: "minmax(154px, max-content)",
               gap: 14,
-              padding: "16px 18px",
+              padding: "16px 18px 24px",
               overflowY: "auto",
               alignContent: "start",
               minHeight: 0,
@@ -1797,113 +1805,128 @@ export default function POS() {
                   (item) => (item.product?._id || item.product) === p._id
                 );
                 const isSelected = !!inCart;
+
+                // Dynamic Category Icon & Color Theme
+                const rawCat = (p.category || "").toLowerCase();
+                const getCatTheme = () => {
+                  if (rawCat.includes("break")) return { bg: "#ecfdf5", border: "#a7f3d0", color: "#059669", emoji: "☀️" };
+                  if (rawCat.includes("lunch") || rawCat.includes("dinner")) return { bg: "#eff6ff", border: "#bfdbfe", color: "#1d4ed8", emoji: "🍽️" };
+                  if (rawCat.includes("drink") || rawCat.includes("bever") || rawCat.includes("juice") || rawCat.includes("cocktail")) return { bg: "#ecfeff", border: "#a5f3fc", color: "#0891b2", emoji: "🥤" };
+                  if (rawCat.includes("coffee") || rawCat.includes("tea") || rawCat.includes("cafe")) return { bg: "#fef3c7", border: "#fde68a", color: "#b45309", emoji: "☕" };
+                  if (rawCat.includes("dessert") || rawCat.includes("sweet") || rawCat.includes("cake") || rawCat.includes("pastr")) return { bg: "#fdf2f8", border: "#fbcfe8", color: "#db2777", emoji: "🍰" };
+                  if (rawCat.includes("starter") || rawCat.includes("salad") || rawCat.includes("soup")) return { bg: "#f5f3ff", border: "#ddd6fe", color: "#7c3aed", emoji: "🥗" };
+                  if (rawCat.includes("snack") || rawCat.includes("bun") || rawCat.includes("bakery")) return { bg: "#fefce8", border: "#fef08a", color: "#ca8a04", emoji: "🥐" };
+                  if (rawCat.includes("burger") || rawCat.includes("sandwich")) return { bg: "#fff7ed", border: "#fed7aa", color: "#c2410c", emoji: "🍔" };
+                  if (rawCat.includes("pizza") || rawCat.includes("pasta") || rawCat.includes("italian")) return { bg: "#fff1f2", border: "#fecdd3", color: "#e11d48", emoji: "🍕" };
+                  return { bg: "#f8fafc", border: "#e2e8f0", color: "#475569", emoji: "🍴" };
+                };
+                const cc = getCatTheme();
+
                 return (
                   <div
                     key={p._id}
                     className="product-card"
                     onClick={() => addItem(p)}
                     style={{
-                      background: isSelected ? "#eff6ff" : "#ffffff",
-                      border: isSelected ? "1.5px solid #3b82f6" : "1.5px solid #e2e8f0",
-                      borderRadius: 16,
+                      background: isSelected ? "#f0f7ff" : "#ffffff",
+                      border: isSelected ? "2px solid #2563eb" : "1.5px solid #e2e8f0",
+                      borderRadius: 18,
                       padding: "14px 14px 12px",
                       cursor: "pointer",
                       display: "flex",
                       flexDirection: "column",
-                      gap: 0,
+                      justifyContent: "space-between",
+                      minHeight: 154,
+                      boxSizing: "border-box",
+                      flexShrink: 0,
                       position: "relative",
                       overflow: "hidden",
                       boxShadow: isSelected
-                        ? "0 6px 20px rgba(37,99,235,0.15)"
+                        ? "0 8px 24px rgba(37,99,235,0.18)"
                         : "0 2px 8px rgba(0,0,0,0.03)",
                     }}
                   >
                     {/* Top shimmer/accent line */}
                     <div style={{
-                      position: "absolute", top: 0, left: 0, right: 0, height: 3,
+                      position: "absolute", top: 0, left: 0, right: 0, height: 3.5,
                       background: isSelected
-                        ? "linear-gradient(90deg, #3b82f6, #2563eb)"
-                        : "linear-gradient(90deg, #e2e8f0, transparent)",
-                      borderRadius: "16px 16px 0 0",
+                        ? "linear-gradient(90deg, #2563eb, #3b82f6)"
+                        : "linear-gradient(90deg, #cbd5e1, transparent)",
+                      borderRadius: "18px 18px 0 0",
                     }} />
 
-                    {/* Category icon area */}
-                    {(() => {
-                      const catColorMap = {
-                        "Dinner": { bg: "#fffbeb", border: "#fde68a", color: "#d97706", emoji: "🍽️" },
-                        "Break Fast": { bg: "#ecfdf5", border: "#a7f3d0", color: "#059669", emoji: "☀️" },
-                        "Breakfast": { bg: "#ecfdf5", border: "#a7f3d0", color: "#059669", emoji: "☀️" },
-                        "Lunch": { bg: "#fff7ed", border: "#fed7aa", color: "#c2410c", emoji: "🌤️" },
-                        "Drinks": { bg: "#ecfeff", border: "#a5f3fc", color: "#0891b2", emoji: "🥤" },
-                        "Beverages": { bg: "#ecfeff", border: "#a5f3fc", color: "#0891b2", emoji: "☕" },
-                        "Desserts": { bg: "#fdf2f8", border: "#fbcfe8", color: "#db2777", emoji: "🍰" },
-                        "Starters": { bg: "#f5f3ff", border: "#ddd6fe", color: "#7c3aed", emoji: "🥗" },
-                        "Snacks": { bg: "#fefce8", border: "#fef08a", color: "#ca8a04", emoji: "🥨" },
-                        "General": { bg: "#eff6ff", border: "#bfdbfe", color: "#2563eb", emoji: "⭐" },
-                      };
-                      const cc = catColorMap[p.category] || { bg: "#f1f5f9", border: "#e2e8f0", color: "#475569", emoji: "🍴" };
-                      return (
-                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                          <div style={{
-                            width: 36, height: 36, borderRadius: 10,
-                            background: cc.bg,
-                            border: `1px solid ${cc.border}`,
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            fontSize: 18, flexShrink: 0,
-                          }}>
-                            {cc.emoji}
-                          </div>
-                          <span style={{
-                            fontSize: 9, fontWeight: 800, textTransform: "uppercase",
-                            color: cc.color, letterSpacing: 0.5,
-                            background: cc.bg, border: `1px solid ${cc.border}`, padding: "2px 7px", borderRadius: 20,
-                          }}>
-                            {p.category || "General"}
-                          </span>
-                        </div>
-                      );
-                    })()}
-
-                    {/* Product Name */}
-                    <div style={{
-                      fontWeight: 800, fontSize: 14, color: "#0f172a",
-                      lineHeight: 1.3, paddingRight: isSelected ? 22 : 0,
-                      marginBottom: 3, flex: 1,
-                    }}>
-                      {p.name}
+                    {/* Category icon header */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, flexShrink: 0 }}>
+                      <div style={{
+                        width: 34, height: 34, borderRadius: 10,
+                        background: cc.bg,
+                        border: `1px solid ${cc.border}`,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontSize: 17, flexShrink: 0,
+                      }}>
+                        {cc.emoji}
+                      </div>
+                      <span style={{
+                        fontSize: 9.5, fontWeight: 800, textTransform: "uppercase",
+                        color: cc.color, letterSpacing: 0.5,
+                        background: cc.bg, border: `1px solid ${cc.border}`,
+                        padding: "2.5px 8px", borderRadius: 20,
+                        maxWidth: "105px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                      }}>
+                        {p.category || "General"}
+                      </span>
                     </div>
 
-                    {/* Product Code */}
-                    <div style={{ fontSize: 10, color: "#64748b", marginBottom: 10, fontFamily: "monospace" }}>
-                      #{p.code || "—"}
+                    {/* Product Name & Code Area */}
+                    <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-start", marginBottom: 8, minHeight: 44, flexShrink: 0 }}>
+                      <div
+                        style={{
+                          fontWeight: 800, fontSize: 13.5, color: "#0f172a",
+                          lineHeight: 1.25, paddingRight: isSelected ? 24 : 0,
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                        title={p.name}
+                      >
+                        {p.name}
+                      </div>
+                      <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 2, fontFamily: "monospace", fontWeight: 600 }}>
+                        #{p.code || "—"}
+                      </div>
                     </div>
 
-                    {/* Price + Tag row */}
+                    {/* Price + Recipe/Direct Tag Footer */}
                     <div style={{
                       display: "flex", alignItems: "center",
                       justifyContent: "space-between",
                       paddingTop: 8,
                       borderTop: "1px solid #f1f5f9",
+                      marginTop: "auto",
+                      flexShrink: 0,
                     }}>
                       <span style={{
-                        fontWeight: 900, fontSize: 14, color: "#059669",
+                        fontWeight: 900, fontSize: 13.5, color: "#059669",
                         background: "#ecfdf5",
-                        padding: "3px 9px", borderRadius: 20,
+                        padding: "3.5px 10px", borderRadius: 20,
                         border: "1px solid #a7f3d0",
                         letterSpacing: -0.3,
+                        boxShadow: "0 1px 2px rgba(5,150,105,0.06)",
                       }}>
                         {Number(p.sellingPrice || 0).toFixed(0)} ETB
                       </span>
                       {(p.ingredients?.length || 0) > 0 ? (
                         <span style={{
-                          fontSize: 9, color: "#b45309", fontWeight: 800,
-                          background: "#fffbeb", padding: "2px 7px",
+                          fontSize: 9.5, color: "#b45309", fontWeight: 800,
+                          background: "#fffbeb", padding: "2.5px 7.5px",
                           borderRadius: 20, border: "1px solid #fde68a",
                         }}>⚡ Recipe</span>
                       ) : (
                         <span style={{
-                          fontSize: 9, color: "#64748b", fontWeight: 600,
-                          background: "#f1f5f9", border: "1px solid #e2e8f0", padding: "2px 7px", borderRadius: 20,
+                          fontSize: 9.5, color: "#64748b", fontWeight: 700,
+                          background: "#f1f5f9", border: "1px solid #e2e8f0", padding: "2.5px 7.5px", borderRadius: 20,
                         }}>Direct</span>
                       )}
                     </div>
