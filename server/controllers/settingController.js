@@ -110,7 +110,7 @@ const updateSettings = asyncHandler(async (req, res) => {
     'currency', 'currencySymbol', 'lowStockThresholdDefault',
     'taxRate', 'autoGenerateVoucherNo', 'allowNegativeStock', 'notes',
     // Pricing & Cost Parameters
-    'contingencyPercent', 'overheadPercent', 'defaultFoodCostPercent',
+    'contingencyPercent', 'overheadPercent', 'spiceCostPercent', 'defaultFoodCostPercent',
     'rawMaterialPriceAdjustType', 'rawMaterialPriceAdjustValue',
     'productSellingPriceAdjustPercent',
     // Service Charge & Hospitality Fees
@@ -149,10 +149,30 @@ const updateSettings = asyncHandler(async (req, res) => {
     settings.markModified('crudPermissions');
   }
 
+  // If user requested to immediately apply price adjustment to all raw materials in database
+  let rawMaterialsUpdated = 0;
+  if (req.body.applyToMaterialsNow && Number(settings.rawMaterialPriceAdjustValue) > 0) {
+    const RawMaterial = require('../models/RawMaterial');
+    const adjType = settings.rawMaterialPriceAdjustType;
+    const adjVal = Number(settings.rawMaterialPriceAdjustValue);
+    const materials = await RawMaterial.find({ isActive: true });
+    for (const mat of materials) {
+      const oldCost = Number(mat.unitCost) || 0;
+      if (oldCost > 0) {
+        mat.unitCost = adjType === 'percent'
+          ? Math.round(oldCost * (1 + adjVal / 100) * 100) / 100
+          : Math.round((oldCost + adjVal) * 100) / 100;
+        await mat.save();
+        rawMaterialsUpdated++;
+      }
+    }
+    invalidateDashboardCache();
+  }
+
   const updated = await settings.save();
   clearSettingsCache();
   tg.notifySettingsChanged(req.body, req.user);
-  res.json(updated);
+  res.json({ ...updated.toJSON(), rawMaterialsUpdated });
 });
 
 // @desc   Apply bulk % increase to ALL product selling prices
@@ -233,10 +253,73 @@ const updateDeveloperLicense = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc   Apply bulk adjustment to ALL active raw material unit costs
+// @route  POST /api/settings/apply-raw-material-price-adjustment
+// @access Private/Admin
+const applyRawMaterialPriceAdjustment = asyncHandler(async (req, res) => {
+  const { type = 'percent', value } = req.body;
+  const val = Number(value);
+  if (isNaN(val) || val <= 0) {
+    res.status(400);
+    throw new Error('Adjustment value must be greater than 0');
+  }
+  if (type === 'percent' && val > 500) {
+    res.status(400);
+    throw new Error('Percent adjustment cannot exceed 500%');
+  }
+
+  const RawMaterial = require('../models/RawMaterial');
+  const materials = await RawMaterial.find({ isActive: true });
+  let updatedCount = 0;
+  const sampleChanges = [];
+
+  for (const mat of materials) {
+    const oldCost = Number(mat.unitCost) || 0;
+    if (oldCost > 0) {
+      const newCost = type === 'percent'
+        ? Math.round(oldCost * (1 + val / 100) * 100) / 100
+        : Math.round((oldCost + val) * 100) / 100;
+      mat.unitCost = newCost;
+      await mat.save();
+      updatedCount++;
+      if (sampleChanges.length < 4) {
+        sampleChanges.push({ name: mat.name, before: oldCost, after: newCost });
+      }
+    }
+  }
+
+  // Also persist the applied setting in Setting document for reference
+  let settings = await Setting.findOne();
+  if (settings) {
+    settings.rawMaterialPriceAdjustType = type;
+    settings.rawMaterialPriceAdjustValue = val;
+    await settings.save();
+    clearSettingsCache();
+  }
+
+  invalidateDashboardCache();
+  if (tg?.notifySettingsChanged) {
+    tg.notifySettingsChanged(
+      { action: `Bulk Raw Material Price adjustment (${type === 'percent' ? `+${val}%` : `+ETB ${val}`})`, updatedCount },
+      req.user
+    );
+  }
+
+  res.json({
+    message: `Successfully updated ${updatedCount} raw material unit cost(s).`,
+    updatedCount,
+    type,
+    value: val,
+    samples: sampleChanges,
+  });
+});
+
 module.exports = {
   getSettings,
   updateSettings,
   applyProductPriceAdjustment,
+  applyRawMaterialPriceAdjustment,
   updateDeveloperLicense,
 };
+
 

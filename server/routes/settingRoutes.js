@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getSettings, updateSettings, applyProductPriceAdjustment, updateDeveloperLicense } = require('../controllers/settingController');
+const { getSettings, updateSettings, applyProductPriceAdjustment, applyRawMaterialPriceAdjustment, updateDeveloperLicense } = require('../controllers/settingController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
 router.route('/')
@@ -9,5 +9,6 @@ router.route('/')
 
 router.put('/developer-license', protect, updateDeveloperLicense);
 router.post('/apply-product-price-adjustment', protect, authorize('admin', 'dev'), applyProductPriceAdjustment);
+router.post('/apply-raw-material-price-adjustment', protect, authorize('admin', 'dev'), applyRawMaterialPriceAdjustment);
 
 module.exports = router;

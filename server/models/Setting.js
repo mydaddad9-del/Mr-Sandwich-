@@ -86,6 +86,8 @@ const settingSchema = new mongoose.Schema(
     contingencyPercent: { type: Number, default: 10, min: 0, max: 100 },
     // Overhead: % of total cost added for electricity, labour, etc.
     overheadPercent: { type: Number, default: 25, min: 0, max: 100 },
+    // Spice Cost: % added for spices, seasoning, culinary oils (Ethiopian hotel/cafe standard)
+    spiceCostPercent: { type: Number, default: 5, min: 0, max: 100 },
     // Default Food Cost %: used to back-calculate suggested selling price
     // e.g. if food cost % = 30, selling price = totalCost / 0.30
     defaultFoodCostPercent: { type: Number, default: 30, min: 1, max: 100 },

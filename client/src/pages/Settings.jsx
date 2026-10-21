@@ -129,10 +129,12 @@ export default function Settings() {
     // Pricing & Cost Parameters
     contingencyPercent: 10,
     overheadPercent: 25,
+    spiceCostPercent: 5,
     defaultFoodCostPercent: 30,
     rawMaterialPriceAdjustType: 'percent',
     rawMaterialPriceAdjustValue: 0,
     productSellingPriceAdjustPercent: 0,
+    applyToMaterialsNow: false,
     rolePermissions: {
       recordGoods: { storekeeper: true, manager: true, admin: true },
       checkReview: { storekeeper: false, manager: true, admin: true },
@@ -180,6 +182,11 @@ export default function Settings() {
   const [bulkPriceApplying, setBulkPriceApplying] = useState(false);
   const [bulkPriceSuccess, setBulkPriceSuccess] = useState('');
   const [bulkPriceError, setBulkPriceError] = useState('');
+
+  // Bulk raw material price adjustment state
+  const [rawMaterialApplying, setRawMaterialApplying] = useState(false);
+  const [rawMaterialSuccess, setRawMaterialSuccess] = useState('');
+  const [rawMaterialError, setRawMaterialError] = useState('');
 
   // Developer / System Owner: license control state
   const [devLicenseForm, setDevLicenseForm] = useState({ subsystem: true });
@@ -586,12 +593,52 @@ export default function Settings() {
       } else {
         await refreshPermissions();
       }
-      setSystemSuccess('Baba Roti  Cafésystem settings & role permissions saved and activated immediately.');
-      setTimeout(() => setSystemSuccess(''), 4000);
+      if (res.data?.rawMaterialsUpdated > 0) {
+        setSystemSuccess(`Baba Roti Café settings saved! Successfully adjusted ${res.data.rawMaterialsUpdated} raw materials in inventory.`);
+      } else {
+        setSystemSuccess('Baba Roti Café system settings & role permissions saved and activated immediately.');
+      }
+      setTimeout(() => setSystemSuccess(''), 5000);
     } catch (err) {
       setSystemError(err.response?.data?.message || 'Failed to update system settings.');
     } finally {
       setSystemSaving(false);
+    }
+  };
+
+  // Handle Bulk Raw Material Price Adjustment (Permanently updates unitCost on all raw materials)
+  const handleRawMaterialBulkApply = async () => {
+    const adjVal = Number(systemForm.rawMaterialPriceAdjustValue);
+    const adjType = systemForm.rawMaterialPriceAdjustType;
+    if (!adjVal || adjVal <= 0) {
+      setRawMaterialError('Enter a valid adjustment value greater than 0.');
+      return;
+    }
+    const description = adjType === 'percent' ? `+${adjVal}%` : `+ETB ${adjVal.toFixed(2)}`;
+    const sampleBreadNew = adjType === 'percent'
+      ? (100 * (1 + adjVal / 100)).toFixed(2)
+      : (100 + adjVal).toFixed(2);
+
+    if (!window.confirm(`This will permanently update the unit cost of ALL active raw materials in the database by ${description} (e.g. Bread @ ETB 100.00 will become ETB ${sampleBreadNew}). Continue?`)) {
+      return;
+    }
+    setRawMaterialApplying(true);
+    setRawMaterialError('');
+    setRawMaterialSuccess('');
+    try {
+      const res = await api.post('/settings/apply-raw-material-price-adjustment', {
+        type: adjType,
+        value: adjVal,
+      });
+      const sampleText = res.data.samples?.length
+        ? ` (e.g. ${res.data.samples.map(s => `${s.name}: ETB ${s.before} → ETB ${s.after}`).join(', ')})`
+        : '';
+      setRawMaterialSuccess(`✓ ${res.data.message}${sampleText}`);
+      setTimeout(() => setRawMaterialSuccess(''), 8000);
+    } catch (err) {
+      setRawMaterialError(err.response?.data?.message || 'Failed to apply raw material price adjustment.');
+    } finally {
+      setRawMaterialApplying(false);
     }
   };
 
@@ -1337,30 +1384,41 @@ export default function Settings() {
               const adjVal = Number(systemForm.rawMaterialPriceAdjustValue) || 0;
               const cont = Number(systemForm.contingencyPercent) || 0;
               const ovhd = Number(systemForm.overheadPercent) || 0;
+              const spice = Number(systemForm.spiceCostPercent) || 0;
               const fc = Math.max(Number(systemForm.defaultFoodCostPercent) || 30, 1);
-              // Example: raw material cost = 357.90 ETB (from the screenshot)
-              const exampleRaw = 357.90;
+
+              // Standard recipe cost example from Ethiopian culinary costing (e.g., Bread & Roti Recipe: 557.57 ETB)
+              const exampleRaw = 557.57;
               const adjCost = adjType === 'percent'
                 ? exampleRaw * (1 + adjVal / 100)
                 : exampleRaw + adjVal;
-              const withCont = adjCost * (1 + cont / 100);
-              const total = withCont * (1 + ovhd / 100);
+              const contAmount = adjCost * (cont / 100);
+              const ovhdAmount = adjCost * (ovhd / 100);
+              const spiceAmount = adjCost * (spice / 100);
+              const total = adjCost + contAmount + ovhdAmount + spiceAmount;
               const selling = total / (fc / 100);
               const fmt = (n) => `ETB ${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
               return (
                 <div className="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-teal-50 p-4 mb-6">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 mb-3">Live Preview (example: {fmt(exampleRaw)} raw material cost)</p>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-800">
+                      Live Culinary Cost Preview (Example: {fmt(exampleRaw)} raw material cost)
+                    </p>
+                    <span className="text-[10px] font-semibold text-emerald-700 bg-white/70 px-2 py-0.5 rounded-full border border-emerald-200">
+                      Hospitality Standard Costing
+                    </span>
+                  </div>
                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6 text-xs">
                     {[
-                      { label: 'Adjusted Cost', value: fmt(adjCost), color: 'text-ink-700' },
-                      { label: `+ Contingency ${cont}%`, value: fmt(withCont - adjCost), color: 'text-amber-600' },
-                      { label: 'After Contingency', value: fmt(withCont), color: 'text-ink-700' },
-                      { label: `+ Overhead ${ovhd}%`, value: fmt(total - withCont), color: 'text-violet-600' },
-                      { label: 'Total Cost', value: fmt(total), color: 'text-ink-900 font-black' },
+                      { label: 'Adjusted Cost', value: fmt(adjCost), color: 'text-ink-700 font-bold' },
+                      { label: `+ Contingency ${cont}%`, value: fmt(contAmount), color: 'text-amber-600 font-semibold' },
+                      { label: `+ Overhead ${ovhd}%`, value: fmt(ovhdAmount), color: 'text-violet-600 font-semibold' },
+                      { label: `+ Spice Cost ${spice}%`, value: fmt(spiceAmount), color: 'text-rose-600 font-semibold' },
+                      { label: 'Total Recipe Cost', value: fmt(total), color: 'text-ink-900 font-black' },
                       { label: `Selling @ ${fc}% FC`, value: fmt(selling), color: 'text-emerald-700 font-black' },
                     ].map(({ label, value, color }) => (
-                      <div key={label} className="rounded-xl bg-white border border-emerald-100 px-3 py-2 text-center">
+                      <div key={label} className="rounded-xl bg-white border border-emerald-100 px-3 py-2 text-center shadow-xs">
                         <p className="text-[10px] text-ink-400 mb-0.5">{label}</p>
                         <p className={`font-bold ${color}`}>{value}</p>
                       </div>
@@ -1369,7 +1427,7 @@ export default function Settings() {
                   {/* Selling price at all benchmarks */}
                   <div className="mt-3 flex flex-wrap gap-2">
                     {[30, 35, 40, 50].map(pct => (
-                      <span key={pct} className="rounded-lg bg-white border border-emerald-200 px-2.5 py-1 text-[11px] font-semibold text-emerald-800">
+                      <span key={pct} className="rounded-lg bg-white border border-emerald-200 px-2.5 py-1 text-[11px] font-semibold text-emerald-800 shadow-xs">
                         Food cost {pct}% → Sell at {fmt(total / (pct / 100))}
                       </span>
                     ))}
@@ -1380,11 +1438,21 @@ export default function Settings() {
 
             <form onSubmit={handleSystemSubmit} className="space-y-5">
               {/* Raw Material Price Adjustment */}
-              <div className="rounded-2xl border border-ink-100 bg-ink-50/30 p-4 space-y-3">
-                <p className="text-xs font-bold text-ink-800">Raw Material Price Adjustment</p>
-                <p className="text-[11px] text-ink-400">Apply a global adjustment to all raw material unit costs before calculating recipe costs. Use this to simulate future price increases.</p>
-                <div className="flex items-center gap-3">
-                  <div className="flex rounded-xl border border-ink-200 overflow-hidden">
+              <div className="rounded-2xl border border-blue-100 bg-blue-50/20 p-5 space-y-4">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-bold text-ink-900">Raw Material Price Adjustment</p>
+                    <span className="rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold px-2.5 py-0.5">
+                      Direct Inventory Sync
+                    </span>
+                  </div>
+                  <p className="text-xs text-ink-500 mt-0.5">
+                    Adjust raw material prices globally. You can apply this adjustment directly to all active raw material inventory unit costs (e.g., Bread @ ETB 100 → ETB 110), or calculate simulated recipe pricing.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex rounded-xl border border-ink-200 overflow-hidden bg-white">
                     {[
                       { val: 'percent', label: '% Percent' },
                       { val: 'fixed', label: 'ETB Fixed' },
@@ -1402,35 +1470,118 @@ export default function Settings() {
                       </button>
                     ))}
                   </div>
-                  <div className="relative flex-1 max-w-[160px]">
+                  <div className="relative w-36">
                     <input
                       type="number"
                       min="0"
                       step="0.01"
                       value={systemForm.rawMaterialPriceAdjustValue}
-                      onChange={e => setSystemForm(p => ({ ...p, rawMaterialPriceAdjustValue: e.target.value }))}
-                      className="w-full rounded-xl border border-ink-200 py-2.5 pl-3 pr-10 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      onChange={e => {
+                        setSystemForm(p => ({ ...p, rawMaterialPriceAdjustValue: e.target.value }));
+                        setRawMaterialError('');
+                        setRawMaterialSuccess('');
+                      }}
+                      className="w-full rounded-xl border-2 border-blue-200 bg-white py-2 pl-3 pr-10 text-sm font-bold outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                       placeholder="0"
                     />
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-ink-400">
                       {systemForm.rawMaterialPriceAdjustType === 'percent' ? '%' : 'ETB'}
                     </span>
                   </div>
-                  {Number(systemForm.rawMaterialPriceAdjustValue) > 0 && (
-                    <span className="text-[11px] font-semibold text-amber-600 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-lg">
-                      {systemForm.rawMaterialPriceAdjustType === 'percent'
-                        ? `+${systemForm.rawMaterialPriceAdjustValue}% on all material costs`
-                        : `+ETB ${systemForm.rawMaterialPriceAdjustValue} per unit`}
-                    </span>
-                  )}
+
+                  {/* Quick adjustment buttons */}
+                  <div className="flex gap-1.5 flex-wrap items-center">
+                    <span className="text-[11px] font-semibold text-ink-400">Quick:</span>
+                    {(systemForm.rawMaterialPriceAdjustType === 'percent'
+                      ? [5, 10, 15, 20, 25]
+                      : [5, 10, 20, 50, 100]
+                    ).map(val => (
+                      <button
+                        key={val}
+                        type="button"
+                        onClick={() => {
+                          setSystemForm(p => ({ ...p, rawMaterialPriceAdjustValue: val }));
+                          setRawMaterialError('');
+                        }}
+                        className={`rounded-lg px-2.5 py-1 text-xs font-semibold border transition ${Number(systemForm.rawMaterialPriceAdjustValue) === val
+                          ? 'bg-blue-600 text-white border-blue-600'
+                          : 'bg-white text-ink-600 border-ink-200 hover:border-blue-400'
+                          }`}
+                      >
+                        +{val}{systemForm.rawMaterialPriceAdjustType === 'percent' ? '%' : ' ETB'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Live Bread Example Calculation */}
+                {(() => {
+                  const val = Number(systemForm.rawMaterialPriceAdjustValue) || 0;
+                  const type = systemForm.rawMaterialPriceAdjustType;
+                  const sampleOld = 100;
+                  const sampleNew = type === 'percent'
+                    ? (sampleOld * (1 + val / 100)).toFixed(2)
+                    : (sampleOld + val).toFixed(2);
+
+                  return (
+                    <div className="rounded-xl border border-blue-200 bg-white p-3 flex items-center justify-between text-xs">
+                      <div>
+                        <span className="font-bold text-ink-700">Example (e.g. Bread @ ETB 100.00): </span>
+                        <span className="text-ink-500">becomes </span>
+                        <span className="font-bold text-blue-700">ETB {sampleNew}</span>
+                        <span className="ml-1 text-[11px] text-ink-400">
+                          ({type === 'percent' ? `+${val}%` : `+ETB ${val.toFixed(2)}`})
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-ink-400">Affects all raw material inventory unit costs</span>
+                    </div>
+                  );
+                })()}
+
+                {/* Feedback for Raw Material bulk adjustment */}
+                {rawMaterialSuccess && (
+                  <div className="flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-xs font-semibold text-emerald-700">
+                    <CheckCircle2 size={14} className="flex-shrink-0" /> {rawMaterialSuccess}
+                  </div>
+                )}
+                {rawMaterialError && (
+                  <div className="flex items-center gap-2 rounded-xl bg-red-50 border border-red-200 p-3 text-xs font-semibold text-red-700">
+                    <AlertCircle size={14} className="flex-shrink-0" /> {rawMaterialError}
+                  </div>
+                )}
+
+                {/* Action button to apply immediately */}
+                <div className="pt-1 flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleRawMaterialBulkApply}
+                    disabled={rawMaterialApplying || !Number(systemForm.rawMaterialPriceAdjustValue)}
+                    className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white hover:bg-blue-700 transition disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+                  >
+                    {rawMaterialApplying
+                      ? 'Updating All Raw Materials…'
+                      : `Apply ${systemForm.rawMaterialPriceAdjustType === 'percent' ? `+${systemForm.rawMaterialPriceAdjustValue || '0'}%` : `+ETB ${systemForm.rawMaterialPriceAdjustValue || '0'}`} to All Raw Materials in Inventory`
+                    }
+                  </button>
+
+                  <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-ink-600">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(systemForm.applyToMaterialsNow)}
+                      onChange={e => setSystemForm(p => ({ ...p, applyToMaterialsNow: e.target.checked }))}
+                      className="h-4 w-4 rounded text-blue-600 border-ink-300 cursor-pointer"
+                    />
+                    <span>Also update all raw material unit costs when saving settings</span>
+                  </label>
                 </div>
               </div>
 
-              {/* Contingency & Overhead */}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {/* Contingency, Overhead & Spice Cost Parameters */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                {/* Contingency */}
                 <div>
                   <label className="block text-xs font-bold text-ink-700 mb-1.5">
-                    Contingency % <span className="font-normal text-ink-400">(waste, spoilage, price buffer)</span>
+                    Contingency % <span className="font-normal text-ink-400">(waste, spoilage)</span>
                   </label>
                   <div className="relative">
                     <input
@@ -1445,11 +1596,13 @@ export default function Settings() {
                     />
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-amber-500">%</span>
                   </div>
-                  <p className="text-[10px] text-ink-400 mt-1">Added to raw material cost. Industry standard: 5–15%</p>
+                  <p className="text-[10px] text-ink-400 mt-1">Buffer added on raw material cost. Standard: 10–15%</p>
                 </div>
+
+                {/* Overhead */}
                 <div>
                   <label className="block text-xs font-bold text-ink-700 mb-1.5">
-                    Overhead % <span className="font-normal text-ink-400">(electricity, labour, equipment)</span>
+                    Overhead % <span className="font-normal text-ink-400">(labour, electricity)</span>
                   </label>
                   <div className="relative">
                     <input
@@ -1464,7 +1617,28 @@ export default function Settings() {
                     />
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-violet-500">%</span>
                   </div>
-                  <p className="text-[10px] text-ink-400 mt-1">Applied after contingency. Industry standard: 20–30%</p>
+                  <p className="text-[10px] text-ink-400 mt-1">Operational costs added to recipe. Standard: 10–25%</p>
+                </div>
+
+                {/* Spice Cost % */}
+                <div>
+                  <label className="block text-xs font-bold text-ink-700 mb-1.5">
+                    Spice Cost % <span className="font-normal text-ink-400">(seasoning, oils)</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.1"
+                      value={systemForm.spiceCostPercent}
+                      onChange={e => setSystemForm(p => ({ ...p, spiceCostPercent: e.target.value }))}
+                      className="w-full rounded-xl border border-ink-200 py-2.5 pl-3 pr-10 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      placeholder="5"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-rose-500">%</span>
+                  </div>
+                  <p className="text-[10px] text-ink-400 mt-1">Culinary spice & oil buffer. Standard: 3–7%</p>
                 </div>
               </div>
 

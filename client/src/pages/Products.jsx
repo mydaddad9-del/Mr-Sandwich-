@@ -808,13 +808,24 @@ const Products = () => {
                   </thead>
                   <tbody>
                     {selectedProduct.ingredients.map((ing, i) => {
-                      const cost = (ing.material?.unitCost ?? 0) * ing.quantity;
+                      const ingDetail = selectedProduct.costBreakdown?.ingredients?.[i];
+                      const unitCost = ingDetail ? ingDetail.effectiveUnitCost : (ing.material?.unitCost ?? 0);
+                      const cost = ingDetail ? ingDetail.subtotal : (unitCost * ing.quantity);
+                      const isAdjusted = ingDetail && ingDetail.effectiveUnitCost !== ingDetail.baseUnitCost;
+
                       return (
                         <tr key={i} className="border-b border-ink-50">
-                          <td className="py-1.5">{ing.material?.name ?? '—'}</td>
+                          <td className="py-1.5 font-medium text-ink-800">{ing.material?.name ?? '—'}</td>
                           <td className="py-1.5 text-right tabular">{ing.quantity} {ing.material?.unit}</td>
-                          <td className="py-1.5 text-right tabular text-ink-400">ETB {ing.material?.unitCost?.toFixed(2) ?? '0.00'}</td>
-                          <td className="py-1.5 text-right tabular font-medium">ETB {cost.toFixed(2)}</td>
+                          <td className="py-1.5 text-right tabular text-ink-600">
+                            ETB {unitCost.toFixed(2)}
+                            {isAdjusted && (
+                              <span className="ml-1 text-[10px] text-amber-600 font-normal">
+                                (base: {ingDetail.baseUnitCost.toFixed(2)})
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-1.5 text-right tabular font-bold text-ink-900">ETB {cost.toFixed(2)}</td>
                         </tr>
                       );
                     })}
@@ -832,16 +843,16 @@ const Products = () => {
               {selectedProduct.costBreakdown && (
                 <div className="mt-4 rounded-xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-teal-50 overflow-hidden">
                   <div className="px-4 py-2.5 border-b border-emerald-100 bg-emerald-100/50">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-800">Full Cost Breakdown</p>
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-800">Full Cost Breakdown (Culinary Cost Sheet)</p>
                   </div>
                   <table className="w-full text-xs">
                     <tbody>
                       {[
-                        { label: 'Raw Material Cost', value: selectedProduct.costBreakdown.rawMaterialCost, color: 'text-ink-700' },
-                        { label: `+ Contingency (${selectedProduct.costBreakdown.settings?.contingencyPercent}%)`, value: selectedProduct.costBreakdown.contingencyAmount, color: 'text-amber-600' },
-                        { label: 'Total after Contingency', value: selectedProduct.costBreakdown.withContingency, color: 'text-ink-700 font-semibold', divider: true },
-                        { label: `+ Overhead (${selectedProduct.costBreakdown.settings?.overheadPercent}%)`, value: selectedProduct.costBreakdown.overheadAmount, color: 'text-violet-600' },
-                        { label: 'Total Cost (G Total Cost)', value: selectedProduct.costBreakdown.totalCost, color: 'text-ink-900 font-black', divider: true },
+                        { label: 'Raw Material Cost (Ingredients Total)', value: selectedProduct.costBreakdown.rawMaterialCost, color: 'text-ink-700 font-bold' },
+                        { label: `+ Contingency (${selectedProduct.costBreakdown.contingencyPercent ?? selectedProduct.costBreakdown.settings?.contingencyPercent}%)`, value: selectedProduct.costBreakdown.contingencyAmount, color: 'text-amber-600' },
+                        { label: `+ Overhead (${selectedProduct.costBreakdown.overheadPercent ?? selectedProduct.costBreakdown.settings?.overheadPercent}%)`, value: selectedProduct.costBreakdown.overheadAmount, color: 'text-violet-600' },
+                        { label: `+ Spice Cost (${selectedProduct.costBreakdown.spiceCostPercent ?? selectedProduct.costBreakdown.settings?.spiceCostPercent ?? 5}%)`, value: selectedProduct.costBreakdown.spiceAmount, color: 'text-rose-600' },
+                        { label: 'Total Recipe Cost (Grand Total)', value: selectedProduct.costBreakdown.totalCost, color: 'text-ink-900 font-black', divider: true },
                         { label: `Suggested Price @ ${selectedProduct.costBreakdown.settings?.defaultFoodCostPercent}% Food Cost`, value: selectedProduct.costBreakdown.suggestedSellingPrice, color: 'text-emerald-700 font-black' },
                       ].map(({ label, value, color, divider }) => (
                         <tr key={label} className={divider ? 'border-t border-emerald-200' : ''}>

@@ -16,40 +16,61 @@ function calcRecipeCostBreakdown(ingredients, settings = {}) {
   const {
     contingencyPercent = 10,
     overheadPercent = 25,
+    spiceCostPercent = 5,
     defaultFoodCostPercent = 30,
     rawMaterialPriceAdjustType = 'percent',
     rawMaterialPriceAdjustValue = 0,
   } = settings;
 
-  // Step 1: raw material cost with price adjustment
-  const rawMaterialCost = (ingredients || []).reduce((sum, ing) => {
-    let unitCost = ing.material?.unitCost ?? 0;
-    // Apply global price adjustment
+  let baseRawCost = 0;
+  let adjustedRawCost = 0;
+
+  // Step 1: ingredient line-item pricing with global adjustment support
+  const enrichedIngredients = (ingredients || []).map((ing) => {
+    const rawCost = Number(ing.material?.unitCost ?? 0);
+    let effectiveCost = rawCost;
     if (rawMaterialPriceAdjustValue > 0) {
       if (rawMaterialPriceAdjustType === 'percent') {
-        unitCost = unitCost * (1 + rawMaterialPriceAdjustValue / 100);
+        effectiveCost = rawCost * (1 + rawMaterialPriceAdjustValue / 100);
       } else {
-        unitCost = unitCost + rawMaterialPriceAdjustValue;
+        effectiveCost = rawCost + rawMaterialPriceAdjustValue;
       }
     }
-    return sum + unitCost * (ing.quantity || 0);
-  }, 0);
+    const qty = Number(ing.quantity || 0);
+    const subtotal = effectiveCost * qty;
+    baseRawCost += rawCost * qty;
+    adjustedRawCost += subtotal;
 
-  // Step 2: add contingency
-  const withContingency = rawMaterialCost * (1 + contingencyPercent / 100);
+    return {
+      material: ing.material,
+      quantity: qty,
+      baseUnitCost: Math.round(rawCost * 100) / 100,
+      effectiveUnitCost: Math.round(effectiveCost * 100) / 100,
+      subtotal: Math.round(subtotal * 100) / 100,
+    };
+  });
 
-  // Step 3: add overhead
-  const totalCost = withContingency * (1 + overheadPercent / 100);
+  const rawMaterialCost = adjustedRawCost;
 
-  // Step 4: suggested selling price (back-calc from food cost %)
+  // Step 2: hotel & cafe culinary costing parameters (as per standard recipe cost sheet)
+  const contingencyAmount = rawMaterialCost * (contingencyPercent / 100);
+  const overheadAmount = rawMaterialCost * (overheadPercent / 100);
+  const spiceAmount = rawMaterialCost * (spiceCostPercent / 100);
+  const totalCost = rawMaterialCost + contingencyAmount + overheadAmount + spiceAmount;
+
+  // Step 3: suggested selling price (back-calc from food cost %)
   const foodCostFraction = Math.max(defaultFoodCostPercent, 1) / 100;
   const suggestedSellingPrice = totalCost / foodCostFraction;
 
   return {
     rawMaterialCost: Math.round(rawMaterialCost * 100) / 100,
-    contingencyAmount: Math.round((withContingency - rawMaterialCost) * 100) / 100,
-    withContingency: Math.round(withContingency * 100) / 100,
-    overheadAmount: Math.round((totalCost - withContingency) * 100) / 100,
+    baseMaterialCost: Math.round(baseRawCost * 100) / 100,
+    contingencyPercent,
+    contingencyAmount: Math.round(contingencyAmount * 100) / 100,
+    overheadPercent,
+    overheadAmount: Math.round(overheadAmount * 100) / 100,
+    spiceCostPercent,
+    spiceAmount: Math.round(spiceAmount * 100) / 100,
     totalCost: Math.round(totalCost * 100) / 100,
     suggestedSellingPrice: Math.round(suggestedSellingPrice * 100) / 100,
     // Selling prices at common food cost benchmarks
@@ -57,8 +78,16 @@ function calcRecipeCostBreakdown(ingredients, settings = {}) {
     sellingAt35pct: Math.round((totalCost / 0.35) * 100) / 100,
     sellingAt40pct: Math.round((totalCost / 0.40) * 100) / 100,
     sellingAt50pct: Math.round((totalCost / 0.50) * 100) / 100,
+    ingredients: enrichedIngredients,
     // Settings used (for display in UI)
-    settings: { contingencyPercent, overheadPercent, defaultFoodCostPercent, rawMaterialPriceAdjustType, rawMaterialPriceAdjustValue },
+    settings: {
+      contingencyPercent,
+      overheadPercent,
+      spiceCostPercent,
+      defaultFoodCostPercent,
+      rawMaterialPriceAdjustType,
+      rawMaterialPriceAdjustValue,
+    },
   };
 }
 
