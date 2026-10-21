@@ -47,13 +47,31 @@ const handleWebhook = asyncHandler(async (req, res) => {
 
   // ── /start or /subscribe ──────────────────────────────────────
   if (text === '/start' || text.startsWith('/subscribe')) {
+    // Check if the user trying to subscribe is an inactive/disabled staff member
+    try {
+      const User = require('../models/User');
+      const cleanChat = String(chatId);
+      const cleanUser = (username || '').toLowerCase().trim();
+      const blocked = await User.findOne({
+        isActive: false,
+        $or: [
+          { telegramChatId: cleanChat },
+          ...(cleanUser ? [{ email: cleanUser }] : []),
+        ],
+      });
+      if (blocked) {
+        await reply(chatId,
+          `🏨 <b>Baba Roti Café</b>\n━━━━━━━━━━━━━━━━━━━━\n❌ <b>ACCESS PROHIBITED</b>\n\nYour staff account (<b>${blocked.name}</b>) has been disabled or deactivated by the administrator.\n\nTelegram notifications cannot be activated for this account.\n━━━━━━━━━━━━━━━━━━━━`
+        );
+        return;
+      }
+    } catch (e) {
+      console.warn('[TelegramWebhook] Inactive check error:', e.message);
+    }
+
     if (alreadySubscribed) {
       await reply(chatId,
-        `✅ <b>Already subscribed!</b>
-
-You are already receiving Baba Roti  CaféHotel notifications.
-
-To unsubscribe, send /unsubscribe`
+        `✅ <b>Already subscribed!</b>\n\nYou are already receiving Baba Roti  CaféHotel notifications.\n\nTo unsubscribe, send /unsubscribe`
       );
       return;
     }
@@ -217,12 +235,39 @@ const removeSubscriber = asyncHandler(async (req, res) => {
   const settings = await Setting.findOne();
   if (!settings) return res.json({ message: 'No settings found' });
 
+  const targetChatId = String(req.params.chatId).trim();
+  const removedSub = (settings.telegramSubscribers || []).find(s => String(s.chatId) === targetChatId);
+
   settings.telegramSubscribers = (settings.telegramSubscribers || [])
-    .filter(s => String(s.chatId) !== String(req.params.chatId));
+    .filter(s => String(s.chatId) !== targetChatId);
   settings.markModified('telegramSubscribers');
   await settings.save();
 
-  res.json({ message: 'Subscriber removed.' });
+  // Also clear telegramChatId on corresponding user account if linked
+  try {
+    const User = require('../models/User');
+    const user = await User.findOne({
+      $or: [
+        { telegramChatId: targetChatId },
+        ...(removedSub?.phone ? [{ phone: removedSub.phone }] : []),
+        ...(removedSub?.username ? [{ email: removedSub.username }] : []),
+      ]
+    });
+    if (user && user.telegramChatId) {
+      user.telegramChatId = '';
+      await user.save();
+    }
+  } catch (err) {
+    console.warn('[RemoveSubscriber] Could not unlink user telegramChatId:', err.message);
+  }
+
+  // Send polite unsubscription notice to that Telegram chat
+  await reply(
+    targetChatId,
+    `🏨 <b>Baba Roti Café</b>\n━━━━━━━━━━━━━━━━━━━━\n🔕 <b>UNSUBSCRIBED BY ADMINISTRATOR</b>\n\nYour Telegram notifications subscription has been removed by the administrator. You will no longer receive alerts.\n━━━━━━━━━━━━━━━━━━━━`
+  );
+
+  res.json({ message: 'Subscriber removed and notifications stopped.' });
 });
 
 module.exports = { handleWebhook, getSubscribers, addSubscriber, updateSubscriberPhone, removeSubscriber };

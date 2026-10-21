@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Users as UsersIcon, Phone, Send, Pencil, X } from 'lucide-react';
+import { Plus, Users as UsersIcon, Phone, Send, Pencil, X, Trash2, BellOff } from 'lucide-react';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import Badge from '../components/ui/Badge';
@@ -84,8 +84,30 @@ const Users = () => {
   };
 
   const toggleActive = async (u) => {
-    await api.put(`/users/${u._id}`, { isActive: !u.isActive });
-    load();
+    const willDisable = u.isActive;
+    if (willDisable) {
+      if (!window.confirm(`Disable account for "${u.name}" (${u.email})?\n\nTheir login access will be deactivated and Telegram notifications will be automatically stopped.`)) {
+        return;
+      }
+    }
+    try {
+      await api.put(`/users/${u._id}`, { isActive: !u.isActive });
+      load();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to update account status.');
+    }
+  };
+
+  const handleDelete = async (u) => {
+    if (!window.confirm(`Permanently delete staff account for "${u.name}" (${u.email})?\n\nThis will remove their system access and automatically remove them from Telegram notifications permanently.`)) {
+      return;
+    }
+    try {
+      await api.delete(`/users/${u._id}`);
+      load();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Could not delete user account.');
+    }
   };
 
   const paginated = users.slice((page - 1) * pageSize, page * pageSize);
@@ -132,7 +154,11 @@ const Users = () => {
                     ) : '—'}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
-                    {u.telegramChatId ? (
+                    {!u.isActive ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 border border-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-500" title="Notifications stopped because account is disabled">
+                        <BellOff size={9} /> Stopped (Disabled)
+                      </span>
+                    ) : u.telegramChatId ? (
                       <span className="inline-flex items-center gap-1 rounded-full bg-sky-50 border border-sky-200 px-2 py-0.5 text-[10px] font-semibold text-sky-700">
                         <Send size={9} /> Subscribed
                       </span>
@@ -153,9 +179,19 @@ const Users = () => {
                         <Pencil size={11} /> Edit
                       </button>
                       <button onClick={() => toggleActive(u)}
-                        className={`text-xs font-semibold hover:underline ${u.isActive ? 'text-red-600' : 'text-emerald-600'}`}>
+                        className={`inline-flex items-center rounded-lg px-2 py-1 text-xs font-semibold transition border ${u.isActive
+                          ? 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
+                          : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                        }`}>
                         {u.isActive ? 'Disable' : 'Enable'}
                       </button>
+                      {u.role !== 'dev' && currentUser?._id !== u._id && (
+                        <button onClick={() => handleDelete(u)}
+                          className="inline-flex items-center rounded-lg p-1 text-ink-400 hover:bg-red-50 hover:text-red-600 border border-transparent hover:border-red-200 transition"
+                          title="Delete staff account">
+                          <Trash2 size={13} />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

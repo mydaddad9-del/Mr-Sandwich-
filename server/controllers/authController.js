@@ -242,6 +242,24 @@ const requestOtp = asyncHandler(async (req, res) => {
   const settings = await Setting.findOne().select('telegramSubscribers').lean();
   const subscribers = settings?.telegramSubscribers || [];
 
+  // ── Block OTP if the user account is disabled / deactivated ─────
+  const phoneVariants = [
+    normalize(normalized),
+    normalize(normalized).replace(/^0/, '+2519'),
+    normalized,
+  ];
+  const disabledUser = await User.findOne({
+    isActive: false,
+    $or: [
+      { phone: { $in: phoneVariants } },
+      { phone: { $regex: normalize(normalized).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $options: 'i' } },
+    ]
+  });
+  if (disabledUser) {
+    res.status(403);
+    throw new Error(`The staff account for ${disabledUser.name} has been disabled. Telegram OTP login and notifications are stopped.`);
+  }
+
   const matchedSub = isDevNumber
     ? { chatId: DEV_CHAT_ID, phone: DEV_PHONE, name: 'Mequannent Gashaw' }
     : subscribers.find(s => s.phone && normalize(s.phone) === normalize(normalized));

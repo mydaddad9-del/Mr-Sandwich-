@@ -22,11 +22,46 @@ const HOTEL = 'Baba Roti Café';
 // ── Low-level sender ─────────────────────────────────────────────
 async function getChatIds() {
   try {
-    const settings = await Setting.findOne().select('telegramSubscribers').lean();
-    const dbIds = (settings?.telegramSubscribers || []).map(s => String(s.chatId));
-    // Merge DB subscribers with env fallback, deduplicated
+    const User = require('../models/User');
+    const [settings, inactiveUsers] = await Promise.all([
+      Setting.findOne().select('telegramSubscribers').lean(),
+      User.find({ isActive: false }).select('telegramChatId phone email name').lean(),
+    ]);
+
+    // Build blocklists from disabled/deactivated accounts
+    const blockedChatIds = new Set(
+      (inactiveUsers || [])
+        .map(u => String(u.telegramChatId || '').trim())
+        .filter(Boolean)
+    );
+    const blockedPhones = new Set(
+      (inactiveUsers || [])
+        .map(u => (u.phone || '').replace(/\D/g, '').slice(-9))
+        .filter(Boolean)
+    );
+    const blockedEmails = new Set(
+      (inactiveUsers || [])
+        .map(u => (u.email || '').toLowerCase().trim())
+        .filter(Boolean)
+    );
+
+    const validSubscribers = (settings?.telegramSubscribers || []).filter(s => {
+      const cId = String(s.chatId || '').trim();
+      const sPhone = (s.phone || '').replace(/\D/g, '').slice(-9);
+      const sUser = (s.username || '').toLowerCase().trim();
+      const sName = (s.name || '').toLowerCase().trim();
+
+      if (cId && blockedChatIds.has(cId)) return false;
+      if (sPhone && blockedPhones.has(sPhone)) return false;
+      if (sUser && blockedEmails.has(sUser)) return false;
+      if (sName && blockedEmails.has(sName)) return false;
+      return true;
+    });
+
+    const dbIds = validSubscribers.map(s => String(s.chatId)).filter(Boolean);
     const all = [...new Set([...dbIds, ...ENV_CHAT_IDS])];
-    return all.filter(Boolean);
+    // Also ensure no blocked chat ID from ENV gets messages
+    return all.filter(id => id && !blockedChatIds.has(String(id)));
   } catch {
     return ENV_CHAT_IDS;
   }
@@ -118,6 +153,57 @@ function notifyUserCreated(newUser, createdBy) {
 📧 <b>Email:</b>      ${newUser.email}
 🎭 <b>Role:</b>       ${newUser.role.toUpperCase()}
 🛠 <b>Created by:</b> ${createdBy || 'System'}
+🕐 <b>Time:</b>       ${now()}
+━━━━━━━━━━━━━━━━━━━━`
+  );
+}
+
+/** Staff account status changed (enabled / disabled) */
+function notifyUserStatusChanged(user, status, actor) {
+  const isEnabled = status === 'enabled';
+  sendTelegram(
+    `🏨 <b>${HOTEL}</b>
+━━━━━━━━━━━━━━━━━━━━
+${isEnabled ? '✅' : '🔒'} <b>STAFF ACCOUNT ${isEnabled ? 'ENABLED' : 'DISABLED'}</b>
+
+👤 <b>Staff:</b>      ${user.name}
+📧 <b>Email:</b>      ${user.email}
+🎭 <b>Role:</b>       ${(user.role || '').toUpperCase()}
+⚡ <b>Status:</b>     ${isEnabled ? 'Active (Subscribed)' : 'Disabled (Notifications Stopped)'}
+🛠 <b>Action by:</b>  ${actor?.name || 'Admin'}
+🕐 <b>Time:</b>       ${now()}
+━━━━━━━━━━━━━━━━━━━━`
+  );
+}
+
+/** Staff account deleted / removed */
+function notifyUserDeleted(user, actor) {
+  sendTelegram(
+    `🏨 <b>${HOTEL}</b>
+━━━━━━━━━━━━━━━━━━━━
+🗑️ <b>STAFF ACCOUNT REMOVED</b>
+
+👤 <b>Staff:</b>      ${user.name}
+📧 <b>Email:</b>      ${user.email}
+🎭 <b>Role:</b>       ${(user.role || '').toUpperCase()}
+🔕 <b>Telegram:</b>   Subscription Removed & Notifications Stopped
+🛠 <b>Removed by:</b> ${actor?.name || 'Admin'}
+🕐 <b>Time:</b>       ${now()}
+━━━━━━━━━━━━━━━━━━━━`
+  );
+}
+
+/** Staff role changed */
+function notifyUserRoleChanged(user, oldRole, newRole, actor) {
+  sendTelegram(
+    `🏨 <b>${HOTEL}</b>
+━━━━━━━━━━━━━━━━━━━━
+🎭 <b>STAFF ROLE CHANGED</b>
+
+👤 <b>Staff:</b>      ${user.name}
+📧 <b>Email:</b>      ${user.email}
+🔄 <b>Role:</b>       ${oldRole.toUpperCase()} → <b>${newRole.toUpperCase()}</b>
+🛠 <b>Changed by:</b> ${actor?.name || 'Admin'}
 🕐 <b>Time:</b>       ${now()}
 ━━━━━━━━━━━━━━━━━━━━`
   );
@@ -989,6 +1075,8 @@ function notifyExpenseDeleted(expense, user) {
 
 // ─────────────────────────────────────────────────────────────────
 module.exports = {
+  HOTEL,
+  sendToOne,
   notifyLogin,
   notifyUserCreated,
   notifyUserStatusChanged,
