@@ -1451,18 +1451,29 @@ export default function Settings() {
                       >
                         <div className="flex items-center justify-between mb-2.5">
                           <div
-                            className="h-8 w-14 rounded-lg shadow-sm border border-white/20 flex items-center justify-center"
+                            className={`h-8 w-14 rounded-lg shadow-sm flex items-center justify-center ${
+                              theme.isLight ? 'border border-slate-300 ring-1 ring-slate-200' : 'border border-white/20'
+                            }`}
                             style={{ background: theme.previewGradient }}
                           >
                             <span className="w-2.5 h-2.5 rounded-full" style={{ background: theme.glowColor, boxShadow: `0 0 6px ${theme.glowColor}` }} />
                           </div>
-                          {isSelected ? (
-                            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white shadow-xs">
-                              <Check size={12} strokeWidth={3} />
+                          <div className="flex items-center gap-1.5">
+                            <span className={`px-1.5 py-0.5 rounded text-[8.5px] font-extrabold uppercase tracking-wide ${
+                              theme.isLight
+                                ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                                : 'bg-slate-100 text-slate-600 border border-slate-200'
+                            }`}>
+                              {theme.category}
                             </span>
-                          ) : (
-                            <span className="h-5 w-5 rounded-full border border-ink-300 group-hover:border-ink-400" />
-                          )}
+                            {isSelected ? (
+                              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white shadow-xs">
+                                <Check size={12} strokeWidth={3} />
+                              </span>
+                            ) : (
+                              <span className="h-5 w-5 rounded-full border border-ink-300 group-hover:border-ink-400" />
+                            )}
+                          </div>
                         </div>
                         <div>
                           <p className="text-xs font-bold text-ink-900">{theme.name}</p>
@@ -2355,7 +2366,7 @@ export default function Settings() {
       )}
       {/* ── Tab 6: Developer / System Owner Controls (Strictly dev role only) ── */}
       {currentTab === 'dev' && user?.role === 'dev' && (
-        <Card className="max-w-2xl">
+        <Card className="max-w-3xl">
           {/* Header */}
           <div className="flex items-start justify-between gap-3 mb-5 pb-4 border-b border-amber-100">
             <div className="flex items-start gap-3">
@@ -2449,7 +2460,7 @@ export default function Settings() {
               Configure the hotel sidebar color palette to match the customer brand identity.
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {THEME_OPTIONS.map((theme) => {
                 const isSelected = (devLicenseForm?.sidebarTheme || 'navy') === theme.id;
                 return (
@@ -2465,18 +2476,29 @@ export default function Settings() {
                   >
                     <div className="flex items-center justify-between mb-2">
                       <div
-                        className="h-8 w-14 rounded-lg shadow-sm border border-white/20 flex items-center justify-center"
+                        className={`h-8 w-14 rounded-lg shadow-sm flex items-center justify-center ${
+                          theme.isLight ? 'border border-slate-300 ring-1 ring-slate-200' : 'border border-white/20'
+                        }`}
                         style={{ background: theme.previewGradient }}
                       >
                         <span className="w-2.5 h-2.5 rounded-full" style={{ background: theme.glowColor, boxShadow: `0 0 6px ${theme.glowColor}` }} />
                       </div>
-                      {isSelected ? (
-                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-500 text-white shadow-xs">
-                          <Check size={12} strokeWidth={3} />
+                      <div className="flex items-center gap-1.5">
+                        <span className={`px-1.5 py-0.5 rounded text-[8.5px] font-extrabold uppercase tracking-wide ${
+                          theme.isLight
+                            ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                            : 'bg-slate-100 text-slate-600 border border-slate-200'
+                        }`}>
+                          {theme.category}
                         </span>
-                      ) : (
-                        <span className="h-5 w-5 rounded-full border border-ink-300 group-hover:border-ink-400" />
-                      )}
+                        {isSelected ? (
+                          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-500 text-white shadow-xs">
+                            <Check size={12} strokeWidth={3} />
+                          </span>
+                        ) : (
+                          <span className="h-5 w-5 rounded-full border border-ink-300 group-hover:border-ink-400" />
+                        )}
+                      </div>
                     </div>
                     <div>
                       <p className="text-xs font-bold text-ink-900">{theme.name}</p>

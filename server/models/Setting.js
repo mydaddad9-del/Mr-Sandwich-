@@ -75,7 +75,6 @@ const settingSchema = new mongoose.Schema(
     sidebarTheme: {
       type: String,
       default: 'navy',
-      enum: ['navy', 'slate', 'espresso', 'emerald', 'violet', 'black'],
     },
     sidebarMaterialIcons: {
       type: Boolean,
