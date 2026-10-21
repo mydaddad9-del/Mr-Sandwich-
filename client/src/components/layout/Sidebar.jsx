@@ -475,8 +475,8 @@ const Sidebar = ({
           {/* Subtle Ambient Hover Highlight */}
           <div className="absolute inset-0 bg-blue-500/0 group-hover:bg-blue-500/[0.06] transition-colors pointer-events-none" />
 
-          {/* Row 1: Logo & Quick Action Buttons */}
-          <div className="relative flex items-center justify-between gap-1.5">
+          {/* Row 1: Logo */}
+          <div className="relative flex items-center justify-between">
             <div
               className={`flex items-center transition-transform duration-150 group-hover:scale-[1.02] ${
                 collapsed ? 'mx-auto' : ''
@@ -485,50 +485,9 @@ const Sidebar = ({
               <BabaRotiLogo
                 collapsed={collapsed}
                 size={collapsed ? 28 : 32}
-                subtitle="Café & Bakery"
+                showSubtitle={false}
               />
             </div>
-
-            {/* Quick Action Circular Buttons */}
-            {!collapsed && (
-              <div
-                className="flex items-center gap-1"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {/* Notification Bell Button */}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate('/settings?tab=telegram');
-                  }}
-                  title="Notifications & Alerts"
-                  className={`relative flex h-7 w-7 items-center justify-center rounded-full transition-all cursor-pointer ${
-                    theme.iconButtonBg || 'bg-white/[0.08] hover:bg-white/[0.18] border border-white/10 text-white/90'
-                  }`}
-                >
-                  <NotificationsNoneRoundedIcon sx={{ fontSize: 15 }} />
-                  <span className={`absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-rose-500 ring-1 ${
-                    theme.isLight ? 'ring-white' : 'ring-[#071233]'
-                  }`} />
-                </button>
-
-                {/* Profile Shortcut Button */}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate('/profile');
-                  }}
-                  title="User Profile"
-                  className={`flex h-7 w-7 items-center justify-center rounded-full transition-all cursor-pointer ${
-                    theme.iconButtonBg || 'bg-white/[0.08] hover:bg-white/[0.18] border border-white/10 text-white/90'
-                  }`}
-                >
-                  <PersonOutlineRoundedIcon sx={{ fontSize: 15 }} />
-                </button>
-              </div>
-            )}
           </div>
 
           {/* Row 2: Dynamic Greeting Text */}
