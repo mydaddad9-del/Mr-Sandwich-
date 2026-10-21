@@ -47,6 +47,8 @@ const DEFAULT_NAV_VISIBILITY = {
 
 const DEFAULT_LICENSED_MODULES = {
   subsystem: true,
+  materialIcons: true,
+  sidebarTheme: 'navy',
 };
 
 /** Clear every settings-related key from localStorage */
@@ -235,6 +237,9 @@ export const AuthProvider = ({ children }) => {
     }
     return await fetchPermissions();
   };
+  const sidebarTheme = licensedModules?.sidebarTheme || 'navy';
+  const useMaterialIcons = licensedModules?.materialIcons !== false;
+
   return (
     <AuthContext.Provider
       value={{
@@ -249,6 +254,8 @@ export const AuthProvider = ({ children }) => {
         canSeeNav,
         isModuleLicensed,
         licensedModules,
+        sidebarTheme,
+        useMaterialIcons,
         rolePermissions,
         navVisibility,
         crudPermissions,

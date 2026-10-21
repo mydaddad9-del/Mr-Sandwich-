@@ -32,11 +32,14 @@ import {
   ToggleLeft,
   ToggleRight,
   Percent,
+  Palette,
+  Sparkles,
 } from 'lucide-react';
 import api from '../api/axios';
 import posPrint from '../utils/posPrint';
 import { useAuth } from '../context/AuthContext';
 import { useSessionTimeout, TIMEOUT_OPTIONS } from '../context/SessionTimeoutContext';
+import { THEME_OPTIONS } from '../config/sidebarThemes';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 
@@ -119,6 +122,8 @@ export default function Settings() {
     currencySymbol: 'ETB',
     lowStockThresholdDefault: 15,
     taxRate: 15,
+    sidebarTheme: 'navy',
+    sidebarMaterialIcons: true,
     // Service Charge & Table Service Fees
     enableServiceCharge: false,
     serviceChargeRate: 10,
@@ -189,7 +194,11 @@ export default function Settings() {
   const [rawMaterialError, setRawMaterialError] = useState('');
 
   // Developer / System Owner: license control state
-  const [devLicenseForm, setDevLicenseForm] = useState({ subsystem: true });
+  const [devLicenseForm, setDevLicenseForm] = useState({
+    subsystem: true,
+    materialIcons: true,
+    sidebarTheme: 'navy',
+  });
   const [devSaving, setDevSaving] = useState(false);
   const [devSuccess, setDevSuccess] = useState('');
   const [devError, setDevError] = useState('');
@@ -351,9 +360,21 @@ export default function Settings() {
         .get('/settings')
         .then((res) => {
           if (res.data) {
-            setSystemForm((prev) => ({ ...prev, ...res.data }));
+            setSystemForm((prev) => ({
+              ...prev,
+              ...res.data,
+              sidebarTheme: res.data.sidebarTheme || res.data.licensedModules?.sidebarTheme || 'navy',
+              sidebarMaterialIcons: res.data.sidebarMaterialIcons !== undefined
+                ? res.data.sidebarMaterialIcons
+                : (res.data.licensedModules?.materialIcons !== false),
+            }));
             if (res.data.licensedModules) {
-              setDevLicenseForm(res.data.licensedModules);
+              setDevLicenseForm((prev) => ({
+                ...prev,
+                ...res.data.licensedModules,
+                materialIcons: res.data.licensedModules.materialIcons !== false,
+                sidebarTheme: res.data.licensedModules.sidebarTheme || 'navy',
+              }));
             }
           }
         })
@@ -588,11 +609,7 @@ export default function Settings() {
     try {
       const res = await api.put('/settings', systemForm);
       setSystemForm((prev) => ({ ...prev, ...res.data }));
-      if (res.data?.rolePermissions || res.data?.navVisibility) {
-        await refreshPermissions(res.data);
-      } else {
-        await refreshPermissions();
-      }
+      await refreshPermissions(res.data);
       if (res.data?.rawMaterialsUpdated > 0) {
         setSystemSuccess(`Baba Roti Café settings saved! Successfully adjusted ${res.data.rawMaterialsUpdated} raw materials in inventory.`);
       } else {
@@ -1358,6 +1375,108 @@ export default function Settings() {
               <div className="pt-3 flex justify-end">
                 <Button type="submit" disabled={systemSaving} className="bg-blue-600 hover:bg-blue-700 text-white">
                   <Save size={15} /> {systemSaving ? 'Saving Settings…' : 'Save Hotel Settings'}
+                </Button>
+              </div>
+            </form>
+          </Card>
+
+          {/* ── Sidebar Appearance & Brand Theme Card ── */}
+          <Card className="mt-6 max-w-3xl">
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-2">
+                <span className="rounded-lg bg-blue-50 p-1.5 text-blue-600">
+                  <Palette size={16} />
+                </span>
+                <h3 className="font-display text-base font-bold text-ink-900">
+                  Sidebar Appearance &amp; Brand Theme
+                </h3>
+              </div>
+              <span className="rounded-full bg-blue-50 border border-blue-200 px-2.5 py-0.5 text-xs font-bold text-blue-800">
+                Visual Customization
+              </span>
+            </div>
+            <p className="text-xs text-ink-400 mb-5">
+              Personalize the navigation sidebar color theme and icon style according to your hotel brand preferences.
+            </p>
+
+            <form onSubmit={handleSystemSubmit} className="space-y-5">
+              {/* Material Icons Toggle */}
+              <div className="flex items-center justify-between rounded-xl border border-ink-100 bg-ink-50/50 p-4">
+                <div className="pr-4">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-bold text-ink-900">Modern Material UI Icons Mode</p>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${
+                      systemForm.sidebarMaterialIcons !== false
+                        ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                        : 'bg-slate-200 text-slate-700 border border-slate-300'
+                    }`}>
+                      {systemForm.sidebarMaterialIcons !== false ? 'Material Icons (Active)' : 'Classic Clean (Minimal)'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-ink-500 mt-1">
+                    {systemForm.sidebarMaterialIcons !== false
+                      ? 'Displays modern Material icons with colorful rounded squircle badges.'
+                      : 'Displays clean, minimalist line icons without colored square badges (classic layout).'}
+                  </p>
+                </div>
+                <label className="relative inline-flex cursor-pointer items-center shrink-0">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={systemForm.sidebarMaterialIcons !== false}
+                    onChange={(e) => setSystemForm({ ...systemForm, sidebarMaterialIcons: e.target.checked })}
+                  />
+                  <div className="h-6 w-11 rounded-full bg-ink-200 peer-focus:ring-2 peer-focus:ring-blue-300 peer-checked:bg-blue-600 transition-colors after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-full after:shadow" />
+                </label>
+              </div>
+
+              {/* Theme Grid */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-ink-700 mb-2.5">
+                  Select Sidebar Theme Palette
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {THEME_OPTIONS.map((theme) => {
+                    const isSelected = (systemForm.sidebarTheme || 'navy') === theme.id;
+                    return (
+                      <button
+                        key={theme.id}
+                        type="button"
+                        onClick={() => setSystemForm({ ...systemForm, sidebarTheme: theme.id })}
+                        className={`relative p-3.5 rounded-2xl border text-left transition-all flex flex-col justify-between overflow-hidden group ${
+                          isSelected
+                            ? 'border-blue-600 ring-2 ring-blue-500/30 shadow-md bg-blue-50/20'
+                            : 'border-ink-200 hover:border-ink-300 bg-white hover:shadow-xs'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2.5">
+                          <div
+                            className="h-8 w-14 rounded-lg shadow-sm border border-white/20 flex items-center justify-center"
+                            style={{ background: theme.previewGradient }}
+                          >
+                            <span className="w-2.5 h-2.5 rounded-full" style={{ background: theme.glowColor, boxShadow: `0 0 6px ${theme.glowColor}` }} />
+                          </div>
+                          {isSelected ? (
+                            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white shadow-xs">
+                              <Check size={12} strokeWidth={3} />
+                            </span>
+                          ) : (
+                            <span className="h-5 w-5 rounded-full border border-ink-300 group-hover:border-ink-400" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-ink-900">{theme.name}</p>
+                          <p className="text-[10px] text-ink-400 mt-0.5 leading-snug">{theme.desc}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="pt-2 flex justify-end">
+                <Button type="submit" disabled={systemSaving} className="bg-blue-600 hover:bg-blue-700 text-white">
+                  <Save size={15} /> {systemSaving ? 'Saving Theme…' : 'Save Theme & Appearance'}
                 </Button>
               </div>
             </form>
@@ -2260,14 +2379,14 @@ export default function Settings() {
             <strong>⚠ Sensitive Area:</strong> Toggling the Subsystem Suite off locks POS, Captain Order, and Cash Sales across all roles including hotel Admin. Only someone with the dev role can re-enable it.
           </div>
 
-          {/* Module Licensing */}
+          {/* Module & Interface Licensing */}
           <div className="mb-6">
             <h4 className="text-sm font-bold text-ink-900 mb-1 flex items-center gap-2">
               <Sliders size={15} className="text-amber-500" />
-              Module Licensing
+              Module &amp; Interface Licensing
             </h4>
             <p className="text-xs text-ink-400 mb-4">
-              Enable or disable premium modules for this hotel installation. Disabled modules show a locked screen to all users.
+              Enable or disable premium modules and interface features per customer request. Changes apply across all devices.
             </p>
 
             <div className="space-y-3">
@@ -2287,6 +2406,85 @@ export default function Settings() {
                   <div className="h-6 w-11 rounded-full bg-ink-200 peer-focus:ring-2 peer-focus:ring-amber-300 peer-checked:bg-amber-500 transition-colors after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-full after:shadow" />
                 </label>
               </div>
+
+              {/* Material UI Modern Icons (Customer toggle) */}
+              <div className="flex items-center justify-between rounded-xl border border-ink-100 bg-ink-50/40 px-4 py-3">
+                <div className="pr-4">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-bold text-ink-900">Modern Material UI Icons Mode</p>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${
+                      devLicenseForm?.materialIcons !== false
+                        ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                        : 'bg-slate-200 text-slate-700 border border-slate-300'
+                    }`}>
+                      {devLicenseForm?.materialIcons !== false ? 'Active (Material UI)' : 'Classic Clean (Off)'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-ink-400 mt-1">
+                    {devLicenseForm?.materialIcons !== false
+                      ? 'ON: Displays Material UI icons with vibrant colored squircle badges (recommended for modern visual experience).'
+                      : 'OFF: Displays classic minimalist icons without colorful squircle boxes (for customers who prefer the original layout).'}
+                  </p>
+                </div>
+                <label className="relative inline-flex cursor-pointer items-center shrink-0">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={devLicenseForm?.materialIcons !== false}
+                    onChange={(e) => setDevLicenseForm(prev => ({ ...prev, materialIcons: e.target.checked }))}
+                  />
+                  <div className="h-6 w-11 rounded-full bg-ink-200 peer-focus:ring-2 peer-focus:ring-amber-300 peer-checked:bg-amber-500 transition-colors after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-full after:shadow" />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Sidebar Appearance & Brand Theme (Developer Managed) */}
+          <div className="mb-6">
+            <h4 className="text-sm font-bold text-ink-900 mb-1 flex items-center gap-2">
+              <Palette size={15} className="text-amber-500" />
+              Sidebar Appearance &amp; Brand Color Theme
+            </h4>
+            <p className="text-xs text-ink-400 mb-3">
+              Configure the hotel sidebar color palette to match the customer brand identity.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {THEME_OPTIONS.map((theme) => {
+                const isSelected = (devLicenseForm?.sidebarTheme || 'navy') === theme.id;
+                return (
+                  <button
+                    key={theme.id}
+                    type="button"
+                    onClick={() => setDevLicenseForm(prev => ({ ...prev, sidebarTheme: theme.id }))}
+                    className={`relative p-3 rounded-2xl border text-left transition-all flex flex-col justify-between overflow-hidden group ${
+                      isSelected
+                        ? 'border-amber-500 ring-2 ring-amber-400/40 shadow-md bg-amber-50/20'
+                        : 'border-ink-200 hover:border-ink-300 bg-white hover:shadow-xs'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div
+                        className="h-8 w-14 rounded-lg shadow-sm border border-white/20 flex items-center justify-center"
+                        style={{ background: theme.previewGradient }}
+                      >
+                        <span className="w-2.5 h-2.5 rounded-full" style={{ background: theme.glowColor, boxShadow: `0 0 6px ${theme.glowColor}` }} />
+                      </div>
+                      {isSelected ? (
+                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-500 text-white shadow-xs">
+                          <Check size={12} strokeWidth={3} />
+                        </span>
+                      ) : (
+                        <span className="h-5 w-5 rounded-full border border-ink-300 group-hover:border-ink-400" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-ink-900">{theme.name}</p>
+                      <p className="text-[10px] text-ink-400 mt-0.5 leading-snug">{theme.desc}</p>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
 

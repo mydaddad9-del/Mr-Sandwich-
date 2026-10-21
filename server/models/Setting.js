@@ -68,7 +68,18 @@ const settingSchema = new mongoose.Schema(
       type: Object,
       default: {
         subsystem: true, // Subsystem: POS Ordering, Captain Order, Cash Sales
+        materialIcons: true, // Material UI Icons with colorful badges (true) vs Classic minimal icons (false)
+        sidebarTheme: 'navy', // 'navy' | 'slate' | 'espresso' | 'emerald' | 'violet' | 'black'
       },
+    },
+    sidebarTheme: {
+      type: String,
+      default: 'navy',
+      enum: ['navy', 'slate', 'espresso', 'emerald', 'violet', 'black'],
+    },
+    sidebarMaterialIcons: {
+      type: Boolean,
+      default: true,
     },
     devMasterKey: {
       type: String,

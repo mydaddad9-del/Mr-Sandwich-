@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import BabaRotiLogo from '../ui/BabaRotiLogo';
+import { SIDEBAR_THEMES } from '../../config/sidebarThemes';
 
 // ── Material UI Icons (@mui/icons-material) ──────────────────────────
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
@@ -69,38 +70,47 @@ const REPORT_ITEMS = [
 ];
 
 /* ── Sub-item Link (Compact & Refined) ── */
-const SubLink = ({ to, label, icon: Icon, end = false, onClick }) => (
-  <NavLink
-    to={to}
-    end={end}
-    onClick={onClick}
-    className={({ isActive }) =>
-      `group flex items-center gap-2 rounded-lg px-2 py-1 text-[11px] font-medium transition-all duration-150 ${
-        isActive
-          ? 'bg-blue-600/35 text-white font-semibold shadow-xs border border-blue-400/30'
-          : 'text-blue-200/65 hover:bg-white/10 hover:text-white'
-      }`
-    }
-  >
-    <span className="flex h-4 w-4 shrink-0 items-center justify-center text-blue-300 group-hover:text-white transition-colors">
-      <Icon sx={{ fontSize: 13 }} />
-    </span>
-    <span className="truncate">{label}</span>
-  </NavLink>
-);
+const SubLink = ({ to, label, icon: Icon, end = false, onClick }) => {
+  const { sidebarTheme } = useAuth();
+  const theme = SIDEBAR_THEMES[sidebarTheme] || SIDEBAR_THEMES.navy;
+
+  return (
+    <NavLink
+      to={to}
+      end={end}
+      onClick={onClick}
+      className={({ isActive }) =>
+        `group flex items-center gap-2 rounded-lg px-2 py-1 text-[11px] font-medium transition-all duration-150 ${
+          isActive
+            ? theme.subitemActive
+            : theme.subitemInactive
+        }`
+      }
+    >
+      <span className="flex h-4 w-4 shrink-0 items-center justify-center text-white/70 group-hover:text-white transition-colors">
+        <Icon sx={{ fontSize: 13 }} />
+      </span>
+      <span className="truncate">{label}</span>
+    </NavLink>
+  );
+};
 
 /* ── Section Label (OPERATIONS, ADMIN) with subtle divider ── */
-const SectionLabel = ({ children, collapsed }) =>
-  collapsed ? (
+const SectionLabel = ({ children, collapsed }) => {
+  const { sidebarTheme } = useAuth();
+  const theme = SIDEBAR_THEMES[sidebarTheme] || SIDEBAR_THEMES.navy;
+
+  return collapsed ? (
     <div className="my-1.5 mx-2 border-t border-white/10" />
   ) : (
     <div className="px-2 pt-2 pb-0.5 flex items-center gap-2 select-none">
-      <span className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-blue-300/40">
+      <span className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-white/40">
         {children}
       </span>
-      <div className="h-[1px] flex-1 bg-gradient-to-r from-blue-400/20 via-blue-400/5 to-transparent" />
+      <div className={`h-[1px] flex-1 bg-gradient-to-r ${theme.sectionDivider}`} />
     </div>
   );
+};
 
 /* ── Collapsible Menu Group (Compact & Proportional) ── */
 const CollapsibleNav = ({
@@ -113,67 +123,84 @@ const CollapsibleNav = ({
   onToggle,
   children,
   collapsed,
-}) => (
-  <div>
-    <button
-      type="button"
-      onClick={onToggle}
-      title={collapsed ? label : undefined}
-      className={`group w-full flex items-center gap-2 rounded-xl py-1 px-1.5 text-left transition-all duration-150 cursor-pointer ${
-        collapsed ? 'justify-center py-1.5 px-0' : ''
-      } ${
-        isActive
-          ? 'bg-gradient-to-r from-[#2952e3] via-[#2447d9] to-[#1e3bbd] text-white shadow-[0_3px_12px_rgba(37,99,235,0.38)] ring-1 ring-white/20 border border-blue-400/30'
-          : 'text-slate-200 hover:bg-white/[0.07] hover:text-white border border-transparent'
-      }`}
-    >
-      {/* Sleek Compact Rounded Icon Box (28px) */}
-      <span
-        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-white transition-transform duration-150 group-hover:scale-105 ${
-          isActive ? 'ring-1.5 ring-white/40' : ''
-        }`}
-        style={{
-          background: iconGradient,
-          boxShadow: '0 2px 6px rgba(0,0,0,0.22)',
-        }}
-      >
-        <Icon sx={{ fontSize: 16 }} />
-      </span>
+}) => {
+  const { sidebarTheme, useMaterialIcons } = useAuth();
+  const theme = SIDEBAR_THEMES[sidebarTheme] || SIDEBAR_THEMES.navy;
 
-      {!collapsed && (
-        <>
-          <div className="min-w-0 flex-1">
-            <p className="text-[12px] font-bold tracking-tight text-white leading-tight">
-              {label}
-            </p>
-            {subtitle && (
-              <p
-                className={`text-[9.5px] truncate leading-tight mt-0.5 ${
-                  isActive ? 'text-blue-100/90 font-medium' : 'text-blue-200/50'
-                }`}
-              >
-                {subtitle}
-              </p>
-            )}
-          </div>
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={onToggle}
+        title={collapsed ? label : undefined}
+        className={`group w-full flex items-center gap-2 rounded-xl py-1 px-1.5 text-left transition-all duration-150 cursor-pointer ${
+          collapsed ? 'justify-center py-1.5 px-0' : ''
+        } ${
+          isActive
+            ? theme.activeLink
+            : theme.hoverLink
+        }`}
+      >
+        {/* Sleek Icon: Material UI colorful squircle OR Classic minimal icon */}
+        {useMaterialIcons ? (
           <span
-            className={`flex items-center justify-center text-blue-200/40 transition-transform duration-150 group-hover:text-white ${
-              open ? 'rotate-90 text-white' : ''
+            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-white transition-transform duration-150 group-hover:scale-105 ${
+              isActive ? 'ring-1.5 ring-white/40' : ''
+            }`}
+            style={{
+              background: iconGradient,
+              boxShadow: '0 2px 6px rgba(0,0,0,0.22)',
+            }}
+          >
+            <Icon sx={{ fontSize: 16 }} />
+          </span>
+        ) : (
+          <span
+            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all duration-150 group-hover:scale-105 ${
+              isActive
+                ? 'bg-white/20 text-white shadow-xs'
+                : 'bg-white/[0.08] text-white/80 group-hover:bg-white/[0.14] group-hover:text-white'
             }`}
           >
-            <ChevronRightRoundedIcon sx={{ fontSize: 14 }} />
+            <Icon sx={{ fontSize: 16 }} />
           </span>
-        </>
-      )}
-    </button>
+        )}
 
-    {open && !collapsed && (
-      <div className="mt-0.5 ml-3 pl-2 py-0.5 space-y-0.5 border-l-2 border-blue-500/30 rounded-r-lg bg-blue-950/20 backdrop-blur-xs">
-        {children}
-      </div>
-    )}
-  </div>
-);
+        {!collapsed && (
+          <>
+            <div className="min-w-0 flex-1">
+              <p className="text-[12px] font-bold tracking-tight text-white leading-tight">
+                {label}
+              </p>
+              {subtitle && (
+                <p
+                  className={`text-[9.5px] truncate leading-tight mt-0.5 ${
+                    isActive ? theme.subtitleActive : theme.subtitleInactive
+                  }`}
+                >
+                  {subtitle}
+                </p>
+              )}
+            </div>
+            <span
+              className={`flex items-center justify-center text-white/40 transition-transform duration-150 group-hover:text-white ${
+                open ? 'rotate-90 text-white' : ''
+              }`}
+            >
+              <ChevronRightRoundedIcon sx={{ fontSize: 14 }} />
+            </span>
+          </>
+        )}
+      </button>
+
+      {open && !collapsed && (
+        <div className="mt-0.5 ml-3 pl-2 py-0.5 space-y-0.5 border-l-2 border-white/20 rounded-r-lg bg-black/15 backdrop-blur-xs">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+};
 
 /* ── Standalone Navigation Link (Compact & Proportional) ── */
 const MenuLink = ({
@@ -185,62 +212,79 @@ const MenuLink = ({
   end = false,
   collapsed = false,
   onClick,
-}) => (
-  <NavLink
-    to={to}
-    end={end}
-    onClick={onClick}
-    title={collapsed ? label : undefined}
-    className={({ isActive }) =>
-      `group flex items-center gap-2 rounded-xl py-1 px-1.5 transition-all duration-150 cursor-pointer ${
-        collapsed ? 'justify-center py-1.5 px-0' : ''
-      } ${
-        isActive
-          ? 'bg-gradient-to-r from-[#2952e3] via-[#2447d9] to-[#1e3bbd] text-white shadow-[0_3px_12px_rgba(37,99,235,0.38)] ring-1 ring-white/20 border border-blue-400/30'
-          : 'text-slate-200 hover:bg-white/[0.07] hover:text-white border border-transparent'
-      }`
-    }
-  >
-    {({ isActive }) => (
-      <>
-        {/* Sleek Compact Rounded Icon Box (28px) */}
-        <span
-          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-white transition-transform duration-150 group-hover:scale-105 ${
-            isActive ? 'ring-1.5 ring-white/40' : ''
-          }`}
-          style={{
-            background: iconGradient,
-            boxShadow: '0 2px 6px rgba(0,0,0,0.22)',
-          }}
-        >
-          <Icon sx={{ fontSize: 16 }} />
-        </span>
+}) => {
+  const { sidebarTheme, useMaterialIcons } = useAuth();
+  const theme = SIDEBAR_THEMES[sidebarTheme] || SIDEBAR_THEMES.navy;
 
-        {!collapsed && (
-          <>
-            <div className="min-w-0 flex-1">
-              <p className="text-[12px] font-bold tracking-tight text-white leading-tight">
-                {label}
-              </p>
-              {subtitle && (
-                <p
-                  className={`text-[9.5px] truncate leading-tight mt-0.5 ${
-                    isActive ? 'text-blue-100/90 font-medium' : 'text-blue-200/50'
-                  }`}
-                >
-                  {subtitle}
-                </p>
-              )}
-            </div>
-            <span className="flex items-center justify-center text-blue-200/35 group-hover:text-white group-hover:translate-x-0.5 transition-all">
-              <ChevronRightRoundedIcon sx={{ fontSize: 14 }} />
+  return (
+    <NavLink
+      to={to}
+      end={end}
+      onClick={onClick}
+      title={collapsed ? label : undefined}
+      className={({ isActive }) =>
+        `group flex items-center gap-2 rounded-xl py-1 px-1.5 transition-all duration-150 cursor-pointer ${
+          collapsed ? 'justify-center py-1.5 px-0' : ''
+        } ${
+          isActive
+            ? theme.activeLink
+            : theme.hoverLink
+        }`
+      }
+    >
+      {({ isActive }) => (
+        <>
+          {/* Sleek Icon: Material UI colorful squircle OR Classic minimal icon */}
+          {useMaterialIcons ? (
+            <span
+              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-white transition-transform duration-150 group-hover:scale-105 ${
+                isActive ? 'ring-1.5 ring-white/40' : ''
+              }`}
+              style={{
+                background: iconGradient,
+                boxShadow: '0 2px 6px rgba(0,0,0,0.22)',
+              }}
+            >
+              <Icon sx={{ fontSize: 16 }} />
             </span>
-          </>
-        )}
-      </>
-    )}
-  </NavLink>
-);
+          ) : (
+            <span
+              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all duration-150 group-hover:scale-105 ${
+                isActive
+                  ? 'bg-white/20 text-white shadow-xs'
+                  : 'bg-white/[0.08] text-white/80 group-hover:bg-white/[0.14] group-hover:text-white'
+              }`}
+            >
+              <Icon sx={{ fontSize: 16 }} />
+            </span>
+          )}
+
+          {!collapsed && (
+            <>
+              <div className="min-w-0 flex-1">
+                <p className="text-[12px] font-bold tracking-tight text-white leading-tight">
+                  {label}
+                </p>
+                {subtitle && (
+                  <p
+                    className={`text-[9.5px] truncate leading-tight mt-0.5 ${
+                      isActive ? theme.subtitleActive : theme.subtitleInactive
+                    }`}
+                  >
+                    {subtitle}
+                  </p>
+                )}
+              </div>
+              <span className="flex items-center justify-center text-white/35 group-hover:text-white group-hover:translate-x-0.5 transition-all">
+                <ChevronRightRoundedIcon sx={{ fontSize: 14 }} />
+              </span>
+            </>
+          )}
+        </>
+      )}
+    </NavLink>
+  );
+};
 
 /* ══════════════════════════════════════════
    SIDEBAR COMPONENT
@@ -252,7 +296,8 @@ const Sidebar = ({
   onToggleCollapse,
   onExpand,
 }) => {
-  const { user, canSeeNav } = useAuth();
+  const { user, canSeeNav, sidebarTheme, useMaterialIcons } = useAuth();
+  const theme = SIDEBAR_THEMES[sidebarTheme] || SIDEBAR_THEMES.navy;
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -380,20 +425,20 @@ const Sidebar = ({
           ${collapsed ? 'w-[64px]' : 'w-[242px]'}
         `}
         style={{
-          background: 'linear-gradient(180deg, #071233 0%, #060e28 50%, #04091c 100%)',
-          borderRight: '1px solid rgba(255, 255, 255, 0.08)',
-          boxShadow: '4px 0 25px rgba(2, 6, 23, 0.55)',
+          background: theme.bg,
+          borderRight: theme.border,
+          boxShadow: theme.shadow,
         }}
       >
         {/* Ambient Subtle Highlights */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div
             className="absolute -top-16 -right-16 h-48 w-48 rounded-full opacity-20"
-            style={{ background: 'radial-gradient(circle, #2563eb 0%, transparent 70%)' }}
+            style={{ background: `radial-gradient(circle, ${theme.glowColor} 0%, transparent 70%)` }}
           />
           <div
             className="absolute top-1/2 -left-16 h-44 w-44 rounded-full opacity-15"
-            style={{ background: 'radial-gradient(circle, #7c3aed 0%, transparent 70%)' }}
+            style={{ background: `radial-gradient(circle, ${theme.glowColor} 0%, transparent 70%)` }}
           />
         </div>
 
@@ -889,7 +934,7 @@ const Sidebar = ({
             onMouseLeave={scheduleCloseFlyout}
             className={`group relative flex items-center gap-2 rounded-xl py-1.5 px-2 transition-all duration-150 cursor-pointer ${
               collapsed ? 'justify-center p-1' : ''
-            } bg-gradient-to-r from-blue-950/60 to-blue-900/30 border border-blue-400/20 hover:border-blue-400/40 hover:bg-white/[0.08]`}
+            } ${theme.userCardBg}`}
           >
             {/* Avatar with Circular Amber Accent & Green Online Indicator (28px) */}
             <div className="relative shrink-0">
@@ -922,7 +967,7 @@ const Sidebar = ({
                     {user?.role || 'Admin'}
                   </span>
                 </div>
-                <span className="text-blue-300/35 group-hover:text-white group-hover:translate-x-0.5 transition-all">
+                <span className="text-white/35 group-hover:text-white group-hover:translate-x-0.5 transition-all">
                   <ChevronRightRoundedIcon sx={{ fontSize: 14 }} />
                 </span>
               </>
@@ -949,8 +994,8 @@ const Sidebar = ({
             zIndex: 9999,
             minWidth: '220px',
             maxWidth: '280px',
-            background: 'linear-gradient(170deg, #071233 0%, #0a1b52 100%)',
-            border: '1px solid rgba(99, 130, 255, 0.35)',
+            background: theme.flyoutBg,
+            border: theme.flyoutBorder,
             borderRadius: '14px',
             boxShadow: '0 15px 40px rgba(0, 5, 30, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.1)',
             backdropFilter: 'blur(20px)',

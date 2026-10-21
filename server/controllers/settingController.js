@@ -70,8 +70,27 @@ const getSettings = asyncHandler(async (req, res) => {
       modified = true;
     }
     if (!settings.licensedModules) {
-      settings.licensedModules = { subsystem: true };
+      settings.licensedModules = { subsystem: true, materialIcons: true, sidebarTheme: 'navy' };
       settings.markModified('licensedModules');
+      modified = true;
+    } else {
+      if (settings.licensedModules.materialIcons === undefined) {
+        settings.licensedModules.materialIcons = settings.sidebarMaterialIcons !== false;
+        settings.markModified('licensedModules');
+        modified = true;
+      }
+      if (!settings.licensedModules.sidebarTheme) {
+        settings.licensedModules.sidebarTheme = settings.sidebarTheme || 'navy';
+        settings.markModified('licensedModules');
+        modified = true;
+      }
+    }
+    if (!settings.sidebarTheme) {
+      settings.sidebarTheme = 'navy';
+      modified = true;
+    }
+    if (settings.sidebarMaterialIcons === undefined) {
+      settings.sidebarMaterialIcons = true;
       modified = true;
     }
     if (settings.serviceChargeRate === undefined || settings.serviceChargeRate === null) {
@@ -115,6 +134,8 @@ const updateSettings = asyncHandler(async (req, res) => {
     'productSellingPriceAdjustPercent',
     // Service Charge & Hospitality Fees
     'enableServiceCharge', 'serviceChargeRate', 'serviceChargePresets', 'autoApplyServiceChargeDineIn',
+    // Sidebar Customization
+    'sidebarTheme', 'sidebarMaterialIcons',
   ];
 
   allowedFields.forEach((field) => {
@@ -128,6 +149,20 @@ const updateSettings = asyncHandler(async (req, res) => {
         settings.markModified('serviceChargePresets');
       } else if (field === 'enableServiceCharge' || field === 'autoApplyServiceChargeDineIn') {
         settings[field] = Boolean(req.body[field]);
+      } else if (field === 'sidebarMaterialIcons') {
+        settings.sidebarMaterialIcons = Boolean(req.body.sidebarMaterialIcons);
+        settings.licensedModules = {
+          ...(settings.licensedModules || {}),
+          materialIcons: Boolean(req.body.sidebarMaterialIcons),
+        };
+        settings.markModified('licensedModules');
+      } else if (field === 'sidebarTheme') {
+        settings.sidebarTheme = req.body.sidebarTheme;
+        settings.licensedModules = {
+          ...(settings.licensedModules || {}),
+          sidebarTheme: req.body.sidebarTheme,
+        };
+        settings.markModified('licensedModules');
       } else {
         settings[field] = req.body[field];
       }
@@ -233,6 +268,12 @@ const updateDeveloperLicense = asyncHandler(async (req, res) => {
       ...settings.licensedModules,
       ...req.body.licensedModules,
     };
+    if (req.body.licensedModules && req.body.licensedModules.sidebarTheme) {
+      settings.sidebarTheme = req.body.licensedModules.sidebarTheme;
+    }
+    if (req.body.licensedModules && req.body.licensedModules.materialIcons !== undefined) {
+      settings.sidebarMaterialIcons = Boolean(req.body.licensedModules.materialIcons);
+    }
     settings.markModified('licensedModules');
   }
 
