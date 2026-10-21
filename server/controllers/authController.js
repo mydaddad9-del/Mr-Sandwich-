@@ -274,12 +274,6 @@ const requestOtp = asyncHandler(async (req, res) => {
   // The OTP proves the person owns the registered Telegram — the login
   // form will verify their system credentials (email + password).
   // We store the OTP hash on the admin account as a temporary token.
-  const phoneVariants = [
-    normalize(normalized),
-    normalize(normalized).replace(/^0/, '+2519'),
-    normalized,
-  ];
-
   let user = null;
   for (const v of phoneVariants) {
     user = await User.findOne({ isActive: true, phone: v });
