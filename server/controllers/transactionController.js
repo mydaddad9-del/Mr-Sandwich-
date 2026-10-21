@@ -89,20 +89,29 @@ const createTransaction = asyncHandler(async (req, res) => {
 
   const resolvedItems = [];
   for (const item of items) {
+    if (!item.material) {
+      res.status(400);
+      throw new Error('Each item must specify a material.');
+    }
+    const qty = Number(item.quantity);
+    if (isNaN(qty) || qty <= 0) {
+      res.status(400);
+      throw new Error('Quantity must be a positive number greater than 0.');
+    }
     const mat = await RawMaterial.findById(item.material);
     if (!mat) {
       res.status(404);
       throw new Error(`Material not found: ${item.material}`);
     }
-    if (direction === 'out' && mat.currentStock < item.quantity) {
+    if (direction === 'out' && mat.currentStock < qty) {
       res.status(400);
       throw new Error(
-        `Insufficient stock for "${mat.name}". Available: ${mat.currentStock} ${mat.unit}, requested: ${item.quantity}.`
+        `Insufficient stock for "${mat.name}". Available: ${mat.currentStock} ${mat.unit}, requested: ${qty}.`
       );
     }
-    const unitCost  = Number(item.unitCost) || mat.unitCost || 0;
-    const totalCost = unitCost * Number(item.quantity);
-    resolvedItems.push({ material: mat._id, quantity: Number(item.quantity), unitCost, totalCost, _doc: mat });
+    const unitCost  = Number(item.unitCost) >= 0 ? Number(item.unitCost) : (mat.unitCost || 0);
+    const totalCost = Math.round(unitCost * qty * 100) / 100;
+    resolvedItems.push({ material: mat._id, quantity: qty, unitCost, totalCost, _doc: mat });
   }
 
   const totalAmount = resolvedItems.reduce((s, i) => s + i.totalCost, 0);

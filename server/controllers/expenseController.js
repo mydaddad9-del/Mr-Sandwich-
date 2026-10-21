@@ -38,7 +38,7 @@ const getExpenses = asyncHandler(async (req, res) => {
   }
 
   if (search && search.trim()) {
-    const s = search.trim();
+    const s = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(s, 'i');
     query.$or = [
       { title: regex },

@@ -4,8 +4,8 @@ const tg = require('../utils/telegramNotifier');
 
 const getSuppliers = asyncHandler(async (req, res) => {
   const { search } = req.query;
-  const filter = search
-    ? { name: { $regex: search, $options: 'i' } }
+  const filter = search && search.trim()
+    ? { name: { $regex: search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $options: 'i' } }
     : {};
   const suppliers = await Supplier.find(filter).sort({ createdAt: -1 }).lean();
   res.json(suppliers);
@@ -22,6 +22,10 @@ const getSupplierById = asyncHandler(async (req, res) => {
 });
 
 const createSupplier = asyncHandler(async (req, res) => {
+  if (!req.body.name || !req.body.name.trim()) {
+    res.status(400);
+    throw new Error('Supplier name is required');
+  }
   const supplier = await Supplier.create(req.body);
   tg.notifySupplierCreated(supplier, req.user);
   res.status(201).json(supplier);

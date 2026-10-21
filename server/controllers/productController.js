@@ -66,7 +66,9 @@ function calcRecipeCostBreakdown(ingredients, settings = {}) {
 const getProducts = asyncHandler(async (req, res) => {
   const { search, pos } = req.query;
   const filter = { isActive: true };
-  if (search) filter.name = { $regex: search, $options: 'i' };
+  if (search && search.trim()) {
+    filter.name = { $regex: search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $options: 'i' };
+  }
 
   // Fast POS Mode: lightweight query, no deep populate/cost calculation needed for cashier terminal
   if (pos === 'true' || pos === '1') {
@@ -115,6 +117,10 @@ const createProduct = asyncHandler(async (req, res) => {
   const { name, category, description, sellingPrice, ingredients, code, uom, parentCategory } = req.body;
 
   if (!name?.trim()) { res.status(400); throw new Error('Product name is required.'); }
+  if (sellingPrice !== undefined && Number(sellingPrice) < 0) {
+    res.status(400);
+    throw new Error('Selling price cannot be negative.');
+  }
 
   // Product code handling: auto-generate next sequential code if blank
   let trimmedCode = (code || '').trim();

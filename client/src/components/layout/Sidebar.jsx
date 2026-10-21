@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Truck, Boxes, ShoppingCart,
   ArrowLeftRight, FileBarChart, Users, UtensilsCrossed,
-  ChevronDown, ChevronRight,
+  ChevronDown, ChevronRight, CircleDot,
   ShoppingBag, CreditCard, Leaf, TrendingUp, Flame, TrendingDown,
   BarChart2, Calendar, PackageOpen, Settings as SettingsIcon, UploadCloud,
   Scale, ClipboardList, Trash2, Coffee, UserCog, Sparkles,
@@ -240,6 +240,62 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
     if (onSubsystem) setSubsystemOpen(true);
   }, [location.pathname]);
 
+  // ── Flyout Popout Menu (for Collapsed / Toggle Mode) ──────────────
+  const [flyout, setFlyout] = useState(null);
+  const flyoutTimerRef = useRef(null);
+
+  const openFlyout = (itemData, e) => {
+    if (!collapsed) return;
+    if (flyoutTimerRef.current) clearTimeout(flyoutTimerRef.current);
+    const rect = e.currentTarget.getBoundingClientRect();
+    setFlyout({ ...itemData, rect });
+  };
+
+  const scheduleCloseFlyout = () => {
+    if (!collapsed) return;
+    if (flyoutTimerRef.current) clearTimeout(flyoutTimerRef.current);
+    flyoutTimerRef.current = setTimeout(() => {
+      setFlyout(null);
+    }, 180);
+  };
+
+  const keepFlyout = () => {
+    if (flyoutTimerRef.current) clearTimeout(flyoutTimerRef.current);
+  };
+
+  const closeFlyoutImmediately = () => {
+    if (flyoutTimerRef.current) clearTimeout(flyoutTimerRef.current);
+    setFlyout(null);
+  };
+
+  useEffect(() => {
+    closeFlyoutImmediately();
+  }, [location.pathname, collapsed]);
+
+  // Submenu items definitions
+  const subsystemItems = [
+    canSeeNav('captainOrder') && { to: '/captain-order', label: 'Captain Order', icon: ClipboardPen },
+    canSeeNav('cashSales') && { to: '/cash-sales', label: 'Cash Sales', icon: BadgeDollarSign },
+    canSeeNav('pos') && { to: '/pos', label: 'POS Ordering', icon: MonitorSmartphone },
+  ].filter(Boolean);
+
+  const inventoryItems = [
+    canSeeNav('rawMaterials') && { to: '/materials', label: 'Raw Materials', icon: Boxes },
+    canSeeNav('products') && { to: '/products', label: 'Products', icon: UtensilsCrossed },
+    canSeeNav('suppliers') && { to: '/suppliers', label: 'Suppliers', icon: Truck },
+    canSeeNav('consumption') && { to: '/consumption', label: 'Consumption', icon: Coffee },
+  ].filter(Boolean);
+
+  const financeItems = [
+    canSeeNav('expenses') && { to: '/expenses', label: 'Overhead Expenses', icon: Receipt },
+    canSeeNav('analytics') && { to: '/analytics', label: 'Analytics & P&L', icon: TrendingUp },
+  ].filter(Boolean);
+
+  const staffItems = [
+    { to: '/users', label: 'Staff Accounts', icon: Users },
+    { to: '/employees', label: 'Employees Directory', icon: UserCog },
+  ];
+
   const linkCls = (isActive) =>
     `group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${collapsed ? 'justify-center' : ''
     } ${isActive
@@ -275,8 +331,20 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
     </NavLink>
   );
 
-  const navLink = (to, Icon, label, end = false) =>
-    collapsed ? iconLink(to, Icon, label, end) : fullLink(to, Icon, label, end);
+  const navLink = (to, Icon, label, end = false, flyoutItems = null) => {
+    if (collapsed) {
+      const items = flyoutItems || [{ to, label, icon: Icon, end }];
+      return (
+        <div
+          onMouseEnter={(e) => openFlyout({ title: label, icon: Icon, items }, e)}
+          onMouseLeave={scheduleCloseFlyout}
+        >
+          {iconLink(to, Icon, label, end)}
+        </div>
+      );
+    }
+    return fullLink(to, Icon, label, end);
+  };
 
   const roleColors = {
     admin: 'from-amber-400 to-orange-500',
@@ -330,20 +398,27 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
           scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">
 
           <SectionLabel collapsed={collapsed}>Main</SectionLabel>
-          {canSeeNav('dashboard') && navLink('/', LayoutDashboard, 'Dashboard', true)}
+          {canSeeNav('dashboard') && navLink('/', LayoutDashboard, 'Dashboard', true, [
+            { to: '/', label: 'Overview & Metrics', icon: LayoutDashboard, end: true }
+          ])}
 
           {/* ── Subsystem (POS + Captain Order + Cash Sales) ── */}
           {/* canSeeNav('subsystem') returns false for non-dev users when the module is disabled by the developer */}
           {canSeeNav('subsystem') && (
             collapsed ? (
-              <NavLink to="/pos" onClick={onClose} title="Subsystem"
-                className={({ isActive }) => linkCls(isActive || onSubsystem)}>
-                {({ isActive }) => (
-                  <span className={iconSpan(isActive || onSubsystem)}>
-                    <Layers3 size={15} strokeWidth={2} />
-                  </span>
-                )}
-              </NavLink>
+              <div
+                onMouseEnter={(e) => openFlyout({ title: 'Subsystem', icon: Layers3, items: subsystemItems }, e)}
+                onMouseLeave={scheduleCloseFlyout}
+              >
+                <NavLink to="/pos" onClick={onClose} title="Subsystem"
+                  className={({ isActive }) => linkCls(isActive || onSubsystem)}>
+                  {({ isActive }) => (
+                    <span className={iconSpan(isActive || onSubsystem)}>
+                      <Layers3 size={15} strokeWidth={2} />
+                    </span>
+                  )}
+                </NavLink>
+              </div>
             ) : (
               <CollapsibleNav
                 label="Subsystem"
@@ -369,18 +444,23 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
           {/* ── Inventory & Items Group ── */}
           {(canSeeNav('rawMaterials') || canSeeNav('products') || canSeeNav('suppliers') || canSeeNav('consumption')) && (
             collapsed ? (
-              <NavLink
-                to="/materials"
-                onClick={onClose}
-                title="Inventory & Items"
-                className={({ isActive }) => linkCls(isActive || onInventory)}
+              <div
+                onMouseEnter={(e) => openFlyout({ title: 'Inventory & Items', icon: Boxes, items: inventoryItems }, e)}
+                onMouseLeave={scheduleCloseFlyout}
               >
-                {({ isActive }) => (
-                  <span className={iconSpan(isActive || onInventory)}>
-                    <Boxes size={15} strokeWidth={2} />
-                  </span>
-                )}
-              </NavLink>
+                <NavLink
+                  to="/materials"
+                  onClick={onClose}
+                  title="Inventory & Items"
+                  className={({ isActive }) => linkCls(isActive || onInventory)}
+                >
+                  {({ isActive }) => (
+                    <span className={iconSpan(isActive || onInventory)}>
+                      <Boxes size={15} strokeWidth={2} />
+                    </span>
+                  )}
+                </NavLink>
+              </div>
             ) : (
               <CollapsibleNav
                 label="Inventory & Items"
@@ -411,14 +491,19 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
           {/* Stock Movements */}
           {canSeeNav('stockMovements') && (
             collapsed ? (
-              <NavLink to="/transactions" onClick={onClose} title="Stock Movements"
-                className={({ isActive }) => linkCls(isActive || onTransactions)}>
-                {({ isActive }) => (
-                  <span className={iconSpan(isActive || onTransactions)}>
-                    <ArrowLeftRight size={15} strokeWidth={2} />
-                  </span>
-                )}
-              </NavLink>
+              <div
+                onMouseEnter={(e) => openFlyout({ title: 'Stock Movements', icon: ArrowLeftRight, items: STOCK_ITEMS }, e)}
+                onMouseLeave={scheduleCloseFlyout}
+              >
+                <NavLink to="/transactions" onClick={onClose} title="Stock Movements"
+                  className={({ isActive }) => linkCls(isActive || onTransactions)}>
+                  {({ isActive }) => (
+                    <span className={iconSpan(isActive || onTransactions)}>
+                      <ArrowLeftRight size={15} strokeWidth={2} />
+                    </span>
+                  )}
+                </NavLink>
+              </div>
             ) : (
               <CollapsibleNav label="Stock Movements" icon={ArrowLeftRight}
                 isActive={onTransactions} open={stockOpen}
@@ -429,19 +514,26 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
           )}
 
           {/* Stock Issue & Request */}
-          {navLink('/stock-requests', SendToBack, 'Stock Issue & Request')}
+          {navLink('/stock-requests', SendToBack, 'Stock Issue & Request', false, [
+            { to: '/stock-requests', label: 'Stock Issue & Request', icon: SendToBack }
+          ])}
 
           {/* Reports */}
           {canSeeNav('reports') && (
             collapsed ? (
-              <NavLink to="/reports" onClick={onClose} title="Reports"
-                className={({ isActive }) => linkCls(isActive || onReports)}>
-                {({ isActive }) => (
-                  <span className={iconSpan(isActive || onReports)}>
-                    <FileBarChart size={15} strokeWidth={2} />
-                  </span>
-                )}
-              </NavLink>
+              <div
+                onMouseEnter={(e) => openFlyout({ title: 'Reports', icon: FileBarChart, items: REPORT_ITEMS }, e)}
+                onMouseLeave={scheduleCloseFlyout}
+              >
+                <NavLink to="/reports" onClick={onClose} title="Reports"
+                  className={({ isActive }) => linkCls(isActive || onReports)}>
+                  {({ isActive }) => (
+                    <span className={iconSpan(isActive || onReports)}>
+                      <FileBarChart size={15} strokeWidth={2} />
+                    </span>
+                  )}
+                </NavLink>
+              </div>
             ) : (
               <CollapsibleNav label="Reports" icon={FileBarChart}
                 isActive={onReports} open={reportOpen}
@@ -454,18 +546,23 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
           {/* ── Finance & Expenses Group ── */}
           {(canSeeNav('expenses') || canSeeNav('analytics')) && (
             collapsed ? (
-              <NavLink
-                to="/expenses"
-                onClick={onClose}
-                title="Finance & Expenses"
-                className={({ isActive }) => linkCls(isActive || onFinance)}
+              <div
+                onMouseEnter={(e) => openFlyout({ title: 'Finance & Expenses', icon: Receipt, items: financeItems }, e)}
+                onMouseLeave={scheduleCloseFlyout}
               >
-                {({ isActive }) => (
-                  <span className={iconSpan(isActive || onFinance)}>
-                    <Receipt size={15} strokeWidth={2} />
-                  </span>
-                )}
-              </NavLink>
+                <NavLink
+                  to="/expenses"
+                  onClick={onClose}
+                  title="Finance & Expenses"
+                  className={({ isActive }) => linkCls(isActive || onFinance)}
+                >
+                  {({ isActive }) => (
+                    <span className={iconSpan(isActive || onFinance)}>
+                      <Receipt size={15} strokeWidth={2} />
+                    </span>
+                  )}
+                </NavLink>
+              </div>
             ) : (
               <CollapsibleNav
                 label="Finance & Expenses"
@@ -490,18 +587,23 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
           {/* ── Staff & Employees Group (Collapsible >) ── */}
           {canSeeNav('staffAccounts') && (
             collapsed ? (
-              <NavLink
-                to="/users"
-                onClick={onClose}
-                title="Staff & Employees"
-                className={({ isActive }) => linkCls(isActive || onStaff)}
+              <div
+                onMouseEnter={(e) => openFlyout({ title: 'Staff & Employees', icon: Users, items: staffItems }, e)}
+                onMouseLeave={scheduleCloseFlyout}
               >
-                {({ isActive }) => (
-                  <span className={iconSpan(isActive || onStaff)}>
-                    <Users size={15} strokeWidth={2} />
-                  </span>
-                )}
-              </NavLink>
+                <NavLink
+                  to="/users"
+                  onClick={onClose}
+                  title="Staff & Employees"
+                  className={({ isActive }) => linkCls(isActive || onStaff)}
+                >
+                  {({ isActive }) => (
+                    <span className={iconSpan(isActive || onStaff)}>
+                      <Users size={15} strokeWidth={2} />
+                    </span>
+                  )}
+                </NavLink>
+              </div>
             ) : (
               <CollapsibleNav
                 label="Staff & Employees"
@@ -517,37 +619,79 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
             )
           )}
 
-          {navLink('/settings', SettingsIcon, 'Settings')}
+          {navLink('/settings', SettingsIcon, 'Settings', false, [
+            { to: '/settings', label: 'System Settings', icon: SettingsIcon }
+          ])}
 
           {/* Recycle Bin */}
           {(canSeeNav('staffAccounts') || user?.role === 'admin' || user?.role === 'manager') && (
-            <NavLink to="/recycle-bin" onClick={onClose} title="Recycle Bin"
-              className={({ isActive }) =>
-                `group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${collapsed ? 'justify-center' : ''
-                } ${isActive
-                  ? 'bg-red-500/20 text-red-300 ring-1 ring-red-500/20'
-                  : 'text-red-400/60 hover:bg-red-500/10 hover:text-red-300'
-                }`
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all ${isActive ? 'bg-red-500/25' : 'bg-red-500/10 group-hover:bg-red-500/15'
+            collapsed ? (
+              <div
+                onMouseEnter={(e) => openFlyout({
+                  title: 'Recycle Bin',
+                  icon: Trash2,
+                  items: [{ to: '/recycle-bin', label: 'Recycle Bin & Restores', icon: Trash2 }]
+                }, e)}
+                onMouseLeave={scheduleCloseFlyout}
+              >
+                <NavLink to="/recycle-bin" onClick={onClose} title="Recycle Bin"
+                  className={({ isActive }) =>
+                    `group flex items-center justify-center rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+                      isActive
+                        ? 'bg-red-500/20 text-red-300 ring-1 ring-red-500/20'
+                        : 'text-red-400/60 hover:bg-red-500/10 hover:text-red-300'
+                    }`
+                  }
+                >
+                  {({ isActive }) => (
+                    <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all ${
+                      isActive ? 'bg-red-500/25' : 'bg-red-500/10 group-hover:bg-red-500/15'
                     }`}>
-                    <Trash2 size={14} strokeWidth={2} />
-                  </span>
-                  {!collapsed && <span className="text-[13px]">Recycle Bin</span>}
-                </>
-              )}
-            </NavLink>
+                      <Trash2 size={14} strokeWidth={2} />
+                    </span>
+                  )}
+                </NavLink>
+              </div>
+            ) : (
+              <NavLink to="/recycle-bin" onClick={onClose} title="Recycle Bin"
+                className={({ isActive }) =>
+                  `group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+                    isActive
+                      ? 'bg-red-500/20 text-red-300 ring-1 ring-red-500/20'
+                      : 'text-red-400/60 hover:bg-red-500/10 hover:text-red-300'
+                  }`
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all ${
+                      isActive ? 'bg-red-500/25' : 'bg-red-500/10 group-hover:bg-red-500/15'
+                    }`}>
+                      <Trash2 size={14} strokeWidth={2} />
+                    </span>
+                    <span className="text-[13px]">Recycle Bin</span>
+                  </>
+                )}
+              </NavLink>
+            )
           )}
         </nav>
 
         {/* ── User card ── */}
-        <div className={`relative mx-2 mb-4 overflow-hidden rounded-xl p-3
-          flex items-center gap-3 transition-all
-          ${collapsed ? 'justify-center' : ''}
-          `}
+        <div
+          onMouseEnter={(e) => openFlyout({
+            title: user?.name || 'Staff User',
+            subtitle: user?.role ? user.role.toUpperCase() : 'USER',
+            icon: Users,
+            items: [
+              { to: '/settings', label: 'My Profile & Settings', icon: SettingsIcon },
+            ]
+          }, e)}
+          onMouseLeave={scheduleCloseFlyout}
+          className={`relative mx-2 mb-4 overflow-hidden rounded-xl p-3
+            flex items-center gap-3 transition-all
+            ${collapsed ? 'justify-center cursor-pointer hover:bg-white/10' : ''}
+            `}
           style={{
             background: 'rgba(255,255,255,0.06)',
             border: '1px solid rgba(255,255,255,0.08)',
@@ -581,6 +725,142 @@ const Sidebar = ({ open, onClose, collapsed = false }) => {
           )}
         </div>
       </aside>
+
+      {/* ── Collapsed Flyout Popout Menu (Matches Second System Reference) ── */}
+      {collapsed && flyout && (
+        <div
+          onMouseEnter={keepFlyout}
+          onMouseLeave={closeFlyoutImmediately}
+          style={{
+            position: 'fixed',
+            left: `${(flyout.rect?.right || 68) + 4}px`,
+            top: `${Math.max(
+              10,
+              Math.min(
+                window.innerHeight - Math.min((flyout.items?.length || 1) * 38 + 60, 420) - 10,
+                (flyout.rect?.top || 0) - 4
+              )
+            )}px`,
+            zIndex: 9999,
+            minWidth: '220px',
+            maxWidth: '280px',
+            background: 'linear-gradient(165deg, #071238 0%, #0a1b52 100%)',
+            border: '1px solid rgba(99, 130, 255, 0.35)',
+            borderRadius: '14px',
+            boxShadow: '0 20px 50px rgba(0, 5, 30, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(16px)',
+            color: '#fff',
+            overflow: 'hidden',
+          }}
+        >
+          {/* Header */}
+          <div
+            style={{
+              padding: '10px 14px',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+              background: 'rgba(255, 255, 255, 0.04)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '8px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {flyout.icon && (
+                <span
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '22px',
+                    height: '22px',
+                    borderRadius: '6px',
+                    background: 'rgba(255, 255, 255, 0.12)',
+                    color: '#93c5fd',
+                  }}
+                >
+                  <flyout.icon size={13} strokeWidth={2.5} />
+                </span>
+              )}
+              <span style={{ fontSize: '13px', fontWeight: 800, letterSpacing: '0.4px', color: '#ffffff' }}>
+                {flyout.title}
+              </span>
+            </div>
+            {flyout.subtitle ? (
+              <span
+                style={{
+                  fontSize: '9px',
+                  fontWeight: 800,
+                  color: '#93c5fd',
+                  background: 'rgba(59, 130, 246, 0.25)',
+                  padding: '2px 6px',
+                  borderRadius: '10px',
+                  letterSpacing: '0.5px',
+                }}
+              >
+                {flyout.subtitle}
+              </span>
+            ) : flyout.items?.length > 1 ? (
+              <span
+                style={{
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  color: '#93c5fd',
+                  background: 'rgba(59, 130, 246, 0.25)',
+                  padding: '1px 6px',
+                  borderRadius: '10px',
+                }}
+              >
+                {flyout.items.length}
+              </span>
+            ) : null}
+          </div>
+
+          {/* Sub-item Links */}
+          <div
+            style={{
+              padding: '6px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '3px',
+              maxHeight: '360px',
+              overflowY: 'auto',
+            }}
+            className="scrollbar-thin scrollbar-thumb-white/10"
+          >
+            {(flyout.items || []).map((sub) => {
+              const SubIcon = sub.icon || CircleDot;
+              return (
+                <NavLink
+                  key={sub.to}
+                  to={sub.to}
+                  end={sub.end}
+                  onClick={() => {
+                    closeFlyoutImmediately();
+                    onClose?.();
+                  }}
+                  className={({ isActive }) =>
+                    `group flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium transition-all duration-150 ${
+                      isActive
+                        ? 'bg-blue-600 text-white font-semibold shadow-md'
+                        : 'text-blue-100/80 hover:bg-white/10 hover:text-white'
+                    }`
+                  }
+                >
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center text-blue-300 group-hover:text-white transition-colors">
+                    <SubIcon size={13} strokeWidth={2.2} />
+                  </span>
+                  <span className="flex-1 truncate text-[12.5px]">{sub.label}</span>
+                  <ChevronRight
+                    size={12}
+                    className="ml-auto text-blue-300/40 group-hover:text-white group-hover:translate-x-0.5 transition-all"
+                  />
+                </NavLink>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </>
   );
 };

@@ -31,24 +31,44 @@ const createCaptainOrder = asyncHandler(async (req, res) => {
     tableNo = "", tableLabel = "", customerName = "Walk-in Guest",
     customerPhone = "", guestCount = 1, orderType = "dine_in",
     waiter = null, waiterName = "",
-    items = [], discountPercent = 0, serviceCharge = 0, tableNotes = "",
+    items = [], discountPercent = 0, serviceCharge = 0, serviceChargePercent = 0, tableNotes = "",
   } = req.body;
 
-  if (!items.length) { res.status(400); throw new Error("Order must have at least one item"); }
+  if (!items || !Array.isArray(items) || !items.length) {
+    res.status(400);
+    throw new Error("Order must have at least one item");
+  }
+
+  const safeDiscountPct = Math.min(100, Math.max(0, Number(discountPercent) || 0));
+  const safeCustomerName = String(customerName || "Walk-in Guest").trim().slice(0, 100);
+  const safeCustomerPhone = String(customerPhone || "").trim().slice(0, 30);
+  const safeTableNo = String(tableNo || "").trim().slice(0, 50);
+  const safeTableLabel = String(tableLabel || tableNo || "").trim().slice(0, 50);
+  const safeTableNotes = String(tableNotes || "").trim().slice(0, 500);
 
   const settings = await Setting.findOne().lean();
   const taxRate = Number(settings?.taxRate ?? 15);
+  let safeServicePct = Math.min(100, Math.max(0, Number(serviceChargePercent) || 0));
+  if (serviceChargePercent === undefined || serviceChargePercent === null) {
+    if (settings?.enableServiceCharge && (!settings?.autoApplyServiceChargeDineIn || orderType === "dine_in")) {
+      safeServicePct = Math.min(100, Math.max(0, Number(settings?.serviceChargeRate) || 10));
+    }
+  }
   const { orderNo, dailySequence } = await generateCaptainOrderNo();
 
   let subtotal = 0;
   const processedItems = [];
 
   for (const item of items) {
+    if (!item.product) {
+      res.status(400);
+      throw new Error("Each item must specify a valid product");
+    }
     const qty = Math.max(0.001, Number(item.quantity) || 1);
     const product = await Product.findById(item.product).lean();
     if (!product) { res.status(400); throw new Error(`Product not found: ${item.productName || item.product}`); }
 
-    const unitPrice = Number(item.unitPrice !== undefined ? item.unitPrice : product.sellingPrice) || 0;
+    const unitPrice = Math.max(0, Number(item.unitPrice !== undefined ? item.unitPrice : product.sellingPrice) || 0);
     const lineTotal = Math.round(unitPrice * qty * 100) / 100;
     subtotal += lineTotal;
     const station = determineStation(product.category, product.parentCategory, product.name);
@@ -69,21 +89,30 @@ const createCaptainOrder = asyncHandler(async (req, res) => {
   }
 
   let finalDiscount = 0;
-  if (discountPercent > 0) finalDiscount = Math.round(subtotal * discountPercent / 100 * 100) / 100;
+  if (safeDiscountPct > 0) finalDiscount = Math.round(subtotal * safeDiscountPct / 100 * 100) / 100;
   const taxableSubtotal = Math.max(0, subtotal - finalDiscount);
   const taxAmount = Math.round(taxableSubtotal * taxRate / 100 * 100) / 100;
-  const grandTotal = Math.round((taxableSubtotal + taxAmount + (Number(serviceCharge) || 0)) * 100) / 100;
+
+  let finalServiceCharge = Math.max(0, Number(serviceCharge) || 0);
+  if (safeServicePct > 0) {
+    finalServiceCharge = Math.round(subtotal * safeServicePct / 100 * 100) / 100;
+  }
+  const grandTotal = Math.round((taxableSubtotal + taxAmount + finalServiceCharge) * 100) / 100;
 
   const order = await CaptainOrder.create({
     orderNo, dailySequence,
-    tableNo, tableLabel, customerName, customerPhone,
-    guestCount: Number(guestCount) || 1, orderType,
+    tableNo: safeTableNo, tableLabel: safeTableLabel,
+    customerName: safeCustomerName, customerPhone: safeCustomerPhone,
+    guestCount: Math.max(1, Number(guestCount) || 1), orderType,
     waiter: waiter || null, waiterName: waiterName || "",
     createdBy: req.user._id, createdByName: req.user.name || "Staff",
     items: processedItems, subtotal,
-    discountPercent, discountAmount: finalDiscount,
-    taxPercent: taxRate, taxAmount, serviceCharge: Number(serviceCharge) || 0, grandTotal,
-    tableNotes: tableNotes || "",
+    discountPercent: safeDiscountPct, discountAmount: finalDiscount,
+    taxPercent: taxRate, taxAmount,
+    serviceChargePercent: safeServicePct,
+    serviceCharge: finalServiceCharge,
+    grandTotal,
+    tableNotes: safeTableNotes,
     status: req.body.status || "open",
   });
 
@@ -102,7 +131,7 @@ const getCaptainOrders = asyncHandler(async (req, res) => {
     filter.createdAt = { $gte: s, $lte: e };
   }
   if (search) {
-    const q = search.trim();
+    const q = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     filter.$or = [
       { orderNo: new RegExp(q, "i") },
       { customerName: new RegExp(q, "i") },
@@ -125,7 +154,7 @@ const getCaptainOrderById = asyncHandler(async (req, res) => {
 // @route PATCH /api/captain-orders/:id
 const updateCaptainOrder = asyncHandler(async (req, res) => {
   const { items, tableNotes, guestCount, customerName, waiter, waiterName,
-    discountPercent, serviceCharge, status } = req.body;
+    discountPercent, serviceCharge, serviceChargePercent, status } = req.body;
 
   const order = await CaptainOrder.findById(req.params.id);
   if (!order) { res.status(404); throw new Error("Captain order not found"); }
@@ -142,7 +171,7 @@ const updateCaptainOrder = asyncHandler(async (req, res) => {
       const qty = Math.max(0.001, Number(item.quantity) || 1);
       const product = await Product.findById(item.product).lean();
       if (!product) continue;
-      const unitPrice = Number(item.unitPrice !== undefined ? item.unitPrice : product.sellingPrice) || 0;
+      const unitPrice = Math.max(0, Number(item.unitPrice !== undefined ? item.unitPrice : product.sellingPrice) || 0);
       const lineTotal = Math.round(unitPrice * qty * 100) / 100;
       subtotal += lineTotal;
       processedItems.push({
@@ -154,17 +183,23 @@ const updateCaptainOrder = asyncHandler(async (req, res) => {
         addedRound: item.addedRound || 1,
       });
     }
-    const dp = Number(discountPercent || order.discountPercent) || 0;
+    const dp = Math.min(100, Math.max(0, Number(discountPercent !== undefined ? discountPercent : order.discountPercent) || 0));
+    const scPct = Math.min(100, Math.max(0, Number(serviceChargePercent !== undefined ? serviceChargePercent : order.serviceChargePercent) || 0));
     const finalDiscount = dp > 0 ? Math.round(subtotal * dp / 100 * 100) / 100 : 0;
     const taxableSubtotal = Math.max(0, subtotal - finalDiscount);
     const taxAmount = Math.round(taxableSubtotal * taxRate / 100 * 100) / 100;
-    const sc = Number(serviceCharge || order.serviceCharge) || 0;
+    
+    let sc = Math.max(0, Number(serviceCharge !== undefined ? serviceCharge : order.serviceCharge) || 0);
+    if (scPct > 0) {
+      sc = Math.round(subtotal * scPct / 100 * 100) / 100;
+    }
     const grandTotal = Math.round((taxableSubtotal + taxAmount + sc) * 100) / 100;
     order.items = processedItems;
     order.subtotal = subtotal;
     order.discountPercent = dp;
     order.discountAmount = finalDiscount;
     order.taxAmount = taxAmount;
+    order.serviceChargePercent = scPct;
     order.serviceCharge = sc;
     order.grandTotal = grandTotal;
   }

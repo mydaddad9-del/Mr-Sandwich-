@@ -84,6 +84,7 @@ export default function POS() {
   const [refreshingWaiters, setRefreshingWaiters] = useState(false);
   const [customerName, setCustomerName] = useState("");
   const [discountPct, setDiscountPct] = useState(0);
+  const [serviceChargePct, setServiceChargePct] = useState(0);
   const [serviceCharge, setServiceCharge] = useState(0);
   const [editingNoteIdx, setEditingNoteIdx] = useState(null);
   const [noteText, setNoteText] = useState("");
@@ -101,9 +102,25 @@ export default function POS() {
   const [settings, setSettings] = useState(() => {
     try {
       const cached = localStorage.getItem("baba_roti_pos_settings_cache");
-      return cached ? JSON.parse(cached) : { taxRate: 15, currency: "ETB" };
+      return cached
+        ? JSON.parse(cached)
+        : {
+            taxRate: 15,
+            currency: "ETB",
+            enableServiceCharge: false,
+            serviceChargeRate: 10,
+            serviceChargePresets: [5, 10, 15],
+            autoApplyServiceChargeDineIn: false,
+          };
     } catch (_) {
-      return { taxRate: 15, currency: "ETB" };
+      return {
+        taxRate: 15,
+        currency: "ETB",
+        enableServiceCharge: false,
+        serviceChargeRate: 10,
+        serviceChargePresets: [5, 10, 15],
+        autoApplyServiceChargeDineIn: false,
+      };
     }
   });
 
@@ -255,11 +272,24 @@ export default function POS() {
         const newSettings = {
           taxRate: Number(settRes.data?.taxRate ?? 15),
           currency: settRes.data?.currencySymbol || "ETB",
+          enableServiceCharge: Boolean(settRes.data?.enableServiceCharge),
+          serviceChargeRate: Number(settRes.data?.serviceChargeRate ?? 10),
+          serviceChargePresets: Array.isArray(settRes.data?.serviceChargePresets) && settRes.data.serviceChargePresets.length > 0
+            ? settRes.data.serviceChargePresets
+            : [5, 10, 15],
+          autoApplyServiceChargeDineIn: Boolean(settRes.data?.autoApplyServiceChargeDineIn),
         };
         setSettings(newSettings);
         try {
           localStorage.setItem("baba_roti_pos_settings_cache", JSON.stringify(newSettings));
         } catch (_) { }
+
+        // Auto-initialize service charge if enabled and not already explicitly set
+        if (newSettings.enableServiceCharge && serviceChargePct === 0) {
+          if (!newSettings.autoApplyServiceChargeDineIn || orderType === 'dine_in') {
+            setServiceChargePct(newSettings.serviceChargeRate || 10);
+          }
+        }
       }
 
       const allEmployees = Array.isArray(empRes.data) ? empRes.data : [];
@@ -297,7 +327,10 @@ export default function POS() {
   const discountAmt = discountPct > 0 ? Math.round((subtotal * discountPct) / 100 * 100) / 100 : 0;
   const taxable = Math.max(0, subtotal - discountAmt);
   const taxAmt = Math.round((taxable * settings.taxRate) / 100 * 100) / 100;
-  const grandTotal = Math.round((taxable + taxAmt + (Number(serviceCharge) || 0)) * 100) / 100;
+  const serviceChargeAmt = serviceChargePct > 0
+    ? Math.round((subtotal * serviceChargePct) / 100 * 100) / 100
+    : (Number(serviceCharge) || 0);
+  const grandTotal = Math.round((taxable + taxAmt + serviceChargeAmt) * 100) / 100;
   const change = Math.max(0, (Number(amountPaid) || 0) - grandTotal);
 
   const filteredProducts = products.filter((p) => {
@@ -373,6 +406,7 @@ export default function POS() {
     setOrderType(order.orderType || "dine_in");
     setCustomerName(order.customerName || "");
     setDiscountPct(order.discountPercent || 0);
+    setServiceChargePct(order.serviceChargePercent || 0);
     setServiceCharge(order.serviceCharge || 0);
 
     const matchedWaiter = waiters.find((w) => w._id === order.waiter || w.name === order.waiterName);
@@ -404,6 +438,7 @@ export default function POS() {
     setSelectedWaiter(null);
     setCustomerName("");
     setDiscountPct(0);
+    setServiceChargePct(0);
     setServiceCharge(0);
     showToast("Cart cleared. Ready for next order.", "info");
   };
@@ -447,7 +482,8 @@ export default function POS() {
           notes: i.notes || "",
         })),
         discountPercent: discountPct,
-        serviceCharge,
+        serviceCharge: serviceChargeAmt,
+        serviceChargePercent: serviceChargePct,
         status: "held", // Default status is held as requested
       };
 
@@ -473,6 +509,7 @@ export default function POS() {
       setHeldOrderNo("");
       setItems([]);
       setDiscountPct(0);
+      setServiceChargePct(0);
       setServiceCharge(0);
       setCustomerName("");
       loadHeldOrders();
@@ -513,7 +550,8 @@ export default function POS() {
           notes: i.notes,
         })),
         discountPercent: discountPct,
-        serviceCharge,
+        serviceCharge: serviceChargeAmt,
+        serviceChargePercent: serviceChargePct,
         paymentMethod: payMethod,
         amountPaid: Number(amountPaid) || grandTotal,
         paymentStatus: "paid",
@@ -553,6 +591,7 @@ export default function POS() {
       setHeldOrderNo("");
       setItems([]);
       setDiscountPct(0);
+      setServiceChargePct(0);
       setServiceCharge(0);
       setCustomerName("");
       setAmountPaid("");
@@ -731,7 +770,11 @@ export default function POS() {
                   type="button"
                   onClick={() => {
                     setOrderType(val);
-                    if (val !== "dine_in") setSelectedTable("");
+                    if (val !== "dine_in") {
+                      setSelectedTable("");
+                    } else if (settings?.autoApplyServiceChargeDineIn && settings?.enableServiceCharge && serviceChargePct === 0) {
+                      setServiceChargePct(settings.serviceChargeRate || 10);
+                    }
                   }}
                   style={{
                     padding: "6px 14px",
@@ -1393,7 +1436,7 @@ export default function POS() {
             }}
           >
             {/* Discount selector */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
               <span style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase" }}>
                 Discount:
               </span>
@@ -1424,6 +1467,41 @@ export default function POS() {
               </div>
             </div>
 
+            {/* Service Charge selector - matching discount mode exactly */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+              <span style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase" }}>
+                Service Charge:
+              </span>
+              <div style={{ display: "flex", gap: 5, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                {Array.from(new Set([0, ...(settings.serviceChargePresets || [5, 10, 15]), ...(serviceChargePct > 0 ? [serviceChargePct] : [])])).sort((a, b) => a - b).map((s) => {
+                  const active = serviceChargePct === s;
+                  return (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => {
+                        setServiceChargePct(s);
+                        if (s === 0) setServiceCharge(0);
+                      }}
+                      style={{
+                        padding: "3px 10px",
+                        borderRadius: 6,
+                        border: active ? "1.5px solid #2563eb" : "1px solid #e2e8f0",
+                        background: active ? "#2563eb" : "#f8fafc",
+                        color: active ? "#ffffff" : "#64748b",
+                        fontSize: 11,
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        transition: "all 0.15s ease",
+                      }}
+                    >
+                      {s === 0 ? "None" : `${s}%`}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* Line calculations */}
             <div style={{ display: "flex", flexDirection: "column", gap: 5, fontSize: 12, marginBottom: 10 }}>
               <div style={{ display: "flex", justifyContent: "space-between", color: "#64748b" }}>
@@ -1440,10 +1518,10 @@ export default function POS() {
                 <span>VAT / Tax ({settings.taxRate}%)</span>
                 <span style={{ fontVariantNumeric: "tabular-nums", color: "#0f172a", fontWeight: 600 }}>{ETB(taxAmt)}</span>
               </div>
-              {serviceCharge > 0 && (
-                <div style={{ display: "flex", justifyContent: "space-between", color: "#64748b" }}>
-                  <span>Service Charge</span>
-                  <span style={{ fontVariantNumeric: "tabular-nums", color: "#0f172a", fontWeight: 600 }}>{ETB(serviceCharge)}</span>
+              {serviceChargeAmt > 0 && (
+                <div style={{ display: "flex", justifyContent: "space-between", color: "#2563eb" }}>
+                  <span>Service Charge {serviceChargePct > 0 ? `(${serviceChargePct}%)` : ""}</span>
+                  <span style={{ fontVariantNumeric: "tabular-nums", color: "#0f172a", fontWeight: 600 }}>+ {ETB(serviceChargeAmt)}</span>
                 </div>
               )}
             </div>

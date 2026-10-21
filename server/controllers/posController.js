@@ -61,6 +61,7 @@ const createOrder = asyncHandler(async (req, res) => {
     discountPercent = 0,
     discountAmount = 0,
     serviceCharge = 0,
+    serviceChargePercent = 0,
     paymentMethod = 'Cash',
     amountPaid = 0,
     paymentStatus = 'paid',
@@ -69,10 +70,20 @@ const createOrder = asyncHandler(async (req, res) => {
     captainOrderRef = null,
   } = req.body;
 
-  if (!items || !items.length) {
+  if (!items || !Array.isArray(items) || !items.length) {
     res.status(400);
     throw new Error('Order must contain at least one item');
   }
+
+  // Input sanitization & boundary validation
+  const safeDiscountPct = Math.min(100, Math.max(0, Number(discountPercent) || 0));
+  const safeServicePct = Math.min(100, Math.max(0, Number(serviceChargePercent) || 0));
+  const safeCustomerName = String(customerName || 'Walk-in Guest').trim().slice(0, 100);
+  const safeCustomerPhone = String(customerPhone || '').trim().slice(0, 30);
+  const safeTableNo = String(tableNo || '').trim().slice(0, 50);
+
+  const allowedPaymentMethods = ['Cash', 'Telebirr', 'Card', 'Credit', 'Other'];
+  const safePaymentMethod = allowedPaymentMethods.includes(paymentMethod) ? paymentMethod : 'Cash';
 
   const settings = await Setting.findOne().lean();
   const taxRate = Number(settings?.taxRate ?? 15);
@@ -87,6 +98,11 @@ const createOrder = asyncHandler(async (req, res) => {
   const materialDeductions = {}; // materialId -> { material, totalQty }
 
   for (const item of items) {
+    if (!item.product) {
+      res.status(400);
+      throw new Error(`Each item must specify a product`);
+    }
+
     const qty = Math.max(0.001, Number(item.quantity) || 1);
     const product = await Product.findById(item.product)
       .populate({ path: 'ingredients.material', model: 'RawMaterial' })
@@ -97,7 +113,7 @@ const createOrder = asyncHandler(async (req, res) => {
       throw new Error(`Product not found: ${item.productName || item.product}`);
     }
 
-    const unitPrice = Number(item.unitPrice !== undefined ? item.unitPrice : product.sellingPrice) || 0;
+    const unitPrice = Math.max(0, Number(item.unitPrice !== undefined ? item.unitPrice : product.sellingPrice) || 0);
     const lineTotal = Math.round(unitPrice * qty * 100) / 100;
     subtotal += lineTotal;
 
@@ -157,12 +173,17 @@ const createOrder = asyncHandler(async (req, res) => {
 
   // Calculate discount & taxes
   let finalDiscount = Number(discountAmount) || 0;
-  if (discountPercent > 0) {
-    finalDiscount = Math.round((subtotal * discountPercent) / 100 * 100) / 100;
+  if (safeDiscountPct > 0) {
+    finalDiscount = Math.round((subtotal * safeDiscountPct) / 100 * 100) / 100;
   }
   const taxableSubtotal = Math.max(0, subtotal - finalDiscount);
   const taxAmount = Math.round((taxableSubtotal * taxRate) / 100 * 100) / 100;
-  const grandTotal = Math.round((taxableSubtotal + taxAmount + (Number(serviceCharge) || 0)) * 100) / 100;
+
+  let finalServiceCharge = Math.max(0, Number(serviceCharge) || 0);
+  if (safeServicePct > 0) {
+    finalServiceCharge = Math.round((subtotal * safeServicePct) / 100 * 100) / 100;
+  }
+  const grandTotal = Math.round((taxableSubtotal + taxAmount + finalServiceCharge) * 100) / 100;
 
   const paidAmount = Number(amountPaid) > 0 ? Number(amountPaid) : grandTotal;
   const changeDue = Math.max(0, Math.round((paidAmount - grandTotal) * 100) / 100);
@@ -266,9 +287,9 @@ const createOrder = asyncHandler(async (req, res) => {
     orderNo,
     dailySequence,
     orderType,
-    tableNo,
-    customerName,
-    customerPhone,
+    tableNo: safeTableNo,
+    customerName: safeCustomerName,
+    customerPhone: safeCustomerPhone,
     cashier: req.user?._id,
     cashierName: req.user?.name || 'Cashier',
     waiter: waiter || null,
@@ -276,14 +297,15 @@ const createOrder = asyncHandler(async (req, res) => {
     captainOrderRef: captainOrderRef || null,
     items: processedItems,
     subtotal,
-    discountPercent,
+    discountPercent: safeDiscountPct,
     discountAmount: finalDiscount,
     taxPercent: taxRate,
     taxAmount,
-    serviceCharge: Number(serviceCharge) || 0,
+    serviceChargePercent: safeServicePct,
+    serviceCharge: finalServiceCharge,
     grandTotal,
     totalCOGS,
-    paymentMethod,
+    paymentMethod: safePaymentMethod,
     amountPaid: paidAmount,
     changeDue,
     paymentStatus,
@@ -334,7 +356,7 @@ const getOrders = asyncHandler(async (req, res) => {
   }
 
   if (search) {
-    const q = search.trim();
+    const q = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     filter.$or = [
       { orderNo: new RegExp(q, 'i') },
       { customerName: new RegExp(q, 'i') },

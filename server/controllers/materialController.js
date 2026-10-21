@@ -7,7 +7,9 @@ const tg = require('../utils/telegramNotifier');
 const getMaterials = asyncHandler(async (req, res) => {
   const { search, status } = req.query;
   const filter = { isActive: true };
-  if (search) filter.name = { $regex: search, $options: 'i' };
+  if (search && search.trim()) {
+    filter.name = { $regex: search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $options: 'i' };
+  }
 
   let materials = await RawMaterial.find(filter).sort({ name: 1 }).lean();
 
@@ -38,6 +40,19 @@ const getMaterialById = asyncHandler(async (req, res) => {
 });
 
 const createMaterial = asyncHandler(async (req, res) => {
+  const { name, unit, unitCost } = req.body;
+  if (!name || !name.trim()) {
+    res.status(400);
+    throw new Error('Material name is required');
+  }
+  if (!unit || !unit.trim()) {
+    res.status(400);
+    throw new Error('Unit of measurement is required');
+  }
+  if (unitCost !== undefined && Number(unitCost) < 0) {
+    res.status(400);
+    throw new Error('Unit cost cannot be negative');
+  }
   const material = await RawMaterial.create(req.body);
   tg.notifyMaterialCreated(material, req.user);
   invalidateDashboardCache();

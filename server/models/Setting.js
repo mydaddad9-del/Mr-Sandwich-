@@ -36,6 +36,11 @@ const settingSchema = new mongoose.Schema(
     currencySymbol: { type: String, default: 'ETB' },
     lowStockThresholdDefault: { type: Number, default: 15 },
     taxRate: { type: Number, default: 15 },
+    // ── Service Charge & Hospitality Fees ────────────────────────
+    enableServiceCharge: { type: Boolean, default: false },
+    serviceChargeRate: { type: Number, default: 10, min: 0, max: 100 },
+    serviceChargePresets: { type: [Number], default: [5, 10, 15] },
+    autoApplyServiceChargeDineIn: { type: Boolean, default: false },
     autoGenerateVoucherNo: { type: Boolean, default: true },
     allowNegativeStock: { type: Boolean, default: false },
     rolePermissions: {

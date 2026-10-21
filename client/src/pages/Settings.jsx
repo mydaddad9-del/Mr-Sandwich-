@@ -29,6 +29,7 @@ import {
   X,
   ToggleLeft,
   ToggleRight,
+  Percent,
 } from 'lucide-react';
 import api from '../api/axios';
 import posPrint from '../utils/posPrint';
@@ -116,6 +117,11 @@ export default function Settings() {
     currencySymbol: 'ETB',
     lowStockThresholdDefault: 15,
     taxRate: 15,
+    // Service Charge & Table Service Fees
+    enableServiceCharge: false,
+    serviceChargeRate: 10,
+    serviceChargePresets: [5, 10, 15],
+    autoApplyServiceChargeDineIn: false,
     autoGenerateVoucherNo: true,
     allowNegativeStock: false,
     // Pricing & Cost Parameters
@@ -647,7 +653,7 @@ export default function Settings() {
           <Shield size={16} /> Security &amp; Password
         </button>
 
-        {hasRole('admin') && (
+        {hasRole('admin', 'manager') && (
           <button
             onClick={() => setTab('system')}
             className={`flex items-center gap-2 border-b-2 px-3.5 py-3 text-sm font-semibold transition whitespace-nowrap ${currentTab === 'system'
@@ -669,7 +675,7 @@ export default function Settings() {
           <Layers size={16} /> Role Privileges
         </button>
 
-        {hasRole('admin') && (
+        {hasRole('admin', 'manager') && (
           <button
             onClick={() => setTab('telegram')}
             className={`flex items-center gap-2 border-b-2 px-3.5 py-3 text-sm font-semibold transition whitespace-nowrap ${currentTab === 'telegram'
@@ -681,7 +687,7 @@ export default function Settings() {
           </button>
         )}
 
-        {hasRole('admin') && (
+        {hasRole('admin', 'manager') && (
           <button
             onClick={() => { setTab('printers'); loadPrinters(); }}
             className={`flex items-center gap-2 border-b-2 px-3.5 py-3 text-sm font-semibold transition whitespace-nowrap ${currentTab === 'printers'
@@ -690,6 +696,18 @@ export default function Settings() {
               }`}
           >
             <Printer size={16} /> Order Printers
+          </button>
+        )}
+
+        {hasRole('admin', 'manager') && (
+          <button
+            onClick={() => setTab('serviceCharge')}
+            className={`flex items-center gap-2 border-b-2 px-3.5 py-3 text-sm font-semibold transition whitespace-nowrap ${currentTab === 'serviceCharge'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-ink-400 hover:text-ink-700'
+              }`}
+          >
+            <Percent size={16} /> Service Charge
           </button>
         )}
 
@@ -1208,10 +1226,59 @@ export default function Settings() {
                     className="w-full rounded-xl border border-ink-200 py-2.5 px-3 text-sm outline-none focus:border-blue-500"
                   />
                 </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-semibold text-ink-700">
+                      Default Service Charge Rate (%)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setTab('serviceCharge')}
+                      className="text-[11px] font-semibold text-blue-600 hover:underline"
+                    >
+                      Configure Presets &rarr;
+                    </button>
+                  </div>
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={systemForm.serviceChargeRate}
+                    onChange={(e) => setSystemForm({ ...systemForm, serviceChargeRate: Number(e.target.value) })}
+                    className="w-full rounded-xl border border-ink-200 py-2.5 px-3 text-sm outline-none focus:border-blue-500"
+                  />
+                </div>
               </div>
 
               {/* Toggles */}
               <div className="space-y-3 pt-2 border-t border-ink-100">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={systemForm.enableServiceCharge}
+                    onChange={(e) => setSystemForm({ ...systemForm, enableServiceCharge: e.target.checked })}
+                    className="h-4 w-4 rounded border-ink-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <div>
+                    <p className="text-xs font-semibold text-ink-900">Enable Service Charge by Default</p>
+                    <p className="text-[11px] text-ink-400">Activates hospitality service charge on POS orders and sales bills</p>
+                  </div>
+                </label>
+
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={systemForm.autoApplyServiceChargeDineIn}
+                    onChange={(e) => setSystemForm({ ...systemForm, autoApplyServiceChargeDineIn: e.target.checked })}
+                    className="h-4 w-4 rounded border-ink-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <div>
+                    <p className="text-xs font-semibold text-ink-900">Auto-apply Service Charge to Dine-In Orders</p>
+                    <p className="text-[11px] text-ink-400">Automatically applies the default rate whenever Dine-In table orders are opened</p>
+                  </div>
+                </label>
+
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input
                     type="checkbox"
@@ -2798,6 +2865,315 @@ export default function Settings() {
                 </div>
               </div>
             )}
+          </div>
+        );
+      })()}
+
+      {/* ── Tab: Service Charge ── */}
+      {currentTab === 'serviceCharge' && (() => {
+        const presets = Array.isArray(systemForm.serviceChargePresets) && systemForm.serviceChargePresets.length > 0
+          ? systemForm.serviceChargePresets
+          : [5, 10, 15];
+
+        const handlePresetsChange = (str) => {
+          const arr = str
+            .split(',')
+            .map((s) => Number(s.trim()))
+            .filter((n) => !isNaN(n) && n > 0 && n <= 100);
+          setSystemForm({ ...systemForm, serviceChargePresets: arr });
+        };
+
+        const togglePreset = (num) => {
+          let next;
+          if (presets.includes(num)) {
+            next = presets.filter((p) => p !== num);
+          } else {
+            next = [...presets, num].sort((a, b) => a - b);
+          }
+          if (next.length === 0) next = [10];
+          setSystemForm({ ...systemForm, serviceChargePresets: next });
+        };
+
+        // Live calculation sample
+        const sampleSubtotal = 250;
+        const currentRate = systemForm.serviceChargeRate || 10;
+        const sampleTax = Math.round((sampleSubtotal * (systemForm.taxRate || 15)) / 100 * 100) / 100;
+        const sampleSvc = systemForm.enableServiceCharge
+          ? Math.round((sampleSubtotal * currentRate) / 100 * 100) / 100
+          : 0;
+        const sampleTotal = sampleSubtotal + sampleTax + sampleSvc;
+
+        return (
+          <div className="space-y-6 max-w-4xl">
+            {systemSuccess && (
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800 flex items-center gap-2">
+                <CheckCircle2 size={18} className="text-emerald-600 flex-shrink-0" />
+                <span className="text-sm font-semibold">{systemSuccess}</span>
+              </div>
+            )}
+            {systemError && (
+              <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-800 flex items-center gap-2">
+                <AlertCircle size={18} className="text-red-600 flex-shrink-0" />
+                <span className="text-sm font-semibold">{systemError}</span>
+              </div>
+            )}
+
+            {/* Header info */}
+            <div>
+              <h2 className="text-xl font-bold text-ink-900 flex items-center gap-2">
+                <span className="rounded-lg bg-blue-50 p-2 text-blue-600">
+                  <Percent size={20} />
+                </span>
+                Service Charge &amp; Table Hospitality Fees
+              </h2>
+              <p className="text-sm text-ink-400 mt-1">
+                Configure restaurant service fees, POS cashier quick-select buttons, Dine-In table rules, and customer receipt breakdowns.
+              </p>
+            </div>
+
+            <form onSubmit={handleSystemSubmit} className="space-y-6">
+              {/* Master Activation Card */}
+              <Card className="p-6 border border-ink-100 shadow-sm rounded-2xl bg-white">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-5 border-b border-ink-100">
+                  <div>
+                    <h3 className="text-base font-bold text-ink-900">Service Charge System Status</h3>
+                    <p className="text-xs text-ink-500 mt-0.5">
+                      When enabled, service charge can be automatically or manually applied across POS Ordering, Captain Orders, and Cash Sales.
+                    </p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={systemForm.enableServiceCharge}
+                      onChange={(e) => setSystemForm({ ...systemForm, enableServiceCharge: e.target.checked })}
+                      className="sr-only peer"
+                    />
+                    <div className="w-14 h-7 bg-ink-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-600"></div>
+                    <span className="ml-3 text-xs font-bold uppercase tracking-wider text-ink-700">
+                      {systemForm.enableServiceCharge ? (
+                        <span className="text-blue-600">Active</span>
+                      ) : (
+                        <span className="text-ink-400">Disabled</span>
+                      )}
+                    </span>
+                  </label>
+                </div>
+
+                {/* Configuration Inputs */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-5">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-ink-700 mb-1.5">
+                      Default Service Charge Rate (%)
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={systemForm.serviceChargeRate}
+                        onChange={(e) => setSystemForm({ ...systemForm, serviceChargeRate: Number(e.target.value) })}
+                        className="w-full rounded-xl border border-ink-200 py-2.5 pl-3.5 pr-10 text-sm font-semibold text-ink-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        placeholder="10"
+                      />
+                      <span className="absolute right-3.5 top-2.5 text-xs font-bold text-ink-400">%</span>
+                    </div>
+                    <p className="text-[11px] text-ink-400 mt-1.5">
+                      Default hospitality charge applied to customer bills when enabled.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-ink-700 mb-1.5">
+                      Quick Preset Percentages (%)
+                    </label>
+                    <input
+                      type="text"
+                      value={presets.join(', ')}
+                      onChange={(e) => handlePresetsChange(e.target.value)}
+                      className="w-full rounded-xl border border-ink-200 py-2.5 px-3.5 text-sm font-semibold text-ink-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 font-mono"
+                      placeholder="5, 10, 15"
+                    />
+                    <p className="text-[11px] text-ink-400 mt-1.5">
+                      Comma-separated list of quick buttons available for cashiers in POS.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Preset Chips Quick Toggle */}
+                <div className="pt-4">
+                  <span className="text-xs font-semibold text-ink-600 block mb-2">
+                    Click to quickly toggle popular percentage buttons:
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {[5, 8, 10, 12, 15, 18, 20].map((rate) => {
+                      const isIncluded = presets.includes(rate);
+                      return (
+                        <button
+                          key={rate}
+                          type="button"
+                          onClick={() => togglePreset(rate)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+                            isIncluded
+                              ? 'bg-blue-600 text-white shadow-sm'
+                              : 'bg-ink-100 text-ink-600 hover:bg-ink-200'
+                          }`}
+                        >
+                          {isIncluded && <Check size={13} />}
+                          {rate}%
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Dine-In Automation Toggle */}
+                <div className="mt-6 pt-5 border-t border-ink-100">
+                  <label className="flex items-start gap-3.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={systemForm.autoApplyServiceChargeDineIn}
+                      onChange={(e) => setSystemForm({ ...systemForm, autoApplyServiceChargeDineIn: e.target.checked })}
+                      className="mt-0.5 h-4 w-4 rounded border-ink-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <div>
+                      <p className="text-xs font-bold text-ink-900">
+                        Automatically Preselect for Dine-In Table Orders
+                      </p>
+                      <p className="text-[11px] text-ink-500 mt-0.5">
+                        When cashiers or captains create a Dine-In table order, the default service charge ({systemForm.serviceChargeRate || 10}%) will be automatically pre-selected. Cashiers can still manually override or remove it by clicking &ldquo;None&rdquo;.
+                      </p>
+                    </div>
+                  </label>
+                </div>
+              </Card>
+
+              {/* Live Preview Card */}
+              <Card className="p-6 border border-blue-100 bg-gradient-to-br from-blue-50/50 to-indigo-50/30 rounded-2xl shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="rounded-md bg-blue-600 text-white p-1">
+                    <Sparkles size={14} />
+                  </span>
+                  <h3 className="text-sm font-bold text-ink-900 uppercase tracking-wide">
+                    Live POS Register &amp; Receipt Preview
+                  </h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* POS Button Interface Preview */}
+                  <div className="bg-white rounded-xl p-4 border border-ink-200 shadow-xs">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-ink-400 mb-2">
+                      Cashier Register Interface Preview
+                    </p>
+                    <div className="p-3 bg-slate-50 rounded-lg border border-slate-200/80">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                          SERVICE CHARGE:
+                        </span>
+                        <div className="flex gap-1.5 flex-wrap">
+                          <span className="px-2.5 py-1 rounded bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-bold">
+                            None
+                          </span>
+                          {presets.map((rate) => {
+                            const isDefault = rate === (systemForm.serviceChargeRate || 10);
+                            return (
+                              <span
+                                key={rate}
+                                className={`px-2.5 py-1 rounded text-[10px] font-bold border transition ${
+                                  isDefault && systemForm.enableServiceCharge
+                                    ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                                    : 'bg-slate-100 text-slate-600 border-slate-200'
+                                }`}
+                              >
+                                {rate}% {isDefault && systemForm.enableServiceCharge && '✓'}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Line calculations breakdown */}
+                      <div className="mt-3 pt-2.5 border-t border-slate-200 text-xs space-y-1 font-mono">
+                        <div className="flex justify-between text-slate-500">
+                          <span>Subtotal:</span>
+                          <span>ETB {sampleSubtotal.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-slate-500">
+                          <span>VAT ({systemForm.taxRate || 15}%):</span>
+                          <span>ETB {sampleTax.toFixed(2)}</span>
+                        </div>
+                        {systemForm.enableServiceCharge && sampleSvc > 0 && (
+                          <div className="flex justify-between text-blue-600 font-semibold">
+                            <span>Service Charge ({currentRate}%):</span>
+                            <span>+ETB {sampleSvc.toFixed(2)}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between text-slate-900 font-bold pt-1 border-t border-slate-200">
+                          <span>Grand Total:</span>
+                          <span>ETB {sampleTotal.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Receipt Preview */}
+                  <div className="bg-white rounded-xl p-4 border border-ink-200 shadow-xs">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-ink-400 mb-2">
+                      Customer Thermal Receipt Preview (ESC/POS)
+                    </p>
+                    <div className="bg-amber-50/60 font-mono text-[11px] text-ink-800 p-3.5 rounded-lg border border-amber-200/60 leading-relaxed">
+                      <div className="text-center font-bold text-xs mb-1">
+                        {systemForm.hotelName || 'Baba Roti  Café'}
+                      </div>
+                      <div className="text-center text-[10px] text-ink-500 mb-2">
+                        {systemForm.address || 'Addis Ababa, Ethiopia'}
+                      </div>
+                      <div className="border-b border-dashed border-ink-300 my-1.5" />
+                      <div className="flex justify-between">
+                        <span>1x Baba Roti Bun</span>
+                        <span>ETB 35.00</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>1x Special Coffee</span>
+                        <span>ETB 30.00</span>
+                      </div>
+                      <div className="border-b border-dashed border-ink-300 my-1.5" />
+                      <div className="flex justify-between text-ink-500">
+                        <span>Subtotal:</span>
+                        <span>ETB 65.00</span>
+                      </div>
+                      <div className="flex justify-between text-ink-500">
+                        <span>Tax ({systemForm.taxRate || 15}%):</span>
+                        <span>ETB 9.75</span>
+                      </div>
+                      {systemForm.enableServiceCharge ? (
+                        <div className="flex justify-between font-bold text-blue-700">
+                          <span>Service Charge ({currentRate}%):</span>
+                          <span>ETB {(65 * currentRate / 100).toFixed(2)}</span>
+                        </div>
+                      ) : null}
+                      <div className="border-t border-ink-800 font-bold pt-1 mt-1 flex justify-between">
+                        <span>TOTAL:</span>
+                        <span>
+                          ETB {(65 + 9.75 + (systemForm.enableServiceCharge ? 65 * currentRate / 100 : 0)).toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Save Bar */}
+              <div className="flex justify-end gap-3 pt-2">
+                <Button
+                  type="submit"
+                  disabled={systemSaving}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-6 py-2.5 shadow-sm inline-flex items-center gap-2 rounded-xl"
+                >
+                  <Save size={15} />
+                  {systemSaving ? 'Saving Settings…' : 'Save Service Charge Settings'}
+                </Button>
+              </div>
+            </form>
           </div>
         );
       })()}

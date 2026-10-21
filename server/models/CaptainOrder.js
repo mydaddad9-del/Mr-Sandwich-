@@ -37,6 +37,7 @@ const captainOrderSchema = new mongoose.Schema(
     discountAmount:  { type: Number, default: 0 },
     taxPercent:      { type: Number, default: 15 },
     taxAmount:       { type: Number, default: 0 },
+    serviceChargePercent: { type: Number, default: 0 },
     serviceCharge:   { type: Number, default: 0 },
     grandTotal:      { type: Number, default: 0 },
     status: {

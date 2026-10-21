@@ -52,11 +52,15 @@ async function resolveItemCosts(items) {
   const stockWarnings = []; // items where requestedQty > currentStock
 
   for (const item of items) {
+    if (!item.material) throw new Error('Material is required for each item');
+    const requestedQty = Number(item.requestedQty);
+    if (isNaN(requestedQty) || requestedQty <= 0) {
+      throw new Error('Requested quantity must be greater than zero');
+    }
     const mat = await RawMaterial.findById(item.material).select('unitCost name unit currentStock');
     if (!mat) throw new Error(`Material not found: ${item.material}`);
-    const unitCost    = mat.unitCost || 0;
-    const requestedQty = Number(item.requestedQty);
-    const totalCost   = unitCost * requestedQty;
+    const unitCost    = Math.max(0, Number(mat.unitCost) || 0);
+    const totalCost   = Math.round(unitCost * requestedQty * 100) / 100;
     total += totalCost;
 
     // Flag if requested exceeds available stock

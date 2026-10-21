@@ -1079,6 +1079,7 @@ export default function CaptainOrder() {
                 <span>Subtotal: <strong style={{ color: "#0f172a" }}>{ETB(refOrder.subtotal)}</strong></span>
                 {refOrder.discountAmount > 0 && <span style={{ marginLeft: 12, color: "#d97706" }}>Discount: -{ETB(refOrder.discountAmount)}</span>}
                 <span style={{ marginLeft: 12 }}>Tax: <strong style={{ color: "#0f172a" }}>{ETB(refOrder.taxAmount)}</strong></span>
+                {refOrder.serviceCharge > 0 && <span style={{ marginLeft: 12, color: "#2563eb" }}>Service: <strong style={{ color: "#2563eb" }}>+{ETB(refOrder.serviceCharge)}</strong></span>}
               </div>
               <div style={{ fontSize: 19, fontWeight: 900, color: "#059669" }}>
                 TOTAL: {ETB(refOrder.grandTotal)}

@@ -42,6 +42,10 @@ const getSettings = asyncHandler(async (req, res) => {
       currencySymbol: 'ETB',
       lowStockThresholdDefault: 15,
       taxRate: 15,
+      enableServiceCharge: false,
+      serviceChargeRate: 10,
+      serviceChargePresets: [5, 10, 15],
+      autoApplyServiceChargeDineIn: false,
       autoGenerateVoucherNo: true,
       allowNegativeStock: false,
       rolePermissions: DEFAULT_ROLE_PERMISSIONS,
@@ -70,6 +74,23 @@ const getSettings = asyncHandler(async (req, res) => {
       settings.markModified('licensedModules');
       modified = true;
     }
+    if (settings.serviceChargeRate === undefined || settings.serviceChargeRate === null) {
+      settings.serviceChargeRate = 10;
+      modified = true;
+    }
+    if (!settings.serviceChargePresets || !Array.isArray(settings.serviceChargePresets) || !settings.serviceChargePresets.length) {
+      settings.serviceChargePresets = [5, 10, 15];
+      settings.markModified('serviceChargePresets');
+      modified = true;
+    }
+    if (settings.enableServiceCharge === undefined) {
+      settings.enableServiceCharge = false;
+      modified = true;
+    }
+    if (settings.autoApplyServiceChargeDineIn === undefined) {
+      settings.autoApplyServiceChargeDineIn = false;
+      modified = true;
+    }
     if (modified) await settings.save();
   }
   res.json(settings);
@@ -92,10 +113,25 @@ const updateSettings = asyncHandler(async (req, res) => {
     'contingencyPercent', 'overheadPercent', 'defaultFoodCostPercent',
     'rawMaterialPriceAdjustType', 'rawMaterialPriceAdjustValue',
     'productSellingPriceAdjustPercent',
+    // Service Charge & Hospitality Fees
+    'enableServiceCharge', 'serviceChargeRate', 'serviceChargePresets', 'autoApplyServiceChargeDineIn',
   ];
 
   allowedFields.forEach((field) => {
-    if (req.body[field] !== undefined) settings[field] = req.body[field];
+    if (req.body[field] !== undefined) {
+      if (field === 'serviceChargeRate') {
+        settings.serviceChargeRate = Math.min(100, Math.max(0, Number(req.body.serviceChargeRate) || 0));
+      } else if (field === 'serviceChargePresets' && Array.isArray(req.body.serviceChargePresets)) {
+        settings.serviceChargePresets = req.body.serviceChargePresets
+          .map((n) => Math.min(100, Math.max(1, Number(n) || 0)))
+          .filter((n) => n > 0);
+        settings.markModified('serviceChargePresets');
+      } else if (field === 'enableServiceCharge' || field === 'autoApplyServiceChargeDineIn') {
+        settings[field] = Boolean(req.body[field]);
+      } else {
+        settings[field] = req.body[field];
+      }
+    }
   });
 
   if (req.body.rolePermissions !== undefined) {

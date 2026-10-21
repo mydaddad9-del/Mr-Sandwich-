@@ -21,6 +21,12 @@ const updateUser = asyncHandler(async (req, res) => {
     throw new Error('Only a System Owner / Developer can assign the dev role.');
   }
 
+  // Prevent self-deactivation
+  if (req.user && String(user._id) === String(req.user._id) && req.body.isActive === false) {
+    res.status(400);
+    throw new Error('You cannot deactivate your own account.');
+  }
+
   const wasActive = user.isActive;
   const oldRole   = user.role;
 
@@ -77,6 +83,11 @@ const deleteUser = asyncHandler(async (req, res) => {
   if (user.role === 'dev') {
     res.status(403);
     throw new Error('System Owner / Developer accounts cannot be deleted.');
+  }
+  // Prevent self-deletion
+  if (req.user && String(user._id) === String(req.user._id)) {
+    res.status(400);
+    throw new Error('You cannot delete your own account while logged in.');
   }
   tg.notifyUserDeleted(user, req.user);
   await user.deleteOne();

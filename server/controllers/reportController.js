@@ -209,10 +209,11 @@ const getStockBalanceReport = asyncHandler(async (req, res) => {
   if (category && category !== 'all') {
     matFilter.category = category;
   }
-  if (search) {
+  if (search && search.trim()) {
+    const escaped = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     matFilter.$or = [
-      { name: { $regex: search, $options: 'i' } },
-      { code: { $regex: search, $options: 'i' } },
+      { name: { $regex: escaped, $options: 'i' } },
+      { code: { $regex: escaped, $options: 'i' } },
     ];
   }
 
