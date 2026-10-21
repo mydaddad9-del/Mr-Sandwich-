@@ -10,7 +10,7 @@ import ModuleLocked from './ui/ModuleLocked';
  *  - module: restrict based on developer module licensing (e.g. 'subsystem')
  */
 const ProtectedRoute = ({ children, roles, capability, module: moduleProp }) => {
-  const { user, loading, can, isModuleLicensed } = useAuth();
+  const { user, loading, can, isModuleLicensed, hasRole } = useAuth();
 
   if (loading) {
     return (
@@ -22,8 +22,13 @@ const ProtectedRoute = ({ children, roles, capability, module: moduleProp }) => 
 
   if (!user) return <Navigate to="/login" replace />;
 
+  // System Developer (Owner) has master bypass for all gates
+  if (user.role === 'dev') {
+    return children;
+  }
+
   // Module licensing gate: dev role always bypasses
-  if (moduleProp && user.role !== 'dev' && !isModuleLicensed(moduleProp)) {
+  if (moduleProp && !isModuleLicensed(moduleProp)) {
     return <ModuleLocked />;
   }
 
@@ -31,7 +36,7 @@ const ProtectedRoute = ({ children, roles, capability, module: moduleProp }) => 
     return <Navigate to="/" replace />;
   }
 
-  if (roles && !capability && !roles.includes(user.role)) {
+  if (roles && !capability && !hasRole(...roles)) {
     return <Navigate to="/" replace />;
   }
 

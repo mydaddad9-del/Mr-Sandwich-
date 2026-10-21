@@ -67,7 +67,7 @@ function App() {
             <Route
               path="/purchases"
               element={
-                <ProtectedRoute roles={['admin', 'manager']}>
+                <ProtectedRoute roles={['admin', 'manager', 'dev']}>
                   <Purchases />
                 </ProtectedRoute>
               }
@@ -75,7 +75,7 @@ function App() {
             <Route
               path="/suppliers"
               element={
-                <ProtectedRoute roles={['admin', 'manager']}>
+                <ProtectedRoute>
                   <Suppliers />
                 </ProtectedRoute>
               }
@@ -121,7 +121,7 @@ function App() {
             <Route
               path="/recycle-bin"
               element={
-                <ProtectedRoute roles={['admin', 'manager']}>
+                <ProtectedRoute roles={['admin', 'manager', 'dev']}>
                   <RecycleBin />
                 </ProtectedRoute>
               }
