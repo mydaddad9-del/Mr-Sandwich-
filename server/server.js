@@ -100,16 +100,34 @@ app.use('/api/captain-orders', require('./routes/captainOrderRoutes'));
 app.use('/api/printers', require('./routes/printerRoutes'));
 app.use('/api/ai', require('./routes/aiRoutes'));
 
-// Serve Frontend in production (for Aletcloud, Render, etc.)
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/dist')));
+// Serve Frontend in production (for Render, Docker, Aletcloud, etc.)
+const distPath = path.resolve(__dirname, '../client/dist');
+const distExists = require('fs').existsSync(path.join(distPath, 'index.html'));
+console.log('[STATIC] Frontend dist exists:', distExists, 'at', distPath);
+
+if (distExists) {
+  app.use(
+    express.static(distPath, {
+      setHeaders: (res, filePath) => {
+        if (filePath.endsWith('index.html')) {
+          res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+          res.setHeader('Pragma', 'no-cache');
+          res.setHeader('Expires', '0');
+        }
+      },
+    })
+  );
 
   // Exclude /api routes from being caught by the wildcard
   app.get(/^(?!\/api).*/, (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../client/dist', 'index.html'));
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.sendFile(path.join(distPath, 'index.html'));
   });
 } else {
-  app.get('/', (req, res) => res.send('Please set to production'));
+  console.warn('[STATIC] Warning: client/dist/index.html not found. Check build output.');
+  app.get('/', (req, res) => res.send('Baba Roti API Server is running. Frontend build in progress or not mounted.'));
 }
 
 app.use(notFound);

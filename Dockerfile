@@ -7,7 +7,7 @@ WORKDIR /app/client
 COPY client/package.json client/package-lock.json* ./
 
 # Install all deps (including devDeps needed for build)
-RUN npm ci --prefer-offline || npm install
+RUN npm ci --prefer-offline || npm install --legacy-peer-deps
 
 # Copy source
 COPY client/ ./
