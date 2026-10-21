@@ -17,7 +17,6 @@ import {
   TrendingUp,
   Building,
   Zap,
-  Sparkles,
   Trash2,
   Edit2,
   Eye,
@@ -562,7 +561,7 @@ export default function Expenses() {
         {/* ── Quick Expense Suggestion Chips ── */}
         <div className="mt-6 pt-4 border-t border-white/10">
           <p className="text-[11px] font-semibold text-blue-200/70 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-            <Sparkles size={12} className="text-amber-300" /> Fast Templates (Click to record)
+            <Zap size={12} className="text-amber-300" /> Fast Templates (Click to record)
           </p>
           <div className="flex flex-wrap gap-2">
             {QUICK_EXPENSE_TEMPLATES.map((tmpl) => (

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
-  Sparkles, X, Send, RefreshCw,
+  Bot, MessageSquare, X, Send, RefreshCw,
   AlertTriangle, User as UserIcon,
   Minimize2, Maximize2, RotateCcw,
   Mic, MicOff, Volume2, VolumeX, Square,
@@ -55,7 +55,7 @@ const MessageBubble = ({ msg, isSpeaking, onSpeak, onStopSpeak }) => {
         ? 'bg-blue-600 text-white'
         : 'bg-gradient-to-br from-violet-500 to-purple-600 text-white'
         }`}>
-        {isUser ? <UserIcon size={13} /> : <Sparkles size={13} />}
+        {isUser ? <UserIcon size={13} /> : <Bot size={13} />}
       </div>
 
       {/* Bubble */}
@@ -118,7 +118,7 @@ const MessageBubble = ({ msg, isSpeaking, onSpeak, onStopSpeak }) => {
 const TypingIndicator = () => (
   <div className="flex items-end gap-2 px-1">
     <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-600">
-      <Sparkles size={13} className="text-white" />
+      <Bot size={13} className="text-white" />
     </div>
     <div className="rounded-2xl rounded-bl-sm bg-white border border-ink-100 px-4 py-3 shadow-sm">
       <div className="flex items-center gap-1">
@@ -453,10 +453,10 @@ export default function AiChat() {
           onClick={handleOpen}
           className="fixed bottom-6 right-6 z-[998] flex items-center gap-2.5 rounded-2xl shadow-2xl px-4 py-3 text-white font-bold text-sm transition-all hover:scale-105 active:scale-95"
           style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 60%, #1a56db 100%)' }}
-          title="Open MEGA — AI Assistant"
+          title="Open MEGA Assistant"
         >
           <div className="relative">
-            <Sparkles size={18} />
+            <Bot size={18} />
             {unread > 0 && (
               <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-black">
                 {unread}
@@ -491,11 +491,11 @@ export default function AiChat() {
           >
             <div className="flex items-center gap-2.5">
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/20">
-                <Sparkles size={16} className="text-white" />
+                <Bot size={16} className="text-white" />
               </div>
               <div>
                 <p className="text-sm font-black text-white leading-tight">MEGA</p>
-                <p className="text-[10px] text-purple-200 leading-tight">Baba Roti  CaféAI Assistant</p>
+                <p className="text-[10px] text-purple-200 leading-tight">Baba Roti Smart Assistant</p>
               </div>
               {analyzed && (
                 <div className="ml-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold text-white">

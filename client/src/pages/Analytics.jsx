@@ -9,7 +9,7 @@ import {
   TrendingUp, TrendingDown, DollarSign, PieChart as PieChartIcon,
   BarChart3, Calendar, Layers, AlertTriangle, CheckCircle2,
   Package, Search, RefreshCw, Eye, Trash2, ArrowUpRight,
-  Flame, Sparkles, Filter, ChevronRight, ChevronLeft, ChevronDown, Download
+  Flame, Filter, ChevronRight, ChevronLeft, ChevronDown, Download
 } from 'lucide-react';
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip,
@@ -434,7 +434,7 @@ export default function Analytics() {
         {[
           { id: 'pl', label: 'Profit & Loss (P&L)', icon: DollarSign },
           { id: 'consumption', label: 'Ingredient Consumption', icon: Layers },
-          { id: 'prediction', label: 'AI & Par-Level Prediction', icon: Sparkles },
+          { id: 'prediction', label: 'Demand & Par-Level Forecasting', icon: TrendingUp },
           { id: 'records', label: 'Imported POS Batches', icon: Calendar },
         ].map((tab) => {
           const Icon = tab.icon;
@@ -1134,7 +1134,7 @@ export default function Analytics() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="rounded-2xl border border-indigo-100 bg-gradient-to-b from-indigo-50/60 to-white p-5 shadow-sm">
               <div className="flex items-center gap-2 text-indigo-700">
-                <Sparkles size={18} />
+                <TrendingUp size={18} />
                 <p className="text-xs font-bold uppercase tracking-wider">Projected Daily Sales</p>
               </div>
               <p className="mt-2 text-2xl font-black text-ink-900">

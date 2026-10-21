@@ -14,7 +14,9 @@ import {
   MapPin,
   Coins,
   BadgeAlert,
-  Sparkles,
+  TrendingUp,
+  Sliders,
+  Eye,
   Layers,
   Check,
   Camera,
@@ -1523,7 +1525,7 @@ export default function Settings() {
                 <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-blue-600 to-indigo-600">
                   <div className="flex items-center gap-3">
                     <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/20">
-                      <Sparkles size={18} className="text-white" />
+                      <TrendingUp size={18} className="text-white" />
                     </div>
                     <div>
                       <p className="text-sm font-black text-white">Bulk Product Price Increase</p>
@@ -1607,8 +1609,8 @@ export default function Settings() {
                     className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-700 transition disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
                   >
                     {bulkPriceApplying
-                      ? <><Sparkles size={15} className="animate-spin" /> Applying…</>
-                      : <><Sparkles size={15} /> Apply +{bulkPricePercent || '0'}% to All Products</>
+                      ? <><Percent size={15} className="animate-spin" /> Applying…</>
+                      : <><Percent size={15} /> Apply +{bulkPricePercent || '0'}% to All Products</>
                     }
                   </button>
                 </div>
@@ -2087,7 +2089,7 @@ export default function Settings() {
           {/* Module Licensing */}
           <div className="mb-6">
             <h4 className="text-sm font-bold text-ink-900 mb-1 flex items-center gap-2">
-              <Sparkles size={15} className="text-amber-500" />
+              <Sliders size={15} className="text-amber-500" />
               Module Licensing
             </h4>
             <p className="text-xs text-ink-400 mb-4">
@@ -3051,7 +3053,7 @@ export default function Settings() {
               <Card className="p-6 border border-blue-100 bg-gradient-to-br from-blue-50/50 to-indigo-50/30 rounded-2xl shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
                   <span className="rounded-md bg-blue-600 text-white p-1">
-                    <Sparkles size={14} />
+                    <Eye size={14} />
                   </span>
                   <h3 className="text-sm font-bold text-ink-900 uppercase tracking-wide">
                     Live POS Register &amp; Receipt Preview

@@ -70,13 +70,6 @@ export const BabaRotiIcon = ({ size = 36, className = '' }) => (
       strokeOpacity="0.75"
     />
 
-    {/* Top Sparkle Accent */}
-    <path
-      d="M51 10 L52 13 L55 14 L52 15 L51 18 L50 15 L47 14 L50 13 Z"
-      fill="#fde68a"
-      opacity="0.9"
-    />
-
     {/* Aroma Steam Wisps */}
     <path
       d="M26 18 Q23 13 27 9"

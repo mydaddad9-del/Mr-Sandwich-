@@ -6,7 +6,7 @@ import {
   ChevronDown, ChevronRight, CircleDot,
   ShoppingBag, CreditCard, Leaf, TrendingUp, Flame, TrendingDown,
   BarChart2, Calendar, PackageOpen, Settings as SettingsIcon, UploadCloud,
-  Scale, ClipboardList, Trash2, Coffee, UserCog, Sparkles,
+  Scale, ClipboardList, Trash2, Coffee, UserCog,
   SendToBack, X, Rocket, ClipboardCheck, ArrowRightLeft, History, Receipt,
   MonitorSmartphone, ClipboardPen, BadgeDollarSign, Layers3,
 } from 'lucide-react';

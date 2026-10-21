@@ -528,7 +528,7 @@ export default function SalesImport() {
                 <PenLine size={13} /> Open Entry Form
               </span>
               <span className="mt-3 inline-flex items-center gap-1 rounded-full bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-semibold px-2.5 py-0.5">
-                ✦ Great for testing or corrections
+                • Great for testing or corrections
               </span>
             </button>
 
@@ -540,7 +540,7 @@ export default function SalesImport() {
               <p className="text-base font-extrabold text-ink-900 mb-1">Scan POS Report (Photo / Image)</p>
               <p className="text-xs text-ink-500 mb-3 leading-relaxed">
                 Take a photo or upload an image of your POS report.<br />
-                AI reads article codes, quantities and amounts automatically.
+                OCR reads article codes, quantities and amounts automatically.
               </p>
               <div className="flex items-center gap-2">
                 {/* Upload image file */}
@@ -555,7 +555,7 @@ export default function SalesImport() {
                 </label>
               </div>
               <span className="mt-3 inline-flex items-center gap-1 rounded-full bg-violet-100 border border-violet-200 text-violet-700 text-[10px] font-semibold px-2.5 py-0.5">
-                ✦ Powered by OCR — auto-detects product lines
+                • Powered by OCR — auto-detects product lines
               </span>
             </div>
 

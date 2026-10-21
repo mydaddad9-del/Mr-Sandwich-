@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, ShieldAlert, ArrowLeft, Phone, Mail, Sparkles } from 'lucide-react';
+import { Lock, ShieldAlert, ArrowLeft, Phone, Mail, KeyRound } from 'lucide-react';
 import Button from './Button';
 
 export default function ModuleLocked({
@@ -47,7 +47,7 @@ export default function ModuleLocked({
         {/* Developer Contact Box */}
         <div className="mb-6 rounded-2xl border border-white/10 bg-white/5 p-4 text-left">
           <div className="flex items-center gap-2 mb-2 text-xs font-bold text-amber-300">
-            <Sparkles size={14} />
+            <KeyRound size={14} />
             To Activate This Module:
           </div>
           <p className="text-xs text-ink-300 mb-3">

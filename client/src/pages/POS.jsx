@@ -5,7 +5,7 @@ import {
   Search, Plus, Minus, Trash2, ChevronDown, X, Clock,
   UtensilsCrossed, ReceiptText, Printer, Check, CreditCard,
   Smartphone, Banknote, RefreshCw, ShoppingBag, User,
-  Users, Table2, Layers, AlertCircle, Sparkles, MessageSquare,
+  Users, Table2, Layers, AlertCircle, MessageSquare,
   History, ArrowRight, CheckCircle2, FileText, ArrowDownLeft,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
@@ -1770,7 +1770,7 @@ export default function POS() {
                     letterSpacing: 0.3,
                   }}
                 >
-                  {cat === "All" ? "✦ All Items" : cat}
+                  {cat === "All" ? "All Items" : cat}
                 </button>
               );
             })}
