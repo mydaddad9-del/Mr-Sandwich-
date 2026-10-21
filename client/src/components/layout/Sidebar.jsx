@@ -370,22 +370,19 @@ const Sidebar = ({
         />
       )}
 
-      {/* Main Sidebar Element (Modern Floating Framed Sidebar — Curved on all 4 corners) */}
+      {/* Main Sidebar Element (Streamlined & Compact) */}
       <aside
         className={`
-          fixed z-50 flex flex-col overflow-hidden
+          fixed z-50 flex h-full flex-col
           transition-all duration-300 ease-in-out
           lg:static lg:translate-x-0
-          my-2 ml-2 h-[calc(100vh-1rem)] lg:my-2.5 lg:ml-2.5 lg:h-[calc(100vh-1.25rem)]
-          rounded-[22px]
-          border border-white/[0.14] ring-1 ring-black/40
-          ${open ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'}
+          ${open ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}
           ${collapsed ? 'w-[64px]' : 'w-[242px]'}
         `}
         style={{
           background: 'linear-gradient(180deg, #071233 0%, #060e28 50%, #04091c 100%)',
-          boxShadow:
-            '0 16px 45px -10px rgba(2, 6, 23, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.08), 0 4px 24px rgba(37, 99, 235, 0.18)',
+          borderRight: '1px solid rgba(255, 255, 255, 0.08)',
+          boxShadow: '4px 0 25px rgba(2, 6, 23, 0.55)',
         }}
       >
         {/* Ambient Subtle Highlights */}
