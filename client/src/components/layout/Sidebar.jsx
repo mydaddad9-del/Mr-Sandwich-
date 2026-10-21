@@ -190,7 +190,7 @@ const CollapsibleNav = ({
               className={`flex items-center justify-center transition-transform duration-150 ${
                 isActive ? 'text-white' : (theme.isLight ? 'text-slate-400 group-hover:text-slate-800' : 'text-white/40 group-hover:text-white')
               } ${
-                open ? 'rotate-90 text-white' : ''
+                open ? 'rotate-90' : ''
               }`}
             >
               <ChevronRightRoundedIcon sx={{ fontSize: 14 }} />
@@ -444,17 +444,19 @@ const Sidebar = ({
           boxShadow: theme.shadow,
         }}
       >
-        {/* Ambient Subtle Highlights */}
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div
-            className="absolute -top-16 -right-16 h-48 w-48 rounded-full opacity-20"
-            style={{ background: `radial-gradient(circle, ${theme.glowColor} 0%, transparent 70%)` }}
-          />
-          <div
-            className="absolute top-1/2 -left-16 h-44 w-44 rounded-full opacity-15"
-            style={{ background: `radial-gradient(circle, ${theme.glowColor} 0%, transparent 70%)` }}
-          />
-        </div>
+        {/* Ambient Subtle Highlights (Hidden on light themes for pristine contrast) */}
+        {!theme.isLight && (
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div
+              className="absolute -top-16 -right-16 h-48 w-48 rounded-full opacity-20"
+              style={{ background: `radial-gradient(circle, ${theme.glowColor} 0%, transparent 70%)` }}
+            />
+            <div
+              className="absolute top-1/2 -left-16 h-44 w-44 rounded-full opacity-15"
+              style={{ background: `radial-gradient(circle, ${theme.glowColor} 0%, transparent 70%)` }}
+            />
+          </div>
+        )}
 
         {/* ── TOP HEADER SECTION (COMPACT & REDIRECTS TO DASHBOARD) ── */}
         <div
@@ -469,8 +471,8 @@ const Sidebar = ({
             }
           }}
           className={`relative pt-2.5 pb-2 px-2.5 ${
-            theme.isLight ? 'border-b border-slate-200' : 'border-b border-white/[0.07]'
-          } cursor-pointer group hover:bg-white/[0.04] transition-all duration-150 select-none`}
+            theme.isLight ? 'border-b border-slate-200 hover:bg-slate-100/70' : 'border-b border-white/[0.07] hover:bg-white/[0.04]'
+          } cursor-pointer group transition-all duration-150 select-none`}
         >
           {/* Subtle Ambient Hover Highlight */}
           <div className="absolute inset-0 bg-blue-500/0 group-hover:bg-blue-500/[0.06] transition-colors pointer-events-none" />
@@ -486,6 +488,8 @@ const Sidebar = ({
                 collapsed={collapsed}
                 size={collapsed ? 28 : 32}
                 showSubtitle={false}
+                isLight={theme.isLight}
+                textColor={theme.headerText}
               />
             </div>
           </div>
@@ -1000,8 +1004,8 @@ const Sidebar = ({
           <div
             style={{
               padding: '8px 12px',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-              background: 'rgba(255, 255, 255, 0.05)',
+              borderBottom: theme.isLight ? '1px solid #e2e8f0' : '1px solid rgba(255, 255, 255, 0.08)',
+              background: theme.isLight ? 'rgba(0, 0, 0, 0.03)' : 'rgba(255, 255, 255, 0.05)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
@@ -1018,14 +1022,14 @@ const Sidebar = ({
                     width: '22px',
                     height: '22px',
                     borderRadius: '6px',
-                    background: 'rgba(59, 130, 246, 0.25)',
-                    color: '#93c5fd',
+                    background: theme.isLight ? 'rgba(37, 99, 235, 0.12)' : 'rgba(59, 130, 246, 0.25)',
+                    color: theme.isLight ? '#2563eb' : '#93c5fd',
                   }}
                 >
                   <flyout.icon sx={{ fontSize: 14 }} />
                 </span>
               )}
-              <span style={{ fontSize: '12px', fontWeight: 800, color: '#ffffff' }}>
+              <span style={{ fontSize: '12px', fontWeight: 800, color: theme.flyoutText || (theme.isLight ? '#0f172a' : '#ffffff') }}>
                 {flyout.title}
               </span>
             </div>
@@ -1034,8 +1038,8 @@ const Sidebar = ({
                 style={{
                   fontSize: '9px',
                   fontWeight: 800,
-                  color: '#93c5fd',
-                  background: 'rgba(59, 130, 246, 0.25)',
+                  color: theme.isLight ? '#2563eb' : '#93c5fd',
+                  background: theme.isLight ? 'rgba(37, 99, 235, 0.12)' : 'rgba(59, 130, 246, 0.25)',
                   padding: '1.5px 6px',
                   borderRadius: '10px',
                 }}
@@ -1047,8 +1051,8 @@ const Sidebar = ({
                 style={{
                   fontSize: '9.5px',
                   fontWeight: 700,
-                  color: '#93c5fd',
-                  background: 'rgba(59, 130, 246, 0.25)',
+                  color: theme.isLight ? '#2563eb' : '#93c5fd',
+                  background: theme.isLight ? 'rgba(37, 99, 235, 0.12)' : 'rgba(59, 130, 246, 0.25)',
                   padding: '1.5px 6px',
                   borderRadius: '8px',
                 }}
@@ -1085,17 +1089,21 @@ const Sidebar = ({
                     `group flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all duration-150 ${
                       isActive
                         ? 'bg-blue-600 text-white font-semibold shadow-xs'
-                        : 'text-blue-100/80 hover:bg-white/10 hover:text-white'
+                        : (theme.isLight ? 'text-slate-700 hover:bg-slate-100 hover:text-slate-950' : 'text-blue-100/80 hover:bg-white/10 hover:text-white')
                     }`
                   }
                 >
-                  <span className="flex h-4 w-4 shrink-0 items-center justify-center text-blue-300 group-hover:text-white transition-colors">
+                  <span className={`flex h-4 w-4 shrink-0 items-center justify-center transition-colors ${
+                    theme.isLight ? 'text-blue-600 group-hover:text-blue-700' : 'text-blue-300 group-hover:text-white'
+                  }`}>
                     <SubIcon sx={{ fontSize: 13 }} />
                   </span>
                   <span className="flex-1 truncate text-[11.5px]">{sub.label}</span>
                   <ChevronRightRoundedIcon
                     sx={{ fontSize: 13 }}
-                    className="ml-auto text-blue-300/40 group-hover:text-white group-hover:translate-x-0.5 transition-all"
+                    className={`ml-auto transition-all ${
+                      theme.isLight ? 'text-slate-400 group-hover:text-slate-700 group-hover:translate-x-0.5' : 'text-blue-300/40 group-hover:text-white group-hover:translate-x-0.5'
+                    }`}
                   />
                 </NavLink>
               );

@@ -169,6 +169,8 @@ export default function BabaRotiLogo({
   showSubtitle = true,
   subtitle = 'Café & Bakery',
   className = '',
+  isLight = false,
+  textColor = '',
 }) {
   const iconSizes = {
     sm: 30,
@@ -186,6 +188,9 @@ export default function BabaRotiLogo({
     );
   }
 
+  const brandTextColor = textColor || (isLight ? 'text-slate-900' : 'text-white');
+  const subTextColor = isLight ? 'text-slate-500' : 'text-blue-200/70';
+
   return (
     <div className={`flex items-center gap-3 select-none ${className}`}>
       {/* Icon Emblem */}
@@ -196,7 +201,7 @@ export default function BabaRotiLogo({
       {/* Brand Typography */}
       <div className="min-w-0">
         <div className="flex items-center gap-1.5">
-          <span className="font-extrabold tracking-tight text-white leading-none text-[15px]">
+          <span className={`font-extrabold tracking-tight leading-none text-[15px] transition-colors ${brandTextColor}`}>
             Baba Roti
           </span>
           <span className="rounded-md bg-gradient-to-r from-amber-400 to-amber-500 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-slate-950 shadow-sm">
@@ -205,7 +210,7 @@ export default function BabaRotiLogo({
         </div>
 
         {showSubtitle && (
-          <p className="mt-1 flex items-center gap-1.5 text-[10px] font-medium text-blue-200/70 tracking-wide leading-none">
+          <p className={`mt-1 flex items-center gap-1.5 text-[10px] font-medium tracking-wide leading-none transition-colors ${subTextColor}`}>
             <span className="h-1 w-1 rounded-full bg-amber-400 opacity-80" />
             {subtitle}
           </p>
