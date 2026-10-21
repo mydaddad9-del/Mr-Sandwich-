@@ -38,6 +38,8 @@ import {
 } from 'lucide-react';
 import api from '../api/axios';
 import Card from '../components/ui/Card';
+import { useAuth } from '../context/AuthContext';
+import MobileDashboardView from '../components/dashboard/MobileDashboardView';
 
 const formatETB = (n) =>
   `ETB ${Number(n || 0).toLocaleString('en-US', {
@@ -148,6 +150,7 @@ let cachedDashboardData = getStoredDashboardData();
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [data, setData] = useState(cachedDashboardData);
   const [loading, setLoading] = useState(!cachedDashboardData);
   const [movementView, setMovementView] = useState('bar'); // 'bar' | 'area' (Bar Chart as default)
@@ -274,8 +277,15 @@ export default function Dashboard() {
   const lowOrOutCount = (data.lowStockCount || 0) + (data.outOfStockCount || 0);
 
   return (
-    <div className="space-y-6 pb-8">
-      {/* ── Welcome & Fast Action Bar ── */}
+    <>
+      {/* ── Smartphone Mobile Dashboard View (Matches Reference Screenshot) ── */}
+      <div className="block lg:hidden -mx-4 -mt-6 sm:-mx-8">
+        <MobileDashboardView data={data} user={user} />
+      </div>
+
+      {/* ── Desktop Dashboard View (Existing Functionality 100% Preserved) ── */}
+      <div className="hidden lg:block space-y-6 pb-8">
+        {/* ── Welcome & Fast Action Bar ── */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <div className="flex items-center gap-2.5">
@@ -1027,5 +1037,6 @@ export default function Dashboard() {
         </Card>
       </div>
     </div>
+    </>
   );
 }
