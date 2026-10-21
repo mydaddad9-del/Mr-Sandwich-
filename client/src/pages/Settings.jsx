@@ -196,6 +196,8 @@ export default function Settings() {
   // Developer / System Owner: license control state
   const [devLicenseForm, setDevLicenseForm] = useState({
     subsystem: true,
+    finance: true,
+    themeCustomization: true,
     materialIcons: true,
     sidebarTheme: 'navy',
   });
@@ -372,6 +374,9 @@ export default function Settings() {
               setDevLicenseForm((prev) => ({
                 ...prev,
                 ...res.data.licensedModules,
+                subsystem: res.data.licensedModules.subsystem !== false,
+                finance: res.data.licensedModules.finance !== false,
+                themeCustomization: res.data.licensedModules.themeCustomization !== false,
                 materialIcons: res.data.licensedModules.materialIcons !== false,
                 sidebarTheme: res.data.licensedModules.sidebarTheme || 'navy',
               }));
@@ -1380,118 +1385,120 @@ export default function Settings() {
             </form>
           </Card>
 
-          {/* ── Sidebar Appearance & Brand Theme Card ── */}
-          <Card className="mt-6 max-w-3xl">
-            <div className="flex items-center justify-between mb-1">
-              <div className="flex items-center gap-2">
-                <span className="rounded-lg bg-blue-50 p-1.5 text-blue-600">
-                  <Palette size={16} />
+          {/* ── Sidebar Appearance & Brand Theme Card (Visible when allowed by developer or user is dev) ── */}
+          {(licensedModules?.themeCustomization !== false || user?.role === 'dev') && (
+            <Card className="mt-6 max-w-3xl">
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-2">
+                  <span className="rounded-lg bg-blue-50 p-1.5 text-blue-600">
+                    <Palette size={16} />
+                  </span>
+                  <h3 className="font-display text-base font-bold text-ink-900">
+                    Sidebar Appearance &amp; Brand Theme
+                  </h3>
+                </div>
+                <span className="rounded-full bg-blue-50 border border-blue-200 px-2.5 py-0.5 text-xs font-bold text-blue-800">
+                  Visual Customization
                 </span>
-                <h3 className="font-display text-base font-bold text-ink-900">
-                  Sidebar Appearance &amp; Brand Theme
-                </h3>
               </div>
-              <span className="rounded-full bg-blue-50 border border-blue-200 px-2.5 py-0.5 text-xs font-bold text-blue-800">
-                Visual Customization
-              </span>
-            </div>
-            <p className="text-xs text-ink-400 mb-5">
-              Personalize the navigation sidebar color theme and icon style according to your hotel brand preferences.
-            </p>
+              <p className="text-xs text-ink-400 mb-5">
+                Personalize the navigation sidebar color theme and icon style according to your hotel brand preferences.
+              </p>
 
-            <form onSubmit={handleSystemSubmit} className="space-y-5">
-              {/* Material Icons Toggle */}
-              <div className="flex items-center justify-between rounded-xl border border-ink-100 bg-ink-50/50 p-4">
-                <div className="pr-4">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-bold text-ink-900">Modern Material UI Icons Mode</p>
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${
-                      systemForm.sidebarMaterialIcons !== false
-                        ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                        : 'bg-slate-200 text-slate-700 border border-slate-300'
-                    }`}>
-                      {systemForm.sidebarMaterialIcons !== false ? 'Material Icons (Active)' : 'Classic Clean (Minimal)'}
-                    </span>
+              <form onSubmit={handleSystemSubmit} className="space-y-5">
+                {/* Material Icons Toggle */}
+                <div className="flex items-center justify-between rounded-xl border border-ink-100 bg-ink-50/50 p-4">
+                  <div className="pr-4">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-bold text-ink-900">Modern Material UI Icons Mode</p>
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${
+                        systemForm.sidebarMaterialIcons !== false
+                          ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                          : 'bg-slate-200 text-slate-700 border border-slate-300'
+                      }`}>
+                        {systemForm.sidebarMaterialIcons !== false ? 'Material Icons (Active)' : 'Classic Clean (Minimal)'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-ink-500 mt-1">
+                      {systemForm.sidebarMaterialIcons !== false
+                        ? 'Displays modern Material icons with colorful rounded squircle badges.'
+                        : 'Displays clean, minimalist line icons without colored square badges (classic layout).'}
+                    </p>
                   </div>
-                  <p className="text-xs text-ink-500 mt-1">
-                    {systemForm.sidebarMaterialIcons !== false
-                      ? 'Displays modern Material icons with colorful rounded squircle badges.'
-                      : 'Displays clean, minimalist line icons without colored square badges (classic layout).'}
-                  </p>
+                  <label className="relative inline-flex cursor-pointer items-center shrink-0">
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={systemForm.sidebarMaterialIcons !== false}
+                      onChange={(e) => setSystemForm({ ...systemForm, sidebarMaterialIcons: e.target.checked })}
+                    />
+                    <div className="h-6 w-11 rounded-full bg-ink-200 peer-focus:ring-2 peer-focus:ring-blue-300 peer-checked:bg-blue-600 transition-colors after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-full after:shadow" />
+                  </label>
                 </div>
-                <label className="relative inline-flex cursor-pointer items-center shrink-0">
-                  <input
-                    type="checkbox"
-                    className="sr-only peer"
-                    checked={systemForm.sidebarMaterialIcons !== false}
-                    onChange={(e) => setSystemForm({ ...systemForm, sidebarMaterialIcons: e.target.checked })}
-                  />
-                  <div className="h-6 w-11 rounded-full bg-ink-200 peer-focus:ring-2 peer-focus:ring-blue-300 peer-checked:bg-blue-600 transition-colors after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-full after:shadow" />
-                </label>
-              </div>
 
-              {/* Theme Grid */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-ink-700 mb-2.5">
-                  Select Sidebar Theme Palette
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {THEME_OPTIONS.map((theme) => {
-                    const isSelected = (systemForm.sidebarTheme || 'navy') === theme.id;
-                    return (
-                      <button
-                        key={theme.id}
-                        type="button"
-                        onClick={() => setSystemForm({ ...systemForm, sidebarTheme: theme.id })}
-                        className={`relative p-3.5 rounded-2xl border text-left transition-all flex flex-col justify-between overflow-hidden group ${
-                          isSelected
-                            ? 'border-blue-600 ring-2 ring-blue-500/30 shadow-md bg-blue-50/20'
-                            : 'border-ink-200 hover:border-ink-300 bg-white hover:shadow-xs'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between mb-2.5">
-                          <div
-                            className={`h-8 w-14 rounded-lg shadow-sm flex items-center justify-center ${
-                              theme.isLight ? 'border border-slate-300 ring-1 ring-slate-200' : 'border border-white/20'
-                            }`}
-                            style={{ background: theme.previewGradient }}
-                          >
-                            <span className="w-2.5 h-2.5 rounded-full" style={{ background: theme.glowColor, boxShadow: `0 0 6px ${theme.glowColor}` }} />
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <span className={`px-1.5 py-0.5 rounded text-[8.5px] font-extrabold uppercase tracking-wide ${
-                              theme.isLight
-                                ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                                : 'bg-slate-100 text-slate-600 border border-slate-200'
-                            }`}>
-                              {theme.category}
-                            </span>
-                            {isSelected ? (
-                              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white shadow-xs">
-                                <Check size={12} strokeWidth={3} />
+                {/* Theme Grid */}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-ink-700 mb-2.5">
+                    Select Sidebar Theme Palette
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {THEME_OPTIONS.map((theme) => {
+                      const isSelected = (systemForm.sidebarTheme || 'navy') === theme.id;
+                      return (
+                        <button
+                          key={theme.id}
+                          type="button"
+                          onClick={() => setSystemForm({ ...systemForm, sidebarTheme: theme.id })}
+                          className={`relative p-3.5 rounded-2xl border text-left transition-all flex flex-col justify-between overflow-hidden group ${
+                            isSelected
+                              ? 'border-blue-600 ring-2 ring-blue-500/30 shadow-md bg-blue-50/20'
+                              : 'border-ink-200 hover:border-ink-300 bg-white hover:shadow-xs'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-2.5">
+                            <div
+                              className={`h-8 w-14 rounded-lg shadow-sm flex items-center justify-center ${
+                                theme.isLight ? 'border border-slate-300 ring-1 ring-slate-200' : 'border border-white/20'
+                              }`}
+                              style={{ background: theme.previewGradient }}
+                            >
+                              <span className="w-2.5 h-2.5 rounded-full" style={{ background: theme.glowColor, boxShadow: `0 0 6px ${theme.glowColor}` }} />
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <span className={`px-1.5 py-0.5 rounded text-[8.5px] font-extrabold uppercase tracking-wide ${
+                                theme.isLight
+                                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                                  : 'bg-slate-100 text-slate-600 border border-slate-200'
+                              }`}>
+                                {theme.category}
                               </span>
-                            ) : (
-                              <span className="h-5 w-5 rounded-full border border-ink-300 group-hover:border-ink-400" />
-                            )}
+                              {isSelected ? (
+                                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white shadow-xs">
+                                  <Check size={12} strokeWidth={3} />
+                                </span>
+                              ) : (
+                                <span className="h-5 w-5 rounded-full border border-ink-300 group-hover:border-ink-400" />
+                              )}
+                            </div>
                           </div>
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-ink-900">{theme.name}</p>
-                          <p className="text-[10px] text-ink-400 mt-0.5 leading-snug">{theme.desc}</p>
-                        </div>
-                      </button>
-                    );
-                  })}
+                          <div>
+                            <p className="text-xs font-bold text-ink-900">{theme.name}</p>
+                            <p className="text-[10px] text-ink-400 mt-0.5 leading-snug">{theme.desc}</p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
 
-              <div className="pt-2 flex justify-end">
-                <Button type="submit" disabled={systemSaving} className="bg-blue-600 hover:bg-blue-700 text-white">
-                  <Save size={15} /> {systemSaving ? 'Saving Theme…' : 'Save Theme & Appearance'}
-                </Button>
-              </div>
-            </form>
-          </Card>
+                <div className="pt-2 flex justify-end">
+                  <Button type="submit" disabled={systemSaving} className="bg-blue-600 hover:bg-blue-700 text-white">
+                    <Save size={15} /> {systemSaving ? 'Saving Theme…' : 'Save Theme & Appearance'}
+                  </Button>
+                </div>
+              </form>
+            </Card>
+          )}
 
           {/* ── Pricing & Cost Parameters Card ── */}
           <Card className="mt-6 max-w-3xl">
@@ -2387,7 +2394,7 @@ export default function Settings() {
 
           {/* Warning Banner */}
           <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
-            <strong>⚠ Sensitive Area:</strong> Toggling the Subsystem Suite off locks POS, Captain Order, and Cash Sales across all roles including hotel Admin. Only someone with the dev role can re-enable it.
+            <strong>⚠ Developer Security Area:</strong> Modules disabled here (Subsystem Suite, Finance &amp; Expenses, or Hotel Appearance Customizer) are locked and hidden across all hotel accounts including Admin. Only users with the Developer (dev) role can re-enable or manage them.
           </div>
 
           {/* Module & Interface Licensing */}
@@ -2397,28 +2404,93 @@ export default function Settings() {
               Module &amp; Interface Licensing
             </h4>
             <p className="text-xs text-ink-400 mb-4">
-              Enable or disable premium modules and interface features per customer request. Changes apply across all devices.
+              Enable or disable premium hotel modules and interface privileges per customer installation. Changes apply immediately across all devices.
             </p>
 
             <div className="space-y-3">
-              {/* Subsystem Module */}
+              {/* 1. Subsystem Suite */}
               <div className="flex items-center justify-between rounded-xl border border-ink-100 bg-ink-50/40 px-4 py-3">
-                <div>
-                  <p className="text-sm font-bold text-ink-900">Subsystem Suite (Restaurant POS &amp; Ordering)</p>
-                  <p className="text-xs text-ink-400">POS Ordering, Captain Order &amp; Cash Sales</p>
+                <div className="pr-4">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-bold text-ink-900">Subsystem Suite (Restaurant POS &amp; Ordering)</p>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${
+                      devLicenseForm?.subsystem !== false
+                        ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                        : 'bg-slate-200 text-slate-700 border border-slate-300'
+                    }`}>
+                      {devLicenseForm?.subsystem !== false ? 'Licensed & Active' : 'Locked / Hidden (Off)'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-ink-400 mt-1">POS Ordering, Captain Order, and Cash Sales. When off, completely hidden from non-developers.</p>
                 </div>
-                <label className="relative inline-flex cursor-pointer items-center">
+                <label className="relative inline-flex cursor-pointer items-center shrink-0">
                   <input
                     type="checkbox"
                     className="sr-only peer"
-                    checked={devLicenseForm?.subsystem ?? true}
+                    checked={devLicenseForm?.subsystem !== false}
                     onChange={(e) => setDevLicenseForm(prev => ({ ...prev, subsystem: e.target.checked }))}
                   />
                   <div className="h-6 w-11 rounded-full bg-ink-200 peer-focus:ring-2 peer-focus:ring-amber-300 peer-checked:bg-amber-500 transition-colors after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-full after:shadow" />
                 </label>
               </div>
 
-              {/* Material UI Modern Icons (Customer toggle) */}
+              {/* 2. Finance & Expenses Suite */}
+              <div className="flex items-center justify-between rounded-xl border border-ink-100 bg-ink-50/40 px-4 py-3">
+                <div className="pr-4">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-bold text-ink-900">Finance &amp; Expenses Suite</p>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${
+                      devLicenseForm?.finance !== false
+                        ? 'bg-purple-100 text-purple-700 border border-purple-200'
+                        : 'bg-slate-200 text-slate-700 border border-slate-300'
+                    }`}>
+                      {devLicenseForm?.finance !== false ? 'Licensed & Active' : 'Locked / Hidden (Off)'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-ink-400 mt-1">
+                    Overhead Expenses &amp; Analytics P&amp;L reports. When disabled, completely hidden and locked from non-developer hotel accounts.
+                  </p>
+                </div>
+                <label className="relative inline-flex cursor-pointer items-center shrink-0">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={devLicenseForm?.finance !== false}
+                    onChange={(e) => setDevLicenseForm(prev => ({ ...prev, finance: e.target.checked }))}
+                  />
+                  <div className="h-6 w-11 rounded-full bg-ink-200 peer-focus:ring-2 peer-focus:ring-amber-300 peer-checked:bg-amber-500 transition-colors after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-full after:shadow" />
+                </label>
+              </div>
+
+              {/* 3. Hotel Sidebar Appearance Customization Permission */}
+              <div className="flex items-center justify-between rounded-xl border border-ink-100 bg-ink-50/40 px-4 py-3">
+                <div className="pr-4">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-bold text-ink-900">Allow Hotel Admin Theme &amp; Icon Customization</p>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${
+                      devLicenseForm?.themeCustomization !== false
+                        ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                        : 'bg-rose-100 text-rose-700 border border-rose-200'
+                    }`}>
+                      {devLicenseForm?.themeCustomization !== false ? 'Allowed (Visible to Admin)' : 'Disallowed (Developer Only)'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-ink-400 mt-1">
+                    When active, hotel Admin can change sidebar themes and icon modes in System Settings. When disabled, the entire Appearance card disappears from Hotel Settings and is controlled exclusively by the developer.
+                  </p>
+                </div>
+                <label className="relative inline-flex cursor-pointer items-center shrink-0">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={devLicenseForm?.themeCustomization !== false}
+                    onChange={(e) => setDevLicenseForm(prev => ({ ...prev, themeCustomization: e.target.checked }))}
+                  />
+                  <div className="h-6 w-11 rounded-full bg-ink-200 peer-focus:ring-2 peer-focus:ring-amber-300 peer-checked:bg-amber-500 transition-colors after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-full after:shadow" />
+                </label>
+              </div>
+
+              {/* 4. Modern Material UI Icons Mode */}
               <div className="flex items-center justify-between rounded-xl border border-ink-100 bg-ink-50/40 px-4 py-3">
                 <div className="pr-4">
                   <div className="flex items-center gap-2">

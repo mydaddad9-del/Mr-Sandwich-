@@ -9,9 +9,10 @@ const {
   updateExpense,
   deleteExpense,
 } = require('../controllers/expenseController');
-const { protect, authorize } = require('../middleware/authMiddleware');
+const { protect, authorize, verifyModuleLicense } = require('../middleware/authMiddleware');
 
 router.use(protect);
+router.use(verifyModuleLicense('finance'));
 
 router.get('/meta', getExpenseMeta);
 router.get('/stats', getExpenseStats);

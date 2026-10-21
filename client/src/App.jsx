@@ -47,7 +47,7 @@ function App() {
             <Route path="/cash-sales" element={<ProtectedRoute module="subsystem"><CashSales /></ProtectedRoute>} />
             <Route path="/materials" element={<RawMaterials />} />
             <Route path="/products" element={<Products />} />
-            <Route path="/analytics" element={<ProtectedRoute capability="viewReports"><Analytics /></ProtectedRoute>} />
+            <Route path="/analytics" element={<ProtectedRoute module="finance" capability="viewReports"><Analytics /></ProtectedRoute>} />
             <Route path="/transactions" element={<StockTransactions />} />
             <Route path="/transactions/cash-grv"       element={<StockTransactions defaultVoucher="cash_grv" />} />
             <Route path="/transactions/credit-grv"     element={<StockTransactions defaultVoucher="credit_grv" />} />
@@ -137,7 +137,7 @@ function App() {
             <Route
               path="/expenses"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute module="finance">
                   <Expenses />
                 </ProtectedRoute>
               }

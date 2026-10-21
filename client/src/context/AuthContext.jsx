@@ -47,6 +47,8 @@ const DEFAULT_NAV_VISIBILITY = {
 
 const DEFAULT_LICENSED_MODULES = {
   subsystem: true,
+  finance: true,
+  themeCustomization: true,
   materialIcons: true,
   sidebarTheme: 'navy',
 };
@@ -198,6 +200,13 @@ export const AuthProvider = ({ children }) => {
     // This gates the parent 'subsystem' key AND its children (pos, captainOrder, cashSales)
     if (['subsystem', 'pos', 'captainOrder', 'cashSales'].includes(navKey)) {
       if (licensedModules?.subsystem === false && user.role !== 'dev') {
+        return false;
+      }
+    }
+    // Finance & Expenses master gating: if locked by dev, hide completely from non-dev users!
+    // This gates the parent 'finance' key AND its children (expenses, analytics)
+    if (['finance', 'expenses', 'analytics'].includes(navKey)) {
+      if (licensedModules?.finance === false && user.role !== 'dev') {
         return false;
       }
     }

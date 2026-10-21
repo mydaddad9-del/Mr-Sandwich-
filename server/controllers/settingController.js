@@ -70,10 +70,26 @@ const getSettings = asyncHandler(async (req, res) => {
       modified = true;
     }
     if (!settings.licensedModules) {
-      settings.licensedModules = { subsystem: true, materialIcons: true, sidebarTheme: 'navy' };
+      settings.licensedModules = {
+        subsystem: true,
+        finance: true,
+        themeCustomization: true,
+        materialIcons: true,
+        sidebarTheme: 'navy',
+      };
       settings.markModified('licensedModules');
       modified = true;
     } else {
+      if (settings.licensedModules.finance === undefined) {
+        settings.licensedModules.finance = true;
+        settings.markModified('licensedModules');
+        modified = true;
+      }
+      if (settings.licensedModules.themeCustomization === undefined) {
+        settings.licensedModules.themeCustomization = true;
+        settings.markModified('licensedModules');
+        modified = true;
+      }
       if (settings.licensedModules.materialIcons === undefined) {
         settings.licensedModules.materialIcons = settings.sidebarMaterialIcons !== false;
         settings.markModified('licensedModules');
@@ -150,19 +166,23 @@ const updateSettings = asyncHandler(async (req, res) => {
       } else if (field === 'enableServiceCharge' || field === 'autoApplyServiceChargeDineIn') {
         settings[field] = Boolean(req.body[field]);
       } else if (field === 'sidebarMaterialIcons') {
-        settings.sidebarMaterialIcons = Boolean(req.body.sidebarMaterialIcons);
-        settings.licensedModules = {
-          ...(settings.licensedModules || {}),
-          materialIcons: Boolean(req.body.sidebarMaterialIcons),
-        };
-        settings.markModified('licensedModules');
+        if (settings.licensedModules?.themeCustomization !== false || req.user?.role === 'dev') {
+          settings.sidebarMaterialIcons = Boolean(req.body.sidebarMaterialIcons);
+          settings.licensedModules = {
+            ...(settings.licensedModules || {}),
+            materialIcons: Boolean(req.body.sidebarMaterialIcons),
+          };
+          settings.markModified('licensedModules');
+        }
       } else if (field === 'sidebarTheme') {
-        settings.sidebarTheme = req.body.sidebarTheme;
-        settings.licensedModules = {
-          ...(settings.licensedModules || {}),
-          sidebarTheme: req.body.sidebarTheme,
-        };
-        settings.markModified('licensedModules');
+        if (settings.licensedModules?.themeCustomization !== false || req.user?.role === 'dev') {
+          settings.sidebarTheme = req.body.sidebarTheme;
+          settings.licensedModules = {
+            ...(settings.licensedModules || {}),
+            sidebarTheme: req.body.sidebarTheme,
+          };
+          settings.markModified('licensedModules');
+        }
       } else {
         settings[field] = req.body[field];
       }

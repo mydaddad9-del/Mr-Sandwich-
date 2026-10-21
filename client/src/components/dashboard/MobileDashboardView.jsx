@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import BabaRotiLogo from '../ui/BabaRotiLogo';
 
 // ── Material UI Icons ────────────────────────────────────────────────
@@ -38,6 +39,7 @@ const formatETB = (n) =>
  */
 export default function MobileDashboardView({ data, user }) {
   const navigate = useNavigate();
+  const { canSeeNav } = useAuth();
 
   // Dynamic Greeting based on current local hour
   const getGreeting = () => {
@@ -406,20 +408,22 @@ export default function MobileDashboardView({ data, user }) {
           </Link>
 
           {/* Tile 5: Finance & Expenses */}
-          <Link
-            to="/expenses"
-            className="group flex items-center justify-between rounded-2xl bg-white border border-slate-100 p-3 shadow-xs hover:border-blue-200 transition-all cursor-pointer"
-          >
-            <div className="flex items-center gap-2.5 min-w-0">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-rose-500 text-white shadow-xs">
-                <SavingsRoundedIcon sx={{ fontSize: 17 }} />
-              </span>
-              <span className="truncate text-xs font-bold text-slate-800 group-hover:text-blue-600 transition-colors">
-                Finance &amp; Expenses
-              </span>
-            </div>
-            <ChevronRightRoundedIcon sx={{ fontSize: 16 }} className="text-slate-300 group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all" />
-          </Link>
+          {(canSeeNav('expenses') || canSeeNav('analytics')) && (
+            <Link
+              to="/expenses"
+              className="group flex items-center justify-between rounded-2xl bg-white border border-slate-100 p-3 shadow-xs hover:border-blue-200 transition-all cursor-pointer"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-rose-500 text-white shadow-xs">
+                  <SavingsRoundedIcon sx={{ fontSize: 17 }} />
+                </span>
+                <span className="truncate text-xs font-bold text-slate-800 group-hover:text-blue-600 transition-colors">
+                  Finance &amp; Expenses
+                </span>
+              </div>
+              <ChevronRightRoundedIcon sx={{ fontSize: 16 }} className="text-slate-300 group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all" />
+            </Link>
+          )}
 
           {/* Tile 6: Settings */}
           <Link

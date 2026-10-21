@@ -7,9 +7,10 @@ const {
   getSalesRecords,
   deleteSalesRecord,
 } = require('../controllers/analyticsController');
-const { protect, authorizePermission } = require('../middleware/authMiddleware');
+const { protect, authorizePermission, verifyModuleLicense } = require('../middleware/authMiddleware');
 
 router.use(protect);
+router.use(verifyModuleLicense('finance'));
 router.use(authorizePermission('viewReports'));
 
 router.get('/pl',               getProfitLoss);

@@ -68,8 +68,10 @@ const settingSchema = new mongoose.Schema(
       type: Object,
       default: {
         subsystem: true, // Subsystem: POS Ordering, Captain Order, Cash Sales
+        finance: true, // Finance & Expenses Suite: Overhead Expenses, Analytics & P&L
+        themeCustomization: true, // Allow Hotel Admin to customize Sidebar Appearance & Brand Theme
         materialIcons: true, // Material UI Icons with colorful badges (true) vs Classic minimal icons (false)
-        sidebarTheme: 'navy', // 'navy' | 'slate' | 'espresso' | 'emerald' | 'violet' | 'black'
+        sidebarTheme: 'navy', // 'navy' | 'slate' | 'espresso' | 'emerald' | 'violet' | 'black' | etc.
       },
     },
     sidebarTheme: {

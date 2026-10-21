@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import ReceiptLongRoundedIcon from '@mui/icons-material/ReceiptLongRounded';
 import Inventory2RoundedIcon from '@mui/icons-material/Inventory2Rounded';
@@ -14,6 +15,7 @@ import MoreHorizRoundedIcon from '@mui/icons-material/MoreHorizRounded';
  */
 export default function MobileBottomNav({ onOpenMenu }) {
   const location = useLocation();
+  const { canSeeNav } = useAuth();
 
   const isHomeActive = location.pathname === '/';
   const isOrdersActive = ['/pos', '/captain-order', '/cash-sales'].some((p) =>
@@ -53,24 +55,26 @@ export default function MobileBottomNav({ onOpenMenu }) {
         <span className="text-[10px] tracking-tight mt-0.5">Home</span>
       </NavLink>
 
-      {/* 2. Orders */}
-      <NavLink
-        to="/pos"
-        className={`flex flex-col items-center justify-center flex-1 py-1 transition-all duration-200 cursor-pointer ${
-          isOrdersActive
-            ? 'text-blue-600 font-bold scale-105'
-            : 'text-slate-500 hover:text-slate-800 font-medium'
-        }`}
-      >
-        <span
-          className={`flex h-8 w-8 items-center justify-center rounded-xl transition-all ${
-            isOrdersActive ? 'bg-blue-50 text-blue-600' : 'text-slate-500'
+      {/* 2. Orders (Subsystem Suite) */}
+      {canSeeNav('subsystem') && (
+        <NavLink
+          to="/pos"
+          className={`flex flex-col items-center justify-center flex-1 py-1 transition-all duration-200 cursor-pointer ${
+            isOrdersActive
+              ? 'text-blue-600 font-bold scale-105'
+              : 'text-slate-500 hover:text-slate-800 font-medium'
           }`}
         >
-          <ReceiptLongRoundedIcon sx={{ fontSize: 22 }} />
-        </span>
-        <span className="text-[10px] tracking-tight mt-0.5">Orders</span>
-      </NavLink>
+          <span
+            className={`flex h-8 w-8 items-center justify-center rounded-xl transition-all ${
+              isOrdersActive ? 'bg-blue-50 text-blue-600' : 'text-slate-500'
+            }`}
+          >
+            <ReceiptLongRoundedIcon sx={{ fontSize: 22 }} />
+          </span>
+          <span className="text-[10px] tracking-tight mt-0.5">Orders</span>
+        </NavLink>
+      )}
 
       {/* 3. Inventory */}
       <NavLink
@@ -91,24 +95,26 @@ export default function MobileBottomNav({ onOpenMenu }) {
         <span className="text-[10px] tracking-tight mt-0.5">Inventory</span>
       </NavLink>
 
-      {/* 4. Finance */}
-      <NavLink
-        to="/expenses"
-        className={`flex flex-col items-center justify-center flex-1 py-1 transition-all duration-200 cursor-pointer ${
-          isFinanceActive
-            ? 'text-blue-600 font-bold scale-105'
-            : 'text-slate-500 hover:text-slate-800 font-medium'
-        }`}
-      >
-        <span
-          className={`flex h-8 w-8 items-center justify-center rounded-xl transition-all ${
-            isFinanceActive ? 'bg-blue-50 text-blue-600' : 'text-slate-500'
+      {/* 4. Finance & Expenses */}
+      {(canSeeNav('expenses') || canSeeNav('analytics')) && (
+        <NavLink
+          to="/expenses"
+          className={`flex flex-col items-center justify-center flex-1 py-1 transition-all duration-200 cursor-pointer ${
+            isFinanceActive
+              ? 'text-blue-600 font-bold scale-105'
+              : 'text-slate-500 hover:text-slate-800 font-medium'
           }`}
         >
-          <SavingsRoundedIcon sx={{ fontSize: 22 }} />
-        </span>
-        <span className="text-[10px] tracking-tight mt-0.5">Finance</span>
-      </NavLink>
+          <span
+            className={`flex h-8 w-8 items-center justify-center rounded-xl transition-all ${
+              isFinanceActive ? 'bg-blue-50 text-blue-600' : 'text-slate-500'
+            }`}
+          >
+            <SavingsRoundedIcon sx={{ fontSize: 22 }} />
+          </span>
+          <span className="text-[10px] tracking-tight mt-0.5">Finance</span>
+        </NavLink>
+      )}
 
       {/* 5. More (Opens Mobile Sidebar Drawer) */}
       <button
