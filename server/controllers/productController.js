@@ -313,7 +313,7 @@ const permanentDeleteProduct = asyncHandler(async (req, res) => {
 
 
 // GET /api/products/export/excel
-// Exports in the Baba Roti  Caféformat:
+// Exports in the Bloom Bar and Restaurant   Caféformat:
 // Code | Name | UOM | Child Category | Parent Category | Default Value | Default Tax | Created On | State
 const exportProductsExcel = asyncHandler(async (req, res) => {
   const products = await Product.find({ isActive: true })
@@ -344,7 +344,7 @@ const exportProductsExcel = asyncHandler(async (req, res) => {
 });
 
 // POST /api/products/import/excel
-// Accepts the Baba Roti  Caféformat:
+// Accepts the Bloom Bar and Restaurant   Caféformat:
 // Code | Name | UOM | Child Category | Parent Category | Default Value | Default Tax | Created On | State
 const importProductsExcel = asyncHandler(async (req, res) => {
   if (!req.file) { res.status(400); throw new Error('No file uploaded'); }

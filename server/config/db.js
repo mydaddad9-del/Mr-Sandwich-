@@ -21,12 +21,12 @@ const connectDB = async () => {
     FALLBACK_URI;
 
   if (uri.includes('xxxxx') || uri.includes('<db_') || uri.includes('<username>')) {
-    console.warn('[DB] Placeholder detected in MONGO_URI, using verified Baba Roti cluster URI');
+    console.warn('[DB] Placeholder detected in MONGO_URI, using verified Bloom Bar and Restaurant  cluster URI');
     uri = FALLBACK_URI;
   }
 
-  const MAX_RETRIES   = 5;
-  const RETRY_DELAY   = 3000; // ms between retries
+  const MAX_RETRIES = 5;
+  const RETRY_DELAY = 3000; // ms between retries
 
   const attempt = async (retryCount = 0) => {
     try {

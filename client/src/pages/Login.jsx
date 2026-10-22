@@ -760,7 +760,7 @@ export default function Login() {
         <section className="login-hero" aria-label="Application branding">
           <CurvedLines />
 
-          {/* Baba Roti Café Official Emblem */}
+          {/* Bloom Bar and Restaurant  Café Official Emblem */}
           <div style={{ position: 'relative', zIndex: 1 }}>
             <div className="rounded-2xl p-1.5 shadow-2xl ring-2 ring-white/20 inline-block bg-white/5 backdrop-blur-md">
               <BabaRotiIcon size={68} />
@@ -771,7 +771,7 @@ export default function Login() {
           <div className="login-hero__content">
             <h1 className="login-hero__heading">
               Hello<br />
-              Baba Roti Café!&nbsp;
+              Bloom Bar and Restaurant  Café!&nbsp;
               <span className="login-hero__wave" role="img" aria-label="waving hand">👋</span>
             </h1>
             <p className="login-hero__desc">
@@ -782,7 +782,7 @@ export default function Login() {
 
           {/* left footer */}
           <footer className="login-hero__footer">
-            © 2026 Baba Roti Café Hotel &amp; Resort Management SC. All rights reserved.
+            © 2026 Bloom Bar and Restaurant  Café Hotel &amp; Resort Management SC. All rights reserved.
           </footer>
         </section>
 
@@ -793,7 +793,7 @@ export default function Login() {
           <div className="login-topbar">
             <div className="flex items-center gap-2.5">
               <BabaRotiIcon size={26} />
-              <span className="login-wordmark flex items-center gap-1" aria-label="Baba Roti Café">
+              <span className="login-wordmark flex items-center gap-1" aria-label="Bloom Bar and Restaurant  Café">
                 <span className="login-wordmark__five">Baba </span>
                 <span className="login-wordmark__stop">Roti</span>
                 <span className="ml-1 rounded bg-amber-400 px-1.5 py-0.5 text-[9px] font-black uppercase text-slate-950">Café</span>
@@ -1008,7 +1008,7 @@ export default function Login() {
             </div>
             <div className="login-footer__bottom">
               <a
-                href="mailto:support@Baba Roti  Café.com"
+                href="mailto:support@Bloom Bar and Restaurant   Café.com"
                 className="login-footer__support"
               >
                 Contact support

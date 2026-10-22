@@ -105,7 +105,7 @@ export default function CashSales() {
       const all = res.data || [];
       // Only include active orders that have not been paid, voided, or cancelled
       setPendingOrders(all.filter((o) => ["open", "held", "sent_to_kitchen", "ready", "billed"].includes(o.status)));
-    } catch (_) {}
+    } catch (_) { }
   }, []);
 
   useEffect(() => {
@@ -152,7 +152,7 @@ export default function CashSales() {
 
       // Print thermal receipt
       posPrint.printReceipt(posOrder, {
-        hotelName: "Baba Roti Café",
+        hotelName: "Bloom Bar and Restaurant  Café",
         taxRate: 15,
       });
 
@@ -256,7 +256,7 @@ export default function CashSales() {
       title: `Cash Sales & Revenue Report (${dateVal || "All Dates"})`,
       columns,
       data: filteredSales,
-      hotelName: "Baba Roti Café",
+      hotelName: "Bloom Bar and Restaurant  Café",
       summary: [
         { label: "Total Paid Sales", value: filteredSales.length },
         { label: "Total Revenue", value: ETB(totalRevenue) },
@@ -952,21 +952,20 @@ export default function CashSales() {
                                   s.paymentMethod === "Cash"
                                     ? "#ecfdf5"
                                     : s.paymentMethod === "Telebirr"
-                                    ? "#eff6ff"
-                                    : "#fffbeb",
-                                border: `1px solid ${
-                                  s.paymentMethod === "Cash"
+                                      ? "#eff6ff"
+                                      : "#fffbeb",
+                                border: `1px solid ${s.paymentMethod === "Cash"
                                     ? "#a7f3d0"
                                     : s.paymentMethod === "Telebirr"
-                                    ? "#bfdbfe"
-                                    : "#fde68a"
-                                }`,
+                                      ? "#bfdbfe"
+                                      : "#fde68a"
+                                  }`,
                                 color:
                                   s.paymentMethod === "Cash"
                                     ? "#047857"
                                     : s.paymentMethod === "Telebirr"
-                                    ? "#1d4ed8"
-                                    : "#b45309",
+                                      ? "#1d4ed8"
+                                      : "#b45309",
                                 fontWeight: 800,
                                 fontSize: 11,
                                 padding: "3px 9px",
@@ -1035,7 +1034,7 @@ export default function CashSales() {
                                 type="button"
                                 onClick={() =>
                                   posPrint.printReceipt(s, {
-                                    hotelName: "Baba Roti Café",
+                                    hotelName: "Bloom Bar and Restaurant  Café",
                                     taxRate: s.taxPercent || 15,
                                     isReprint: true,
                                   })
@@ -1376,7 +1375,7 @@ export default function CashSales() {
                 type="button"
                 onClick={() =>
                   posPrint.printReceipt(refOrder, {
-                    hotelName: "Baba Roti Café",
+                    hotelName: "Bloom Bar and Restaurant  Café",
                     taxRate: refOrder.taxPercent || 15,
                     isReprint: true,
                   })

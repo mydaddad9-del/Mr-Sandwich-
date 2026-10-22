@@ -1,6 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const User = require('../models/User');
-const tg  = require('../utils/telegramNotifier');
+const tg = require('../utils/telegramNotifier');
 
 const getUsers = asyncHandler(async (req, res) => {
   const users = await User.find({}).select('-password').sort({ createdAt: -1 });
@@ -28,14 +28,14 @@ const updateUser = asyncHandler(async (req, res) => {
   }
 
   const wasActive = user.isActive;
-  const oldRole   = user.role;
+  const oldRole = user.role;
   const isDeactivating = req.body.isActive === false && wasActive === true;
   const isReactivating = req.body.isActive === true && wasActive === false;
 
-  user.name           = req.body.name          ?? user.name;
-  user.role           = req.body.role          ?? user.role;
-  user.isActive       = req.body.isActive      ?? user.isActive;
-  user.phone          = req.body.phone         ?? user.phone;
+  user.name = req.body.name ?? user.name;
+  user.role = req.body.role ?? user.role;
+  user.isActive = req.body.isActive ?? user.isActive;
+  user.phone = req.body.phone ?? user.phone;
   user.telegramChatId = req.body.telegramChatId ?? user.telegramChatId;
   if (req.body.password) user.password = req.body.password;
 
@@ -54,7 +54,7 @@ const updateUser = asyncHandler(async (req, res) => {
       if (cleanChatId) {
         tg.sendToOne && tg.sendToOne(
           cleanChatId,
-          `🏨 <b>Baba Roti Café</b>\n━━━━━━━━━━━━━━━━━━━━\n🔒 <b>ACCOUNT DISABLED</b>\n\nHello <b>${updated.name}</b>, your staff account has been <b>disabled</b> by the administrator.\n\n🔕 Telegram notifications for this account have been automatically stopped.\n━━━━━━━━━━━━━━━━━━━━`
+          `🏨 <b>Bloom Bar and Restaurant  Café</b>\n━━━━━━━━━━━━━━━━━━━━\n🔒 <b>ACCOUNT DISABLED</b>\n\nHello <b>${updated.name}</b>, your staff account has been <b>disabled</b> by the administrator.\n\n🔕 Telegram notifications for this account have been automatically stopped.\n━━━━━━━━━━━━━━━━━━━━`
         );
       }
 
@@ -98,7 +98,7 @@ const updateUser = asyncHandler(async (req, res) => {
       }
       tg.sendToOne && tg.sendToOne(
         updated.telegramChatId,
-        `🏨 <b>Baba Roti Café</b>\n━━━━━━━━━━━━━━━━━━━━\n✅ <b>ACCOUNT RE-ENABLED</b>\n\nHello <b>${updated.name}</b>, your staff account has been re-enabled by the administrator.\n\n🔔 Telegram notifications are now active.\n━━━━━━━━━━━━━━━━━━━━`
+        `🏨 <b>Bloom Bar and Restaurant  Café</b>\n━━━━━━━━━━━━━━━━━━━━\n✅ <b>ACCOUNT RE-ENABLED</b>\n\nHello <b>${updated.name}</b>, your staff account has been re-enabled by the administrator.\n\n🔔 Telegram notifications are now active.\n━━━━━━━━━━━━━━━━━━━━`
       );
     } catch (e) {
       console.warn('[UpdateUser] Could not re-subscribe Telegram on reactivate:', e.message);
@@ -139,12 +139,12 @@ const updateUser = asyncHandler(async (req, res) => {
   }
 
   res.json({
-    _id:            updated._id,
-    name:           updated.name,
-    email:          updated.email,
-    role:           updated.role,
-    isActive:       updated.isActive,
-    phone:          updated.phone || '',
+    _id: updated._id,
+    name: updated.name,
+    email: updated.email,
+    role: updated.role,
+    isActive: updated.isActive,
+    phone: updated.phone || '',
     telegramChatId: updated.telegramChatId || '',
   });
 });
@@ -171,7 +171,7 @@ const deleteUser = asyncHandler(async (req, res) => {
     if (cleanChatId) {
       tg.sendToOne && tg.sendToOne(
         cleanChatId,
-        `🏨 <b>Baba Roti Café</b>\n━━━━━━━━━━━━━━━━━━━━\n🗑️ <b>ACCOUNT REMOVED</b>\n\nHello <b>${user.name}</b>, your staff account has been deleted by the administrator.\n\n🔕 Telegram notifications have been permanently stopped.\n━━━━━━━━━━━━━━━━━━━━`
+        `🏨 <b>Bloom Bar and Restaurant  Café</b>\n━━━━━━━━━━━━━━━━━━━━\n🗑️ <b>ACCOUNT REMOVED</b>\n\nHello <b>${user.name}</b>, your staff account has been deleted by the administrator.\n\n🔕 Telegram notifications have been permanently stopped.\n━━━━━━━━━━━━━━━━━━━━`
       );
     }
 

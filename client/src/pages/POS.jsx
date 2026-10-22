@@ -118,13 +118,13 @@ export default function POS() {
       return cached
         ? JSON.parse(cached)
         : {
-            taxRate: 15,
-            currency: "ETB",
-            enableServiceCharge: false,
-            serviceChargeRate: 10,
-            serviceChargePresets: [5, 10, 15],
-            autoApplyServiceChargeDineIn: false,
-          };
+          taxRate: 15,
+          currency: "ETB",
+          enableServiceCharge: false,
+          serviceChargeRate: 10,
+          serviceChargePresets: [5, 10, 15],
+          autoApplyServiceChargeDineIn: false,
+        };
     } catch (_) {
       return {
         taxRate: 15,
@@ -512,10 +512,10 @@ export default function POS() {
       }
 
       // Print KOT on browser (browser print dialog fallback)
-      posPrint.printKOT(savedOrder, { businessName: "Baba Roti Café" });
+      posPrint.printKOT(savedOrder, { businessName: "Bloom Bar and Restaurant  Café" });
 
       // Auto-fire to network thermal printer (silent, non-blocking)
-      firePrinter('kot', savedOrder, { businessName: "Baba Roti Café" });
+      firePrinter('kot', savedOrder, { businessName: "Bloom Bar and Restaurant  Café" });
 
       // Reset cart
       setHeldOrderId(null);
@@ -589,13 +589,13 @@ export default function POS() {
 
       // Print receipt in browser (browser print dialog fallback)
       posPrint.printReceipt(savedSale, {
-        hotelName: "Baba Roti Café",
+        hotelName: "Bloom Bar and Restaurant  Café",
         taxRate: settings.taxRate,
       });
 
       // Auto-fire to network thermal printer (silent, non-blocking)
       firePrinter('receipt', savedSale, {
-        hotelName: "Baba Roti Café",
+        hotelName: "Bloom Bar and Restaurant  Café",
         taxRate: settings.taxRate,
         currency: "ETB",
       });
@@ -775,7 +775,7 @@ export default function POS() {
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span style={{ fontWeight: 800, fontSize: 16, color: "#0f172a", letterSpacing: 0.3 }}>
-                Baba Roti Café
+                Bloom Bar and Restaurant  Café
               </span>
               <span
                 style={{
@@ -1741,7 +1741,7 @@ export default function POS() {
                   type="button"
                   onClick={() =>
                     posPrint.printReceipt(lastOrder, {
-                      hotelName: "Baba Roti Café",
+                      hotelName: "Bloom Bar and Restaurant  Café",
                       taxRate: settings.taxRate,
                     })
                   }
@@ -1766,7 +1766,7 @@ export default function POS() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => posPrint.printKOT(lastOrder, { businessName: "Baba Roti Café" })}
+                  onClick={() => posPrint.printKOT(lastOrder, { businessName: "Bloom Bar and Restaurant  Café" })}
                   style={{
                     flex: 1,
                     padding: "7px",

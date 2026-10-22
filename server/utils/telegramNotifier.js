@@ -1,5 +1,5 @@
 /**
- * Baba Roti  Café— Telegram Notification Service
+ * Bloom Bar and Restaurant   Café— Telegram Notification Service
  * ─────────────────────────────────────────────────────────────────
  * Sends richly-formatted HTML messages to a Telegram bot/channel
  * whenever a meaningful CRUD event occurs in the system.
@@ -17,7 +17,7 @@ const ENV_CHAT_IDS = (process.env.TELEGRAM_CHAT_ID || '')
   .split(',')
   .map(id => id.trim())
   .filter(id => id && id !== 'your_chat_id_here');
-const HOTEL = 'Baba Roti Café';
+const HOTEL = 'Bloom Bar and Restaurant  Café';
 
 // ── Low-level sender ─────────────────────────────────────────────
 async function getChatIds() {
@@ -913,7 +913,7 @@ function notifyStockRequestCreated(req, user) {
   ).join('\n');
   const emoji = req.priority === 'urgent' ? '🚨' : '📋';
   sendTelegram(
-    `🏨 <b>Baba Roti  CaféHotel</b>
+    `🏨 <b>Bloom Bar and Restaurant   CaféHotel</b>
 ━━━━━━━━━━━━━━━━━━━━
 ${emoji} <b>NEW STOCK REQUEST</b>
 
@@ -933,7 +933,7 @@ ${items || '  —'}
 
 function notifyStockRequestApproved(req, user) {
   sendTelegram(
-    `🏨 <b>Baba Roti  CaféHotel</b>
+    `🏨 <b>Bloom Bar and Restaurant   CaféHotel</b>
 ━━━━━━━━━━━━━━━━━━━━
 ✅ <b>STOCK REQUEST APPROVED</b>
 
@@ -953,7 +953,7 @@ function notifyStockIssued(req, user) {
     `  • ${i.material?.name || '—'} × <b>${i.issuedQty}</b> ${i.material?.unit || ''} — ${etb(i.totalCost)}`
   ).join('\n');
   sendTelegram(
-    `🏨 <b>Baba Roti  CaféHotel</b>
+    `🏨 <b>Bloom Bar and Restaurant   CaféHotel</b>
 ━━━━━━━━━━━━━━━━━━━━
 📤 <b>STOCK ISSUED</b>
 

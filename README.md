@@ -1,4 +1,4 @@
-# Baba Roti  Café Plc Stock — Hotel Stock Management System
+# Bloom Bar and Restaurant   Café Plc Stock — Hotel Stock Management System
 
 A full-stack stock/inventory management system for a hotel, built with **React (Vite + Tailwind)** on the frontend and **Node.js/Express + MongoDB** on the backend.
 

@@ -126,7 +126,7 @@ const printTestPageEndpoint = asyncHandler(async (req, res) => {
       brand: brand || 'Generic',
       model: model || '',
       enabled: true,
-      headerLine1: 'Baba Roti Café',
+      headerLine1: 'Bloom Bar and Restaurant  Café',
       footerLine: 'Test Print Successful!',
       copies: 1,
     };
@@ -145,14 +145,14 @@ const printTestPageEndpoint = asyncHandler(async (req, res) => {
     serviceCharge: 0,
     amountPaid: 150,
     items: [
-      { productName: 'Baba Roti Special Bun', quantity: 2, unitPrice: 50 },
+      { productName: 'Bloom Bar and Restaurant  Special Bun', quantity: 2, unitPrice: 50 },
       { productName: 'Hot Cappuccino', quantity: 1, unitPrice: 50 },
     ],
   };
 
   try {
     await printReceipt(printer, sampleOrder, {
-      hotelName: 'Baba Roti Café - Test Print',
+      hotelName: 'Bloom Bar and Restaurant  Café - Test Print',
       footerLine: `Print Test Passed • ${printer.brand || ''} ${printer.model || ''}`.trim(),
     });
     res.json({ ok: true, message: `Test page sent to ${printer.ipAddress}:${printer.port || 9100}` });

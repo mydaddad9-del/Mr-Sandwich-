@@ -26,15 +26,15 @@ const VOUCHER_TYPES = [
 
 // Direction each voucher type moves stock
 const VOUCHER_DIRECTION = {
-  cash_grv:       'in',
-  credit_grv:     'in',
-  disposal:       'out',
+  cash_grv: 'in',
+  credit_grv: 'in',
+  disposal: 'out',
   neg_adjustment: 'out',
   pos_adjustment: 'in',
-  fresh_bazaar:   'in',
-  sales_import:   'out',
-  pos_sale:       'out',
-  manual_sale:    'out',
+  fresh_bazaar: 'in',
+  sales_import: 'out',
+  pos_sale: 'out',
+  manual_sale: 'out',
 };
 
 const lineItemSchema = new mongoose.Schema(
@@ -61,12 +61,12 @@ const lineItemSchema = new mongoose.Schema(
 */
 const trailEntrySchema = new mongoose.Schema(
   {
-    action:  { type: String },
-    by:      { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    byName:  { type: String },
-    byRole:  { type: String },
-    at:      { type: Date, default: Date.now },
-    note:    { type: String, default: '' },
+    action: { type: String },
+    by: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    byName: { type: String },
+    byRole: { type: String },
+    at: { type: Date, default: Date.now },
+    note: { type: String, default: '' },
   },
   { _id: false }
 );
@@ -74,7 +74,7 @@ const trailEntrySchema = new mongoose.Schema(
 const stockTransactionSchema = new mongoose.Schema(
   {
     voucherType: { type: String, enum: VOUCHER_TYPES, required: true },
-    voucherNo:   { type: String, trim: true, default: '' },
+    voucherNo: { type: String, trim: true, default: '' },
 
     // Workflow status
     status: {
@@ -84,48 +84,48 @@ const stockTransactionSchema = new mongoose.Schema(
     },
 
     // Per-stage sign-off
-    checkedBy:  { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    checkedAt:  { type: Date },
+    checkedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    checkedAt: { type: Date },
     approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     approvedAt: { type: Date },
-    postedBy:   { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    postedAt:   { type: Date },
+    postedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    postedAt: { type: Date },
 
     // Audit trail
     trail: [trailEntrySchema],
 
     // Legacy single-material fields kept for backward compat
     material: { type: mongoose.Schema.Types.ObjectId, ref: 'RawMaterial' },
-    type:     { type: String, enum: ['in', 'out'] },
+    type: { type: String, enum: ['in', 'out'] },
     quantity: { type: Number, min: 0 },
     unitCost: { type: Number, default: 0 },
 
     items: [lineItemSchema],
 
     supplier: { type: mongoose.Schema.Types.ObjectId, ref: 'Supplier' },
-    reason:    { type: String, trim: true, default: '' },
+    reason: { type: String, trim: true, default: '' },
     reference: { type: String, trim: true, default: '' },
 
     performedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     notes: { type: String, trim: true, default: '' },
-    date:  { type: Date, default: Date.now },
+    date: { type: Date, default: Date.now },
 
     // Receipt / Invoice Attachments
-    attachment:  { type: String, default: '' },
+    attachment: { type: String, default: '' },
     attachments: [
       {
-        url:        { type: String, required: true },
-        name:       { type: String, default: 'Receipt' },
-        mimeType:   { type: String, default: 'image/jpeg' },
-        size:       { type: Number, default: 0 },
+        url: { type: String, required: true },
+        name: { type: String, default: 'Receipt' },
+        mimeType: { type: String, default: 'image/jpeg' },
+        size: { type: Number, default: 0 },
         uploadedAt: { type: Date, default: Date.now },
       },
     ],
 
     totalAmount: { type: Number, default: 0 },
     // Recycle bin fields
-    deletedAt:   { type: Date, default: null },
-    deletedBy:   { type: String, default: null },
+    deletedAt: { type: Date, default: null },
+    deletedBy: { type: String, default: null },
     deletedFrom: { type: String, default: 'transactions' },
   },
   { timestamps: true }
@@ -140,15 +140,15 @@ stockTransactionSchema.index({ material: 1 });
 // Virtual: human-readable label
 stockTransactionSchema.virtual('voucherLabel').get(function () {
   const labels = {
-    cash_grv:       'Cash GRV',
-    credit_grv:     'Credit GRV',
-    disposal:       'Goods Disposal',
+    cash_grv: 'Cash GRV',
+    credit_grv: 'Credit GRV',
+    disposal: 'Goods Disposal',
     neg_adjustment: 'Negative Adjustment',
     pos_adjustment: 'Positive Adjustment',
-    fresh_bazaar:   'Fresh Bazaar GRV',
-    sales_import:   'Imported Sales',
-    pos_sale:       'Baba Roti POS Sale',
-    manual_sale:    'Manual Sale',
+    fresh_bazaar: 'Fresh Bazaar GRV',
+    sales_import: 'Imported Sales',
+    pos_sale: 'Bloom Bar and Restaurant  POS Sale',
+    manual_sale: 'Manual Sale',
   };
   return labels[this.voucherType] ?? this.voucherType;
 });

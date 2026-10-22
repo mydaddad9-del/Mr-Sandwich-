@@ -181,8 +181,8 @@ const HelpModal = ({ onClose }) => {
                   key={s.id}
                   onClick={() => setActiveSection(s.id)}
                   className={`w-full flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-xs font-medium transition mb-0.5 ${activeSection === s.id
-                      ? 'bg-white shadow-sm text-blue-700 font-bold border border-ink-100'
-                      : 'text-ink-600 hover:bg-white/70 hover:text-ink-900'
+                    ? 'bg-white shadow-sm text-blue-700 font-bold border border-ink-100'
+                    : 'text-ink-600 hover:bg-white/70 hover:text-ink-900'
                     }`}
                 >
                   <span className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-lg ${s.color}`}>
@@ -282,7 +282,7 @@ const HelpModal = ({ onClose }) => {
 
         {/* Modal Footer */}
         <div className="flex items-center justify-between border-t border-ink-100 bg-ink-50/40 px-6 py-3">
-          <p className="text-[10px] text-ink-400">Baba Roti  CaféHotel Management · Powered by MEGA Technology</p>
+          <p className="text-[10px] text-ink-400">Bloom Bar and Restaurant   CaféHotel Management · Powered by MEGA Technology</p>
           <button
             onClick={onClose}
             className="rounded-xl bg-blue-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-blue-700 transition"
@@ -379,8 +379,8 @@ const NotificationBell = () => {
       <button
         onClick={() => { setOpen(v => !v); if (!open) fetchNotifications(); }}
         className={`relative flex h-9 w-9 items-center justify-center rounded-xl border transition ${unread > 0
-            ? 'border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100'
-            : 'border-ink-200 bg-white text-ink-500 hover:bg-ink-50'
+          ? 'border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100'
+          : 'border-ink-200 bg-white text-ink-500 hover:bg-ink-50'
           }`}
         title="Notifications"
       >

@@ -1,5 +1,5 @@
 /**
- * Curated Sidebar Themes & Color Palettes for Baba Roti Cafe & Restaurant Systems
+ * Curated Sidebar Themes & Color Palettes for Bloom Bar and Restaurant  Cafe & Restaurant Systems
  * Allows hotel clients and system developers to customize brand aesthetics.
  * Includes both modern luxury dark palettes and crisp, minimalist light themes.
  */

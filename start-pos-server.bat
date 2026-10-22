@@ -1,8 +1,8 @@
 @echo off
-title Baba Roti Cafe - POS Server
+title Bloom Bar and Restaurant  Cafe - POS Server
 cls
 echo ========================================================
-echo   Baba Roti Cafe - Restaurant POS Server
+echo   Bloom Bar and Restaurant  Cafe - Restaurant POS Server
 echo ========================================================
 echo.
 echo Starting restaurant server on port 5000...

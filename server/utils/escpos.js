@@ -18,31 +18,31 @@
  */
 
 const ESC = 0x1b;
-const GS  = 0x1d;
-const LF  = 0x0a;
-const CR  = 0x0d;
+const GS = 0x1d;
+const LF = 0x0a;
+const CR = 0x0d;
 
 // ── Text alignment constants ────────────────────────────────────────────────
-const ALIGN_LEFT   = Buffer.from([ESC, 0x61, 0x00]);
+const ALIGN_LEFT = Buffer.from([ESC, 0x61, 0x00]);
 const ALIGN_CENTER = Buffer.from([ESC, 0x61, 0x01]);
-const ALIGN_RIGHT  = Buffer.from([ESC, 0x61, 0x02]);
+const ALIGN_RIGHT = Buffer.from([ESC, 0x61, 0x02]);
 
 // ── Text style constants ────────────────────────────────────────────────────
-const BOLD_ON   = Buffer.from([ESC, 0x45, 0x01]);
-const BOLD_OFF  = Buffer.from([ESC, 0x45, 0x00]);
-const DOUBLE_HEIGHT_ON  = Buffer.from([ESC, 0x21, 0x10]);
+const BOLD_ON = Buffer.from([ESC, 0x45, 0x01]);
+const BOLD_OFF = Buffer.from([ESC, 0x45, 0x00]);
+const DOUBLE_HEIGHT_ON = Buffer.from([ESC, 0x21, 0x10]);
 const DOUBLE_HEIGHT_OFF = Buffer.from([ESC, 0x21, 0x00]);
-const DOUBLE_SIZE_ON    = Buffer.from([ESC, 0x21, 0x30]);
-const DOUBLE_SIZE_OFF   = Buffer.from([ESC, 0x21, 0x00]);
+const DOUBLE_SIZE_ON = Buffer.from([ESC, 0x21, 0x30]);
+const DOUBLE_SIZE_OFF = Buffer.from([ESC, 0x21, 0x00]);
 
 // ── Feed & cut ───────────────────────────────────────────────────────────────
 const LINE_FEED = Buffer.from([LF]);
-const FEED_3    = Buffer.from([ESC, 0x64, 3]);
-const FEED_5    = Buffer.from([ESC, 0x64, 5]);
+const FEED_3 = Buffer.from([ESC, 0x64, 3]);
+const FEED_5 = Buffer.from([ESC, 0x64, 5]);
 
 // Full cut (cutter not on all models, safe to send – ignored if no cutter)
-const CUT_FULL  = Buffer.from([GS, 0x56, 0x00]);
-const CUT_HALF  = Buffer.from([GS, 0x56, 0x01]);
+const CUT_FULL = Buffer.from([GS, 0x56, 0x00]);
+const CUT_HALF = Buffer.from([GS, 0x56, 0x01]);
 
 // Initialise printer (reset)
 const INIT = Buffer.from([ESC, 0x40]);
@@ -129,7 +129,7 @@ function buildKOT(order, opts = {}) {
 
   (order.items || []).forEach((item) => {
     const name = String(item.productName || item.name || '').slice(0, W - 12);
-    const qty  = String(item.quantity || 1);
+    const qty = String(item.quantity || 1);
     const note = String(item.notes || '').slice(0, 12);
     chunks.push(
       BOLD_ON,
@@ -161,24 +161,24 @@ function buildKOT(order, opts = {}) {
 // ─────────────────────────────────────────────────────────────────────────────
 function buildReceipt(order, opts = {}) {
   const W = opts.charWidth || 42;
-  const hotelName   = opts.hotelName   || 'Baba Roti Café';
+  const hotelName = opts.hotelName || 'Bloom Bar and Restaurant  Café';
   const headerLine2 = opts.headerLine2 || '';
-  const footerLine  = opts.footerLine  || 'Thank you! Come again.';
-  const taxRate     = opts.taxRate || 15;
-  const currency    = opts.currency || 'ETB';
+  const footerLine = opts.footerLine || 'Thank you! Come again.';
+  const taxRate = opts.taxRate || 15;
+  const currency = opts.currency || 'ETB';
 
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-ET');
   const timeStr = now.toLocaleTimeString('en-ET', { hour: '2-digit', minute: '2-digit' });
 
-  const subtotal   = (order.items || []).reduce((s, i) => s + (i.quantity * i.unitPrice), 0);
-  const discAmt    = subtotal * ((order.discountPercent || 0) / 100);
-  const afterDisc  = subtotal - discAmt;
-  const svcAmt     = (order.serviceCharge || 0);
-  const taxAmt     = afterDisc * (taxRate / 100);
+  const subtotal = (order.items || []).reduce((s, i) => s + (i.quantity * i.unitPrice), 0);
+  const discAmt = subtotal * ((order.discountPercent || 0) / 100);
+  const afterDisc = subtotal - discAmt;
+  const svcAmt = (order.serviceCharge || 0);
+  const taxAmt = afterDisc * (taxRate / 100);
   const grandTotal = afterDisc + svcAmt + taxAmt;
   const amountPaid = order.amountPaid || grandTotal;
-  const change     = amountPaid - grandTotal;
+  const change = amountPaid - grandTotal;
 
   const fmt = (n) => `${currency} ${Number(n || 0).toFixed(2)}`;
 
@@ -223,8 +223,8 @@ function buildReceipt(order, opts = {}) {
   );
 
   (order.items || []).forEach((item) => {
-    const name  = String(item.productName || item.name || '').slice(0, W - 20);
-    const qty   = String(item.quantity || 1);
+    const name = String(item.productName || item.name || '').slice(0, W - 20);
+    const qty = String(item.quantity || 1);
     const price = fmt(item.unitPrice).slice(-8);
     const total = fmt(item.quantity * item.unitPrice).slice(-8);
     chunks.push(text(padEnd(name, W - 20) + padEnd(`x${qty}`, 5) + padEnd(price, 8) + total));
@@ -279,11 +279,11 @@ function buildReceipt(order, opts = {}) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 // PCL escape sequences for laser printers
-const PCL_RESET   = '\x1bE';           // PCL printer reset
-const PCL_LF      = '\n';             // line feed
-const PCL_FF      = '\x0c';           // form feed (eject page)
+const PCL_RESET = '\x1bE';           // PCL printer reset
+const PCL_LF = '\n';             // line feed
+const PCL_FF = '\x0c';           // form feed (eject page)
 // Set font size 12pt, portrait, letter/A4
-const PCL_SETUP   = '\x1b&l0O\x1b(s12V\x1b&k2G';
+const PCL_SETUP = '\x1b&l0O\x1b(s12V\x1b&k2G';
 
 /**
  * Build plain-text KOT for HP LaserJet / PCL laser printers.
@@ -305,7 +305,7 @@ function buildKOT_plain(order, opts = {}) {
   lines.push('='.repeat(W));
   lines.push(twoCol('Order #:', order.orderNo || '--', W));
   lines.push(twoCol('Type:', (order.orderType || 'dine_in').replace('_', ' ').toUpperCase(), W));
-  if (order.tableNo)    lines.push(twoCol('Table:', order.tableNo, W));
+  if (order.tableNo) lines.push(twoCol('Table:', order.tableNo, W));
   if (order.waiterName) lines.push(twoCol('Waiter:', order.waiterName, W));
   if (order.customerName && order.customerName !== 'Walk-in Guest')
     lines.push(twoCol('Customer:', order.customerName, W));
@@ -317,7 +317,7 @@ function buildKOT_plain(order, opts = {}) {
 
   (order.items || []).forEach(item => {
     const name = String(item.productName || item.name || '').slice(0, W - 14);
-    const qty  = `x${item.quantity || 1}`;
+    const qty = `x${item.quantity || 1}`;
     const note = String(item.notes || '');
     lines.push(padEnd(name, W - 14) + padEnd(qty, 6) + note);
     if (item.notes) lines.push(`    >> ${item.notes}`);
@@ -337,23 +337,23 @@ function buildKOT_plain(order, opts = {}) {
  */
 function buildReceipt_plain(order, opts = {}) {
   const W = 60;
-  const hotelName  = opts.hotelName  || 'Baba Roti Café';
+  const hotelName = opts.hotelName || 'Bloom Bar and Restaurant  Café';
   const footerLine = opts.footerLine || 'Thank you! Come again.';
-  const taxRate    = opts.taxRate ?? 15;
-  const currency   = opts.currency || 'ETB';
+  const taxRate = opts.taxRate ?? 15;
+  const currency = opts.currency || 'ETB';
 
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-ET');
   const timeStr = now.toLocaleTimeString('en-ET', { hour: '2-digit', minute: '2-digit' });
 
-  const subtotal  = (order.items || []).reduce((s, i) => s + (i.quantity * i.unitPrice), 0);
-  const discAmt   = subtotal * ((order.discountPercent || 0) / 100);
+  const subtotal = (order.items || []).reduce((s, i) => s + (i.quantity * i.unitPrice), 0);
+  const discAmt = subtotal * ((order.discountPercent || 0) / 100);
   const afterDisc = subtotal - discAmt;
-  const svcAmt    = order.serviceCharge || 0;
-  const taxAmt    = afterDisc * (taxRate / 100);
+  const svcAmt = order.serviceCharge || 0;
+  const taxAmt = afterDisc * (taxRate / 100);
   const grandTotal = afterDisc + svcAmt + taxAmt;
   const amountPaid = order.amountPaid || grandTotal;
-  const change    = amountPaid - grandTotal;
+  const change = amountPaid - grandTotal;
   const fmt = (n) => `${currency} ${Number(n || 0).toFixed(2)}`;
 
   const lines = [];
@@ -366,7 +366,7 @@ function buildReceipt_plain(order, opts = {}) {
   lines.push(twoCol('Receipt #:', order.orderNo || '--', W));
   lines.push(twoCol('Date:', dateStr, W));
   lines.push(twoCol('Time:', timeStr, W));
-  if (order.tableNo)   lines.push(twoCol('Table:', order.tableNo, W));
+  if (order.tableNo) lines.push(twoCol('Table:', order.tableNo, W));
   if (order.waiterName) lines.push(twoCol('Server:', order.waiterName, W));
   if (order.customerName && order.customerName !== 'Walk-in Guest')
     lines.push(twoCol('Guest:', order.customerName, W));
@@ -376,8 +376,8 @@ function buildReceipt_plain(order, opts = {}) {
   lines.push('-'.repeat(W));
 
   (order.items || []).forEach(item => {
-    const name  = String(item.productName || item.name || '').slice(0, W - 24);
-    const qty   = `x${item.quantity || 1}`;
+    const name = String(item.productName || item.name || '').slice(0, W - 24);
+    const qty = `x${item.quantity || 1}`;
     const price = fmt(item.unitPrice);
     const total = fmt(item.quantity * item.unitPrice);
     lines.push(padEnd(name, W - 24) + padEnd(qty, 5) + padEnd(price, 10) + total);

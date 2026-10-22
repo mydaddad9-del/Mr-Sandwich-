@@ -18,7 +18,7 @@ const autoSeed = async () => {
     const User = require('./models/User');
     const defaults = [
       { name: 'System Developer', email: 'dev@hotel.com', password: 'admin123', role: 'dev' },
-      { name: 'Baba Roti  CaféAdmin', email: 'admin@hotel.com', password: 'admin123', role: 'admin', phone: '0918592028' },
+      { name: 'Bloom Bar and Restaurant   CaféAdmin', email: 'admin@hotel.com', password: 'admin123', role: 'admin', phone: '0918592028' },
       { name: 'Hotel Manager', email: 'manager@hotel.com', password: 'admin123', role: 'manager' },
       { name: 'Floor Supervisor', email: 'supervisor@hotel.com', password: 'admin123', role: 'supervisor' },
       { name: 'Store Keeper', email: 'storekeeper@hotel.com', password: 'admin123', role: 'storekeeper' },
@@ -131,7 +131,7 @@ if (distExists) {
   });
 } else {
   console.warn('[STATIC] Warning: client/dist/index.html not found. Check build output.');
-  app.get('/', (req, res) => res.send('Baba Roti API Server is running. Frontend build in progress or not mounted.'));
+  app.get('/', (req, res) => res.send('Bloom Bar and Restaurant  API Server is running. Frontend build in progress or not mounted.'));
 }
 
 app.use(notFound);

@@ -48,7 +48,7 @@ const DashboardLayout = () => {
   const location = useLocation();
   const isPos = location.pathname === '/pos';
   const isDashboard = location.pathname === '/';
-  const title = titles[location.pathname] || 'Baba Roti  Café Plc Stock';
+  const title = titles[location.pathname] || 'Bloom Bar and Restaurant   Café Plc Stock';
 
   return (
     <div className="flex h-screen overflow-hidden bg-ink-50">
@@ -81,7 +81,7 @@ const DashboardLayout = () => {
               <Outlet />
             </div>
             <footer className="mt-12 pt-6 border-t border-ink-100 hidden lg:flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-ink-400 pb-2">
-              <p>© 2026 Baba Roti  CaféHotel Management System · All rights reserved.</p>
+              <p>© 2026 Bloom Bar and Restaurant   CaféHotel Management System · All rights reserved.</p>
               <div className="flex flex-wrap items-center gap-3 text-xs">
                 <span>Developed By <strong className="text-ink-700 font-semibold">Mega Tech Teams</strong></span>
               </div>

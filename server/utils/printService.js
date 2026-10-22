@@ -5,11 +5,11 @@
  * No external npm packages required — uses Node.js built-in `net` module.
  */
 
-const net  = require('net');
+const net = require('net');
 const { buildKOT, buildReceipt, buildKOT_plain, buildReceipt_plain } = require('./escpos');
 
 const CONNECT_TIMEOUT_MS = 5000;
-const WRITE_TIMEOUT_MS   = 8000;
+const WRITE_TIMEOUT_MS = 8000;
 
 /**
  * Send raw bytes to a TCP printer.
@@ -63,12 +63,12 @@ function isLaserPrinter(printer) {
   const brand = String(printer.brand || '').toLowerCase();
   const model = String(printer.model || '').toLowerCase();
   return laserBrands.some(b => brand.includes(b)) ||
-         model.includes('laserjet') ||
-         model.includes('laser') ||
-         model.includes('m402') ||
-         model.includes('m404') ||
-         model.includes('m428') ||
-         model.includes('m118');
+    model.includes('laserjet') ||
+    model.includes('laser') ||
+    model.includes('m402') ||
+    model.includes('m404') ||
+    model.includes('m428') ||
+    model.includes('m118');
 }
 
 /**
@@ -92,7 +92,7 @@ async function printKOT(printer, order, opts = {}) {
   } else {
     // Standard ESC/POS thermal mode
     data = buildKOT(order, {
-      charWidth:    printer.charWidth || 42,
+      charWidth: printer.charWidth || 42,
       businessName: opts.businessName || printer.headerLine1 || 'Kitchen Order',
       ...opts,
     });
@@ -118,22 +118,22 @@ async function printReceipt(printer, order, opts = {}) {
   if (isLaserPrinter(printer)) {
     // HP LaserJet / PCL plain-text mode
     data = buildReceipt_plain(order, {
-      hotelName:   opts.hotelName || printer.headerLine1 || 'Baba Roti Café',
+      hotelName: opts.hotelName || printer.headerLine1 || 'Bloom Bar and Restaurant  Café',
       headerLine2: opts.headerLine2 || printer.headerLine2 || '',
-      footerLine:  opts.footerLine || printer.footerLine || 'Thank you! Come again.',
-      taxRate:     opts.taxRate ?? 15,
-      currency:    opts.currency || 'ETB',
+      footerLine: opts.footerLine || printer.footerLine || 'Thank you! Come again.',
+      taxRate: opts.taxRate ?? 15,
+      currency: opts.currency || 'ETB',
       ...opts,
     });
   } else {
     // Standard ESC/POS thermal mode
     data = buildReceipt(order, {
-      charWidth:   printer.charWidth || 42,
-      hotelName:   opts.hotelName || printer.headerLine1 || 'Baba Roti Café',
+      charWidth: printer.charWidth || 42,
+      hotelName: opts.hotelName || printer.headerLine1 || 'Bloom Bar and Restaurant  Café',
       headerLine2: opts.headerLine2 || printer.headerLine2 || '',
-      footerLine:  opts.footerLine || printer.footerLine || 'Thank you! Come again.',
-      taxRate:     opts.taxRate ?? 15,
-      currency:    opts.currency || 'ETB',
+      footerLine: opts.footerLine || printer.footerLine || 'Thank you! Come again.',
+      taxRate: opts.taxRate ?? 15,
+      currency: opts.currency || 'ETB',
       ...opts,
     });
   }

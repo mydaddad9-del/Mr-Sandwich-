@@ -1,35 +1,35 @@
 const mongoose = require('mongoose');
 
 const DEFAULT_NAV_VISIBILITY = {
-  dashboard:     { storekeeper: true,  cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
-  pos:           { storekeeper: true,  cashier: true,  waiter: true,  supervisor: true,  manager: true,  admin: true },
-  captainOrder:  { storekeeper: true,  cashier: true,  waiter: true,  supervisor: true,  manager: true,  admin: true },
-  cashSales:     { storekeeper: true,  cashier: true,  waiter: false, supervisor: true,  manager: true,  admin: true },
-  rawMaterials:  { storekeeper: true,  cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
-  products:      { storekeeper: true,  cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
-  stockMovements:{ storekeeper: true,  cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
-  suppliers:     { storekeeper: false, cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
-  consumption:   { storekeeper: true,  cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
-  reports:       { storekeeper: false, cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
-  expenses:      { storekeeper: true,  cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
-  analytics:     { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: true,  admin: true },
+  dashboard: { storekeeper: true, cashier: false, waiter: false, supervisor: true, manager: true, admin: true },
+  pos: { storekeeper: true, cashier: true, waiter: true, supervisor: true, manager: true, admin: true },
+  captainOrder: { storekeeper: true, cashier: true, waiter: true, supervisor: true, manager: true, admin: true },
+  cashSales: { storekeeper: true, cashier: true, waiter: false, supervisor: true, manager: true, admin: true },
+  rawMaterials: { storekeeper: true, cashier: false, waiter: false, supervisor: true, manager: true, admin: true },
+  products: { storekeeper: true, cashier: false, waiter: false, supervisor: true, manager: true, admin: true },
+  stockMovements: { storekeeper: true, cashier: false, waiter: false, supervisor: true, manager: true, admin: true },
+  suppliers: { storekeeper: false, cashier: false, waiter: false, supervisor: true, manager: true, admin: true },
+  consumption: { storekeeper: true, cashier: false, waiter: false, supervisor: true, manager: true, admin: true },
+  reports: { storekeeper: false, cashier: false, waiter: false, supervisor: true, manager: true, admin: true },
+  expenses: { storekeeper: true, cashier: false, waiter: false, supervisor: true, manager: true, admin: true },
+  analytics: { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: true, admin: true },
   staffAccounts: { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true },
 };
 
 const DEFAULT_CRUD_PERMISSIONS = {
-  rawMaterials:   { view: { storekeeper: true,  cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true }, edit: { storekeeper: false, cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true }, delete: { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true } },
-  products:       { view: { storekeeper: true,  cashier: true,  waiter: true,  supervisor: true,  manager: true,  admin: true }, edit: { storekeeper: false, cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true }, delete: { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true } },
-  suppliers:      { view: { storekeeper: true,  cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true }, edit: { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: true,  admin: true }, delete: { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true } },
-  expenses:       { view: { storekeeper: true,  cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true }, edit: { storekeeper: false, cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true }, delete: { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true } },
-  stockMovements: { view: { storekeeper: true,  cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true }, edit: { storekeeper: false, cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true }, delete: { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true } },
-  purchases:      { view: { storekeeper: true,  cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true }, edit: { storekeeper: false, cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true }, delete: { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true } },
-  employees:      { view: { storekeeper: true,  cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true }, edit: { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: true,  admin: true }, delete: { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true } },
+  rawMaterials: { view: { storekeeper: true, cashier: false, waiter: false, supervisor: true, manager: true, admin: true }, edit: { storekeeper: false, cashier: false, waiter: false, supervisor: true, manager: true, admin: true }, delete: { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true } },
+  products: { view: { storekeeper: true, cashier: true, waiter: true, supervisor: true, manager: true, admin: true }, edit: { storekeeper: false, cashier: false, waiter: false, supervisor: true, manager: true, admin: true }, delete: { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true } },
+  suppliers: { view: { storekeeper: true, cashier: false, waiter: false, supervisor: true, manager: true, admin: true }, edit: { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: true, admin: true }, delete: { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true } },
+  expenses: { view: { storekeeper: true, cashier: false, waiter: false, supervisor: true, manager: true, admin: true }, edit: { storekeeper: false, cashier: false, waiter: false, supervisor: true, manager: true, admin: true }, delete: { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true } },
+  stockMovements: { view: { storekeeper: true, cashier: false, waiter: false, supervisor: true, manager: true, admin: true }, edit: { storekeeper: false, cashier: false, waiter: false, supervisor: true, manager: true, admin: true }, delete: { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true } },
+  purchases: { view: { storekeeper: true, cashier: false, waiter: false, supervisor: true, manager: true, admin: true }, edit: { storekeeper: false, cashier: false, waiter: false, supervisor: true, manager: true, admin: true }, delete: { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true } },
+  employees: { view: { storekeeper: true, cashier: false, waiter: false, supervisor: true, manager: true, admin: true }, edit: { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: true, admin: true }, delete: { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true } },
 };
 
 const settingSchema = new mongoose.Schema(
   {
-    hotelName: { type: String, default: 'Baba Roti  Café' },
-    systemEmail: { type: String, default: 'info@Baba Roti  Café.com' },
+    hotelName: { type: String, default: 'Bloom Bar and Restaurant   Café' },
+    systemEmail: { type: String, default: 'info@Bloom Bar and Restaurant   Café.com' },
     phone: { type: String, default: '+251 911 000 111' },
     address: { type: String, default: 'Addis Ababa, Ethiopia' },
     currency: { type: String, default: 'ETB' },
@@ -46,13 +46,13 @@ const settingSchema = new mongoose.Schema(
     rolePermissions: {
       type: Object,
       default: {
-        recordGoods:      { storekeeper: true,  cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
-        checkReview:      { storekeeper: false, cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
-        approveGoods:     { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true },
-        postLedger:       { storekeeper: false, cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+        recordGoods: { storekeeper: true, cashier: false, waiter: false, supervisor: true, manager: true, admin: true },
+        checkReview: { storekeeper: false, cashier: false, waiter: false, supervisor: true, manager: true, admin: true },
+        approveGoods: { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true },
+        postLedger: { storekeeper: false, cashier: false, waiter: false, supervisor: true, manager: true, admin: true },
         voidTransactions: { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true },
-        viewReports:      { storekeeper: false, cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
-        manageAccounts:   { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true },
+        viewReports: { storekeeper: false, cashier: false, waiter: false, supervisor: true, manager: true, admin: true },
+        manageAccounts: { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true },
       },
     },
     navVisibility: {
@@ -91,7 +91,7 @@ const settingSchema = new mongoose.Schema(
       type: Array,
       default: [],
     },
-    notes: { type: String, default: 'Baba Roti  CaféHotel Management & Stock Control System' },
+    notes: { type: String, default: 'Bloom Bar and Restaurant   CaféHotel Management & Stock Control System' },
 
     // ── Pricing & Cost Parameters ─────────────────────────────────
     // Contingency: % buffer added on top of raw material cost (waste, price fluctuation)

@@ -16,15 +16,15 @@ import { useAuth } from '../context/AuthContext';
 
 // ── Voucher config ────────────────────────────────────────────────────
 const VOUCHERS = [
-  { key: 'cash_grv',       label: 'Cash GRV',        fullLabel: 'Cash Goods Receiving Voucher',   icon: ShoppingBag,  badgeCls: 'bg-emerald-100 text-emerald-700', activeCls: 'bg-emerald-600', direction: 'in',  needsSupplier: true,  needsCost: true,  description: 'Goods received and paid in cash' },
-  { key: 'credit_grv',     label: 'Credit GRV',      fullLabel: 'Credit Goods Receiving Voucher', icon: CreditCard,   badgeCls: 'bg-blue-100 text-blue-700',       activeCls: 'bg-blue-600',    direction: 'in',  needsSupplier: true,  needsCost: true,  description: 'Goods received on credit / invoice' },
-  { key: 'fresh_bazaar',   label: 'Fresh Bazaar',    fullLabel: 'Fresh Bazaar Receiving Voucher', icon: Leaf,         badgeCls: 'bg-lime-100 text-lime-700',       activeCls: 'bg-lime-600',    direction: 'in',  needsSupplier: false, needsCost: true,  description: 'Fresh market / direct purchase receiving' },
-  { key: 'pos_adjustment', label: '+ve Adjustment',  fullLabel: 'Positive Stock Adjustment',      icon: TrendingUp,   badgeCls: 'bg-violet-100 text-violet-700',   activeCls: 'bg-violet-600',  direction: 'in',  needsSupplier: false, needsCost: false, description: 'Correct stock upward after physical count' },
-  { key: 'disposal',       label: 'Disposal',        fullLabel: 'Goods Disposal Voucher',         icon: Flame,        badgeCls: 'bg-orange-100 text-orange-700',   activeCls: 'bg-orange-600',  direction: 'out', needsSupplier: false, needsCost: false, description: 'Write off damaged / expired goods' },
-  { key: 'neg_adjustment', label: '−ve Adjustment',  fullLabel: 'Negative Stock Adjustment',      icon: TrendingDown, badgeCls: 'bg-red-100 text-red-700',         activeCls: 'bg-red-600',     direction: 'out', needsSupplier: false, needsCost: false, description: 'Correct stock downward after physical count' },
-  { key: 'sales_import',   label: 'Imported Sale',   fullLabel: 'Imported Sales Deduction',       icon: ShoppingBag,  badgeCls: 'bg-rose-100 text-rose-700',       activeCls: 'bg-rose-600',    direction: 'out', needsSupplier: false, needsCost: false, description: 'Sales imported from external POS' },
-  { key: 'pos_sale',       label: 'Baba Roti POS',   fullLabel: 'Baba Roti POS Sale',             icon: ShoppingBag,  badgeCls: 'bg-cyan-100 text-cyan-800',       activeCls: 'bg-cyan-600',    direction: 'out', needsSupplier: false, needsCost: false, description: 'Direct sales from Baba Roti POS' },
-  { key: 'manual_sale',    label: 'Manual Sale',     fullLabel: 'Manual Sales Record',            icon: ShoppingBag,  badgeCls: 'bg-purple-100 text-purple-700',   activeCls: 'bg-purple-600',  direction: 'out', needsSupplier: false, needsCost: false, description: 'Manually entered sale deduction' },
+  { key: 'cash_grv', label: 'Cash GRV', fullLabel: 'Cash Goods Receiving Voucher', icon: ShoppingBag, badgeCls: 'bg-emerald-100 text-emerald-700', activeCls: 'bg-emerald-600', direction: 'in', needsSupplier: true, needsCost: true, description: 'Goods received and paid in cash' },
+  { key: 'credit_grv', label: 'Credit GRV', fullLabel: 'Credit Goods Receiving Voucher', icon: CreditCard, badgeCls: 'bg-blue-100 text-blue-700', activeCls: 'bg-blue-600', direction: 'in', needsSupplier: true, needsCost: true, description: 'Goods received on credit / invoice' },
+  { key: 'fresh_bazaar', label: 'Fresh Bazaar', fullLabel: 'Fresh Bazaar Receiving Voucher', icon: Leaf, badgeCls: 'bg-lime-100 text-lime-700', activeCls: 'bg-lime-600', direction: 'in', needsSupplier: false, needsCost: true, description: 'Fresh market / direct purchase receiving' },
+  { key: 'pos_adjustment', label: '+ve Adjustment', fullLabel: 'Positive Stock Adjustment', icon: TrendingUp, badgeCls: 'bg-violet-100 text-violet-700', activeCls: 'bg-violet-600', direction: 'in', needsSupplier: false, needsCost: false, description: 'Correct stock upward after physical count' },
+  { key: 'disposal', label: 'Disposal', fullLabel: 'Goods Disposal Voucher', icon: Flame, badgeCls: 'bg-orange-100 text-orange-700', activeCls: 'bg-orange-600', direction: 'out', needsSupplier: false, needsCost: false, description: 'Write off damaged / expired goods' },
+  { key: 'neg_adjustment', label: '−ve Adjustment', fullLabel: 'Negative Stock Adjustment', icon: TrendingDown, badgeCls: 'bg-red-100 text-red-700', activeCls: 'bg-red-600', direction: 'out', needsSupplier: false, needsCost: false, description: 'Correct stock downward after physical count' },
+  { key: 'sales_import', label: 'Imported Sale', fullLabel: 'Imported Sales Deduction', icon: ShoppingBag, badgeCls: 'bg-rose-100 text-rose-700', activeCls: 'bg-rose-600', direction: 'out', needsSupplier: false, needsCost: false, description: 'Sales imported from external POS' },
+  { key: 'pos_sale', label: 'Bloom Bar and Restaurant  POS', fullLabel: 'Bloom Bar and Restaurant  POS Sale', icon: ShoppingBag, badgeCls: 'bg-cyan-100 text-cyan-800', activeCls: 'bg-cyan-600', direction: 'out', needsSupplier: false, needsCost: false, description: 'Direct sales from Bloom Bar and Restaurant  POS' },
+  { key: 'manual_sale', label: 'Manual Sale', fullLabel: 'Manual Sales Record', icon: ShoppingBag, badgeCls: 'bg-purple-100 text-purple-700', activeCls: 'bg-purple-600', direction: 'out', needsSupplier: false, needsCost: false, description: 'Manually entered sale deduction' },
 ];
 const voucherByKey = Object.fromEntries(VOUCHERS.map(v => [v.key, v]));
 const emptyItem = () => ({ material: '', quantity: '', unitCost: '' });
@@ -33,34 +33,34 @@ const emptyForm = key => ({ voucherType: key, voucherNo: '', supplier: '', reaso
 // ── Component ─────────────────────────────────────────────────────────
 export default function StockTransactions({ defaultVoucher } = {}) {
   const { can, hasRole, canCrud } = useAuth();
-  const canEdit   = canCrud ? canCrud('stockMovements', 'edit') : can('recordGoods');
+  const canEdit = canCrud ? canCrud('stockMovements', 'edit') : can('recordGoods');
   const canDelete = canCrud ? canCrud('stockMovements', 'delete') : can('voidTransactions');
-  const isAdmin   = hasRole('admin');
+  const isAdmin = hasRole('admin');
 
   // filterType comes from sidebar navigation (defaultVoucher) or stays null (All)
   const filterType = defaultVoucher ?? null;
 
   const [transactions, setTransactions] = useState([]);
-  const [selected,     setSelected]     = useState(new Set());
-  const [materials,    setMaterials]    = useState([]);
-  const [suppliers,    setSuppliers]    = useState([]);
-  const [search,       setSearch]       = useState('');
-  const [modalOpen,    setModalOpen]    = useState(false);
-  const [activeV,      setActiveV]      = useState(null);
-  const [editingTxn,   setEditingTxn]   = useState(null);
-  const [form,         setForm]         = useState(null);
-  const [error,        setError]        = useState('');
-  const [submitting,   setSubmitting]   = useState(false);
+  const [selected, setSelected] = useState(new Set());
+  const [materials, setMaterials] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
+  const [search, setSearch] = useState('');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [activeV, setActiveV] = useState(null);
+  const [editingTxn, setEditingTxn] = useState(null);
+  const [form, setForm] = useState(null);
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   // Workflow approval state
-  const [approveOpen,    setApproveOpen]    = useState(false);
-  const [approveAction,  setApproveAction]  = useState(null);
-  const [approveTxn,     setApproveTxn]     = useState(null);
+  const [approveOpen, setApproveOpen] = useState(false);
+  const [approveAction, setApproveAction] = useState(null);
+  const [approveTxn, setApproveTxn] = useState(null);
   const [approveLoading, setApproveLoading] = useState(false);
-  const [approveError,   setApproveError]   = useState(null);
+  const [approveError, setApproveError] = useState(null);
   // Detail / trail modal
   const [detailOpen, setDetailOpen] = useState(false);
-  const [detailTxn,  setDetailTxn]  = useState(null);
+  const [detailTxn, setDetailTxn] = useState(null);
 
   const load = useCallback(() => {
     const params = filterType ? { voucherType: filterType } : {};
@@ -83,7 +83,7 @@ export default function StockTransactions({ defaultVoucher } = {}) {
   });
 
   // ── Pagination ──
-  const [page, setPage]         = useState(1);
+  const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   // Reset to page 1 whenever search or filter changes
   React.useEffect(() => { setPage(1); }, [search, filterType]);
@@ -171,8 +171,8 @@ export default function StockTransactions({ defaultVoucher } = {}) {
     setModalOpen(true);
   };
 
-  const addItem    = ()          => setForm(f => ({ ...f, items: [...f.items, emptyItem()] }));
-  const removeItem = i           => setForm(f => ({ ...f, items: f.items.filter((_, idx) => idx !== i) }));
+  const addItem = () => setForm(f => ({ ...f, items: [...f.items, emptyItem()] }));
+  const removeItem = i => setForm(f => ({ ...f, items: f.items.filter((_, idx) => idx !== i) }));
   const updateItem = (i, fld, v) => setForm(f => {
     const items = [...f.items];
     items[i] = { ...items[i], [fld]: v };
@@ -183,14 +183,14 @@ export default function StockTransactions({ defaultVoucher } = {}) {
   const handleSubmit = async e => {
     e.preventDefault(); setError(''); setSubmitting(true);
     const payload = {
-      voucherType:  form.voucherType,
-      voucherNo:    form.voucherNo  || undefined,
-      supplier:     form.supplier   || undefined,
-      reason:       form.reason,
-      reference:    form.reference,
-      notes:        form.notes,
-      date:         form.date,
-      attachments:  form.attachments || [],
+      voucherType: form.voucherType,
+      voucherNo: form.voucherNo || undefined,
+      supplier: form.supplier || undefined,
+      reason: form.reason,
+      reference: form.reference,
+      notes: form.notes,
+      date: form.date,
+      attachments: form.attachments || [],
       items: form.items.filter(it => it.material && it.quantity).map(it => ({
         material: it.material, quantity: Number(it.quantity), unitCost: Number(it.unitCost) || 0,
       })),
@@ -204,7 +204,8 @@ export default function StockTransactions({ defaultVoucher } = {}) {
       setModalOpen(false);
       setEditingTxn(null);
       load();
-    } catch (err) { setError(err.response?.data?.message || 'Could not save voucher.');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Could not save voucher.');
     } finally { setSubmitting(false); }
   };
 
@@ -215,7 +216,7 @@ export default function StockTransactions({ defaultVoucher } = {}) {
 
   const handleBulkDelete = async () => {
     const deletable = displayed.filter(t =>
-      canDelete && (isAdmin || ['pending','voided'].includes(t.status ?? 'pending')) && selected.has(t._id)
+      canDelete && (isAdmin || ['pending', 'voided'].includes(t.status ?? 'pending')) && selected.has(t._id)
     );
     if (!deletable.length) return;
     if (!confirm(`Move ${deletable.length} transaction(s) to recycle bin?`)) return;
@@ -225,15 +226,15 @@ export default function StockTransactions({ defaultVoucher } = {}) {
 
   /* ── selection helpers ── */
   const canDeleteRow = (t) =>
-    canDelete && (isAdmin || ['pending','voided'].includes(t.status ?? 'pending'));
+    canDelete && (isAdmin || ['pending', 'voided'].includes(t.status ?? 'pending'));
 
   // Admin can select all rows; others only pending/voided
   const deletableIds = displayed
-    .filter(t => canDelete && (isAdmin || ['pending','voided'].includes(t.status ?? 'pending')))
+    .filter(t => canDelete && (isAdmin || ['pending', 'voided'].includes(t.status ?? 'pending')))
     .map(t => t._id);
-  const allChecked   = deletableIds.length > 0 && deletableIds.every(id => selected.has(id));
-  const someChecked  = deletableIds.some(id => selected.has(id));
-  const toggleAll    = () => allChecked
+  const allChecked = deletableIds.length > 0 && deletableIds.every(id => selected.has(id));
+  const someChecked = deletableIds.some(id => selected.has(id));
+  const toggleAll = () => allChecked
     ? setSelected(prev => { const n = new Set(prev); deletableIds.forEach(id => n.delete(id)); return n; })
     : setSelected(prev => { const n = new Set(prev); deletableIds.forEach(id => n.add(id)); return n; });
   const toggleOne = id => setSelected(prev => {
@@ -242,21 +243,21 @@ export default function StockTransactions({ defaultVoucher } = {}) {
 
   // ── Workflow helpers ──
   const NEXT_ACTIONS = {
-    pending:  [{ action: 'check',   label: 'Check',   cap: 'checkReview' },
-               { action: 'void',    label: 'Void',    cap: 'voidTransactions', danger: true }],
-    checked:  [{ action: 'approve', label: 'Approve', cap: 'approveGoods' },
-               { action: 'void',    label: 'Void',    cap: 'voidTransactions', danger: true }],
-    approved: [{ action: 'post',    label: 'Post',    cap: 'postLedger' },
-               { action: 'void',    label: 'Void',    cap: 'voidTransactions', danger: true }],
-    posted:   [],
-    voided:   [],
+    pending: [{ action: 'check', label: 'Check', cap: 'checkReview' },
+    { action: 'void', label: 'Void', cap: 'voidTransactions', danger: true }],
+    checked: [{ action: 'approve', label: 'Approve', cap: 'approveGoods' },
+    { action: 'void', label: 'Void', cap: 'voidTransactions', danger: true }],
+    approved: [{ action: 'post', label: 'Post', cap: 'postLedger' },
+    { action: 'void', label: 'Void', cap: 'voidTransactions', danger: true }],
+    posted: [],
+    voided: [],
   };
 
   const ACTION_COLORS = {
-    check:   'bg-blue-600 hover:bg-blue-700',
+    check: 'bg-blue-600 hover:bg-blue-700',
     approve: 'bg-violet-600 hover:bg-violet-700',
-    post:    'bg-emerald-600 hover:bg-emerald-700',
-    void:    'bg-red-50 hover:bg-red-100 !text-red-600',
+    post: 'bg-emerald-600 hover:bg-emerald-700',
+    void: 'bg-red-50 hover:bg-red-100 !text-red-600',
   };
 
   const actionsFor = (txn) => {
@@ -279,7 +280,7 @@ export default function StockTransactions({ defaultVoucher } = {}) {
     } finally { setApproveLoading(false); }
   };
 
-  const formTotal = (form?.items ?? []).reduce((s, it) => s + (Number(it.quantity)||0) * (Number(it.unitCost)||0), 0);
+  const formTotal = (form?.items ?? []).reduce((s, it) => s + (Number(it.quantity) || 0) * (Number(it.unitCost) || 0), 0);
 
   // Page heading
   const headingV = filterType ? voucherByKey[filterType] : null;
@@ -361,129 +362,129 @@ export default function StockTransactions({ defaultVoucher } = {}) {
       <div className="overflow-hidden rounded-xl border border-blue-200/70 bg-white shadow-soft">
 
         <div className="overflow-x-auto">
-        <table className="min-w-full text-sm" style={{ borderCollapse: 'collapse' }}>
-          <thead style={{ background: 'linear-gradient(90deg, #1e3a8a 0%, #1d4ed8 50%, #2563eb 100%)' }}>
-            <tr>
-              {canDelete && (
-                <th className="w-10 px-4 py-2.5" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>
-                  <input type="checkbox" checked={allChecked}
-                    ref={el => { if (el) el.indeterminate = someChecked && !allChecked; }}
-                    onChange={toggleAll}
-                    className="h-4 w-4 rounded cursor-pointer accent-white" />
-                </th>
+          <table className="min-w-full text-sm" style={{ borderCollapse: 'collapse' }}>
+            <thead style={{ background: 'linear-gradient(90deg, #1e3a8a 0%, #1d4ed8 50%, #2563eb 100%)' }}>
+              <tr>
+                {canDelete && (
+                  <th className="w-10 px-4 py-2.5" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>
+                    <input type="checkbox" checked={allChecked}
+                      ref={el => { if (el) el.indeterminate = someChecked && !allChecked; }}
+                      onChange={toggleAll}
+                      className="h-4 w-4 rounded cursor-pointer accent-white" />
+                  </th>
+                )}
+                <th className="px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100 whitespace-nowrap" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>Date</th>
+                <th className="px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100 whitespace-nowrap" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>Voucher No</th>
+                {!filterType && <th className="px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100 whitespace-nowrap" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>Type</th>}
+                <th className="px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100 whitespace-nowrap" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>Direction</th>
+                <th className="px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100 whitespace-nowrap" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>Material(s)</th>
+                <th className="px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100 whitespace-nowrap" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>Supplier</th>
+                <th className="px-4 py-2.5 text-right text-[11px] font-bold uppercase tracking-wider text-blue-100 whitespace-nowrap" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>Total (ETB)</th>
+                <th className="px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100 whitespace-nowrap" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>Status</th>
+                <th className="px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100 whitespace-nowrap" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>By</th>
+                <th className="px-4 py-2.5 text-right text-[11px] font-bold uppercase tracking-wider text-blue-100 whitespace-nowrap" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-ink-50">
+              {displayed.length === 0 && (
+                <tr><td colSpan={filterType ? 9 : 10} className="px-4 py-12 text-center text-ink-400">No transactions found.</td></tr>
               )}
-              <th className="px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100 whitespace-nowrap" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>Date</th>
-              <th className="px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100 whitespace-nowrap" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>Voucher No</th>
-              {!filterType && <th className="px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100 whitespace-nowrap" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>Type</th>}
-              <th className="px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100 whitespace-nowrap" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>Direction</th>
-              <th className="px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100 whitespace-nowrap" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>Material(s)</th>
-              <th className="px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100 whitespace-nowrap" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>Supplier</th>
-              <th className="px-4 py-2.5 text-right text-[11px] font-bold uppercase tracking-wider text-blue-100 whitespace-nowrap" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>Total (ETB)</th>
-              <th className="px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100 whitespace-nowrap" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>Status</th>
-              <th className="px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100 whitespace-nowrap" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>By</th>
-              <th className="px-4 py-2.5 text-right text-[11px] font-bold uppercase tracking-wider text-blue-100 whitespace-nowrap" style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-ink-50">
-            {displayed.length === 0 && (
-              <tr><td colSpan={filterType ? 9 : 10} className="px-4 py-12 text-center text-ink-400">No transactions found.</td></tr>
-            )}
-            {paginated.map(t => {
-              const v = voucherByKey[t.voucherType];
-              const Icon = v?.icon ?? CircleArrowDown;
-              const isIn = t.type === 'in';
-              const matSummary = t.items?.length > 0
-                ? t.items.map(i => `${i.material?.name ?? '—'} ×${i.quantity}`).join(', ')
-                : `${t.material?.name ?? '—'}${t.quantity ? ' ×' + t.quantity : ''}`;
-              const acts = actionsFor(t);
-              return (
-                <tr key={t._id} className={`hover:bg-ink-50/40 ${selected.has(t._id) ? 'bg-red-50/40' : ''}`}>
-                  {canDelete && (
-                    <td className="px-4 py-3">
-                      <input type="checkbox" checked={selected.has(t._id)}
-                        onChange={() => toggleOne(t._id)}
-                        className="h-4 w-4 rounded accent-red-600 cursor-pointer" />
-                    </td>
-                  )}
-                  <td className="px-4 py-3 whitespace-nowrap text-xs text-ink-500">{new Date(t.date).toLocaleString()}</td>
-                  <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-ink-400">{t.voucherNo || '—'}</td>
-                  {!filterType && (
+              {paginated.map(t => {
+                const v = voucherByKey[t.voucherType];
+                const Icon = v?.icon ?? CircleArrowDown;
+                const isIn = t.type === 'in';
+                const matSummary = t.items?.length > 0
+                  ? t.items.map(i => `${i.material?.name ?? '—'} ×${i.quantity}`).join(', ')
+                  : `${t.material?.name ?? '—'}${t.quantity ? ' ×' + t.quantity : ''}`;
+                const acts = actionsFor(t);
+                return (
+                  <tr key={t._id} className={`hover:bg-ink-50/40 ${selected.has(t._id) ? 'bg-red-50/40' : ''}`}>
+                    {canDelete && (
+                      <td className="px-4 py-3">
+                        <input type="checkbox" checked={selected.has(t._id)}
+                          onChange={() => toggleOne(t._id)}
+                          className="h-4 w-4 rounded accent-red-600 cursor-pointer" />
+                      </td>
+                    )}
+                    <td className="px-4 py-3 whitespace-nowrap text-xs text-ink-500">{new Date(t.date).toLocaleString()}</td>
+                    <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-ink-400">{t.voucherNo || '—'}</td>
+                    {!filterType && (
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {v ? (
+                          <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${v.badgeCls}`}>
+                            <Icon size={11} /> {v.label}
+                          </span>
+                        ) : <span className="text-xs text-ink-400">—</span>}
+                      </td>
+                    )}
                     <td className="px-4 py-3 whitespace-nowrap">
-                      {v ? (
-                        <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${v.badgeCls}`}>
-                          <Icon size={11} /> {v.label}
-                        </span>
-                      ) : <span className="text-xs text-ink-400">—</span>}
+                      <span className={`inline-flex items-center gap-1 text-xs font-semibold ${isIn ? 'text-emerald-700' : 'text-red-700'}`}>
+                        {isIn ? <CircleArrowDown size={13} /> : <CircleArrowUp size={13} />}
+                        {isIn ? 'IN' : 'OUT'}
+                      </span>
                     </td>
-                  )}
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <span className={`inline-flex items-center gap-1 text-xs font-semibold ${isIn ? 'text-emerald-700' : 'text-red-700'}`}>
-                      {isIn ? <CircleArrowDown size={13}/> : <CircleArrowUp size={13}/>}
-                      {isIn ? 'IN' : 'OUT'}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-xs text-ink-700 max-w-[180px] truncate" title={matSummary}>{matSummary}</td>
-                  <td className="px-4 py-3 whitespace-nowrap text-xs text-ink-500">{t.supplier?.name || '—'}</td>
-                  <td className="px-4 py-3 whitespace-nowrap text-right tabular font-medium text-ink-800">
-                    {t.totalAmount ? `ETB ${t.totalAmount.toFixed(2)}` : '—'}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <WorkflowBadge status={t.status ?? 'pending'} size="sm" />
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-xs text-ink-400">{t.performedBy?.name || '—'}</td>
-                  <td className="px-4 py-3 whitespace-nowrap text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      {/* Attachment badge */}
-                      {t.attachments?.length > 0 && (
-                        <span
-                          className="inline-flex items-center gap-0.5 rounded-full bg-blue-50 border border-blue-200 px-1.5 py-0.5 text-[10px] font-bold text-blue-600 cursor-pointer"
-                          title={`${t.attachments.length} attachment${t.attachments.length > 1 ? 's' : ''}`}
-                          onClick={() => { setDetailTxn(t); setDetailOpen(true); }}
-                        >
-                          <Paperclip size={9} /> {t.attachments.length}
-                        </span>
-                      )}
-                      {/* Detail / trail */}
-                      <button
-                        onClick={() => { setDetailTxn(t); setDetailOpen(true); }}
-                        className="rounded-md p-1.5 text-ink-400 hover:bg-ink-100 hover:text-ink-600 transition"
-                        title="View trail"
-                      >
-                        <Eye size={13} />
-                      </button>
-                      {/* Edit (only pending status) */}
-                      {canEdit && (t.status ?? 'pending') === 'pending' && (
+                    <td className="px-4 py-3 text-xs text-ink-700 max-w-[180px] truncate" title={matSummary}>{matSummary}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-xs text-ink-500">{t.supplier?.name || '—'}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-right tabular font-medium text-ink-800">
+                      {t.totalAmount ? `ETB ${t.totalAmount.toFixed(2)}` : '—'}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <WorkflowBadge status={t.status ?? 'pending'} size="sm" />
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-xs text-ink-400">{t.performedBy?.name || '—'}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        {/* Attachment badge */}
+                        {t.attachments?.length > 0 && (
+                          <span
+                            className="inline-flex items-center gap-0.5 rounded-full bg-blue-50 border border-blue-200 px-1.5 py-0.5 text-[10px] font-bold text-blue-600 cursor-pointer"
+                            title={`${t.attachments.length} attachment${t.attachments.length > 1 ? 's' : ''}`}
+                            onClick={() => { setDetailTxn(t); setDetailOpen(true); }}
+                          >
+                            <Paperclip size={9} /> {t.attachments.length}
+                          </span>
+                        )}
+                        {/* Detail / trail */}
                         <button
-                          onClick={() => openEditTransaction(t)}
-                          className="inline-flex items-center gap-1 rounded-lg bg-amber-500 hover:bg-amber-600 px-2 py-1 text-xs font-semibold text-white transition shadow-xs"
-                          title="Edit pending voucher"
+                          onClick={() => { setDetailTxn(t); setDetailOpen(true); }}
+                          className="rounded-md p-1.5 text-ink-400 hover:bg-ink-100 hover:text-ink-600 transition"
+                          title="View trail"
                         >
-                          <Pencil size={11} /> Edit
+                          <Eye size={13} />
                         </button>
-                      )}
-                      {/* Workflow action buttons */}
-                      {acts.map(a => (
-                        <button key={a.action}
-                          onClick={() => openApprove(t, a.action)}
-                          className={`rounded-lg px-2 py-1 text-xs font-semibold text-white transition ${ACTION_COLORS[a.action]}`}>
-                          {a.label}
-                        </button>
-                      ))}
-                      {/* Delete — admin can delete any status; others only pending/voided */}
-                      {canDeleteRow(t) && (
-                        <button onClick={() => handleDelete(t._id)}
-                          className="rounded-md p-1.5 text-ink-400 hover:bg-red-50 hover:text-red-600 transition"
-                          title="Delete transaction">
-                          <Trash2 size={13} />
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                        {/* Edit (only pending status) */}
+                        {canEdit && (t.status ?? 'pending') === 'pending' && (
+                          <button
+                            onClick={() => openEditTransaction(t)}
+                            className="inline-flex items-center gap-1 rounded-lg bg-amber-500 hover:bg-amber-600 px-2 py-1 text-xs font-semibold text-white transition shadow-xs"
+                            title="Edit pending voucher"
+                          >
+                            <Pencil size={11} /> Edit
+                          </button>
+                        )}
+                        {/* Workflow action buttons */}
+                        {acts.map(a => (
+                          <button key={a.action}
+                            onClick={() => openApprove(t, a.action)}
+                            className={`rounded-lg px-2 py-1 text-xs font-semibold text-white transition ${ACTION_COLORS[a.action]}`}>
+                            {a.label}
+                          </button>
+                        ))}
+                        {/* Delete — admin can delete any status; others only pending/voided */}
+                        {canDeleteRow(t) && (
+                          <button onClick={() => handleDelete(t._id)}
+                            className="rounded-md p-1.5 text-ink-400 hover:bg-red-50 hover:text-red-600 transition"
+                            title="Delete transaction">
+                            <Trash2 size={13} />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
         <Pagination
           page={page}
@@ -504,25 +505,25 @@ export default function StockTransactions({ defaultVoucher } = {}) {
         >
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${activeV.direction === 'in' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
-              {activeV.direction === 'in' ? <CircleArrowDown size={16}/> : <CircleArrowUp size={16}/>}
+              {activeV.direction === 'in' ? <CircleArrowDown size={16} /> : <CircleArrowUp size={16} />}
               {activeV.description} — stock will be <strong>{activeV.direction === 'in' ? 'increased' : 'decreased'}</strong>
             </div>
-            {error && <div className="flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600"><X size={14}/>{error}</div>}
+            {error && <div className="flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600"><X size={14} />{error}</div>}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="mb-1 block text-xs font-semibold text-ink-500">Voucher No <span className="font-normal text-ink-400">(auto if blank)</span></label>
-                <input value={form.voucherNo} onChange={e => setForm(f=>({...f,voucherNo:e.target.value}))} placeholder="Auto-generated"
-                  className="w-full rounded-lg border border-ink-200 px-3 py-2 text-sm outline-none focus:border-blue-500"/>
+                <input value={form.voucherNo} onChange={e => setForm(f => ({ ...f, voucherNo: e.target.value }))} placeholder="Auto-generated"
+                  className="w-full rounded-lg border border-ink-200 px-3 py-2 text-sm outline-none focus:border-blue-500" />
               </div>
               <div>
                 <label className="mb-1 block text-xs font-semibold text-ink-500">Date &amp; Time</label>
-                <input type="datetime-local" value={form.date} onChange={e => setForm(f=>({...f,date:e.target.value}))}
-                  className="w-full rounded-lg border border-ink-200 px-3 py-2 text-sm outline-none focus:border-blue-500"/>
+                <input type="datetime-local" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
+                  className="w-full rounded-lg border border-ink-200 px-3 py-2 text-sm outline-none focus:border-blue-500" />
               </div>
               {activeV.needsSupplier && (
                 <div className="col-span-2">
                   <label className="mb-1 block text-xs font-semibold text-ink-500">Supplier *</label>
-                  <select required value={form.supplier} onChange={e => setForm(f=>({...f,supplier:e.target.value}))}
+                  <select required value={form.supplier} onChange={e => setForm(f => ({ ...f, supplier: e.target.value }))}
                     className="w-full rounded-lg border border-ink-200 px-3 py-2 text-sm outline-none focus:border-blue-500">
                     <option value="">Select supplier…</option>
                     {suppliers.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
@@ -532,15 +533,15 @@ export default function StockTransactions({ defaultVoucher } = {}) {
               {!activeV.needsSupplier && (
                 <div className="col-span-2">
                   <label className="mb-1 block text-xs font-semibold text-ink-500">{activeV.key === 'disposal' ? 'Disposal reason' : 'Adjustment reason'}</label>
-                  <input value={form.reason} onChange={e => setForm(f=>({...f,reason:e.target.value}))}
+                  <input value={form.reason} onChange={e => setForm(f => ({ ...f, reason: e.target.value }))}
                     placeholder={activeV.key === 'disposal' ? 'e.g. Expired, damaged…' : 'e.g. Physical count variance…'}
-                    className="w-full rounded-lg border border-ink-200 px-3 py-2 text-sm outline-none focus:border-blue-500"/>
+                    className="w-full rounded-lg border border-ink-200 px-3 py-2 text-sm outline-none focus:border-blue-500" />
                 </div>
               )}
               <div className="col-span-2">
                 <label className="mb-1 block text-xs font-semibold text-ink-500">Reference <span className="font-normal text-ink-400">(optional)</span></label>
-                <input value={form.reference} onChange={e => setForm(f=>({...f,reference:e.target.value}))} placeholder="e.g. INV-2024-001"
-                  className="w-full rounded-lg border border-ink-200 px-3 py-2 text-sm outline-none focus:border-blue-500"/>
+                <input value={form.reference} onChange={e => setForm(f => ({ ...f, reference: e.target.value }))} placeholder="e.g. INV-2024-001"
+                  className="w-full rounded-lg border border-ink-200 px-3 py-2 text-sm outline-none focus:border-blue-500" />
               </div>
             </div>
 
@@ -549,11 +550,11 @@ export default function StockTransactions({ defaultVoucher } = {}) {
                 <p className="text-sm font-semibold text-ink-700">Items *</p>
                 <button type="button" onClick={addItem}
                   className="flex items-center gap-1 rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100">
-                  <Plus size={13}/> Add row
+                  <Plus size={13} /> Add row
                 </button>
               </div>
               <div className={`grid gap-2 mb-1 px-1 text-xs font-semibold text-ink-400 ${activeV.needsCost ? 'grid-cols-[1fr_80px_110px_26px]' : 'grid-cols-[1fr_80px_26px]'}`}>
-                <span>Material</span><span>Quantity</span>{activeV.needsCost && <span>Unit Cost (ETB)</span>}<span/>
+                <span>Material</span><span>Quantity</span>{activeV.needsCost && <span>Unit Cost (ETB)</span>}<span />
               </div>
               <div className="space-y-2">
                 {form.items.map((item, idx) => (
@@ -566,16 +567,16 @@ export default function StockTransactions({ defaultVoucher } = {}) {
                       onChange={val => updateItem(idx, 'material', val)}
                     />
                     <input type="number" step="0.001" min="0.001" required placeholder="Qty" value={item.quantity}
-                      onChange={e => updateItem(idx,'quantity',e.target.value)}
-                      className="rounded-lg border border-ink-200 px-2 py-2 text-sm outline-none focus:border-blue-500"/>
+                      onChange={e => updateItem(idx, 'quantity', e.target.value)}
+                      className="rounded-lg border border-ink-200 px-2 py-2 text-sm outline-none focus:border-blue-500" />
                     {activeV.needsCost && (
                       <input type="number" step="0.01" min="0" placeholder="Unit cost" value={item.unitCost}
-                        onChange={e => updateItem(idx,'unitCost',e.target.value)}
-                        className="rounded-lg border border-ink-200 px-2 py-2 text-sm outline-none focus:border-blue-500"/>
+                        onChange={e => updateItem(idx, 'unitCost', e.target.value)}
+                        className="rounded-lg border border-ink-200 px-2 py-2 text-sm outline-none focus:border-blue-500" />
                     )}
-                    <button type="button" onClick={() => removeItem(idx)} disabled={form.items.length===1}
+                    <button type="button" onClick={() => removeItem(idx)} disabled={form.items.length === 1}
                       className="rounded-md p-1 text-ink-300 hover:bg-red-50 hover:text-red-500 disabled:opacity-30">
-                      <X size={14}/>
+                      <X size={14} />
                     </button>
                   </div>
                 ))}
@@ -590,8 +591,8 @@ export default function StockTransactions({ defaultVoucher } = {}) {
 
             <div>
               <label className="mb-1 block text-xs font-semibold text-ink-500">Notes <span className="font-normal text-ink-400">(optional)</span></label>
-              <textarea rows={2} value={form.notes} onChange={e => setForm(f=>({...f,notes:e.target.value}))}
-                className="w-full resize-none rounded-lg border border-ink-200 px-3 py-2 text-sm outline-none focus:border-blue-500"/>
+              <textarea rows={2} value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
+                className="w-full resize-none rounded-lg border border-ink-200 px-3 py-2 text-sm outline-none focus:border-blue-500" />
             </div>
 
             {/* ── Attachments ── */}
@@ -649,13 +650,13 @@ export default function StockTransactions({ defaultVoucher } = {}) {
               <div><p className="text-xs text-ink-400">Status</p><WorkflowBadge status={detailTxn.status ?? 'pending'} /></div>
               <div><p className="text-xs text-ink-400">Date</p><p className="font-medium">{new Date(detailTxn.date).toLocaleString()}</p></div>
               <div><p className="text-xs text-ink-400">Recorded by</p><p className="font-medium">{detailTxn.performedBy?.name ?? '—'}</p></div>
-              <div><p className="text-xs text-ink-400">Total</p><p className="font-semibold">ETB {(detailTxn.totalAmount||0).toFixed(2)}</p></div>
+              <div><p className="text-xs text-ink-400">Total</p><p className="font-semibold">ETB {(detailTxn.totalAmount || 0).toFixed(2)}</p></div>
             </div>
             <div className="rounded-lg bg-ink-50 p-3 text-xs space-y-1">
               {[
-                { label: 'Checked by',  who: detailTxn.checkedBy,  at: detailTxn.checkedAt },
+                { label: 'Checked by', who: detailTxn.checkedBy, at: detailTxn.checkedAt },
                 { label: 'Approved by', who: detailTxn.approvedBy, at: detailTxn.approvedAt },
-                { label: 'Posted by',   who: detailTxn.postedBy,   at: detailTxn.postedAt },
+                { label: 'Posted by', who: detailTxn.postedBy, at: detailTxn.postedAt },
               ].filter(e => e.who).map((e, i) => (
                 <div key={i} className="flex justify-between">
                   <span className="text-ink-500">{e.label}</span>

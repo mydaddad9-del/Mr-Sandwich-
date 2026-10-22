@@ -63,7 +63,7 @@ async function generate() {
   const icoBuffer = Buffer.concat([header, ...entryBuffers, ...imageBuffers]);
   fs.writeFileSync(path.join(publicDir, 'favicon.ico'), icoBuffer);
 
-  console.log('Successfully generated all Baba Roti Café favicons and icon files!');
+  console.log('Successfully generated all Bloom Bar and Restaurant  Café favicons and icon files!');
 }
 
 generate().catch(err => {

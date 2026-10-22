@@ -191,10 +191,10 @@ async function buildSystemContext(userRole = 'storekeeper') {
   const monthName = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
   let ctx = `
-=== Baba Roti  CaféHOTEL — LIVE SYSTEM SNAPSHOT ===
+=== Bloom Bar and Restaurant   CaféHOTEL — LIVE SYSTEM SNAPSHOT ===
 Date: ${today}
 User Role: ${userRole.toUpperCase()}
-Hotel: Baba Roti  CaféHotel (Baba Roti  Café Plc Stock Management System)
+Hotel: Bloom Bar and Restaurant   CaféHotel (Bloom Bar and Restaurant   Café Plc Stock Management System)
 
 --- STOCK OVERVIEW ---
 Total Active Materials: ${materialCount}

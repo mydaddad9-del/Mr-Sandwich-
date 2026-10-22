@@ -61,7 +61,7 @@ const handleWebhook = asyncHandler(async (req, res) => {
       });
       if (blocked) {
         await reply(chatId,
-          `🏨 <b>Baba Roti Café</b>\n━━━━━━━━━━━━━━━━━━━━\n❌ <b>ACCESS PROHIBITED</b>\n\nYour staff account (<b>${blocked.name}</b>) has been disabled or deactivated by the administrator.\n\nTelegram notifications cannot be activated for this account.\n━━━━━━━━━━━━━━━━━━━━`
+          `🏨 <b>Bloom Bar and Restaurant  Café</b>\n━━━━━━━━━━━━━━━━━━━━\n❌ <b>ACCESS PROHIBITED</b>\n\nYour staff account (<b>${blocked.name}</b>) has been disabled or deactivated by the administrator.\n\nTelegram notifications cannot be activated for this account.\n━━━━━━━━━━━━━━━━━━━━`
         );
         return;
       }
@@ -71,7 +71,7 @@ const handleWebhook = asyncHandler(async (req, res) => {
 
     if (alreadySubscribed) {
       await reply(chatId,
-        `✅ <b>Already subscribed!</b>\n\nYou are already receiving Baba Roti  CaféHotel notifications.\n\nTo unsubscribe, send /unsubscribe`
+        `✅ <b>Already subscribed!</b>\n\nYou are already receiving Bloom Bar and Restaurant   CaféHotel notifications.\n\nTo unsubscribe, send /unsubscribe`
       );
       return;
     }
@@ -87,7 +87,7 @@ const handleWebhook = asyncHandler(async (req, res) => {
     await settings.save();
 
     await reply(chatId,
-      `🏨 <b>Baba Roti  CaféHotel</b>
+      `🏨 <b>Bloom Bar and Restaurant   CaféHotel</b>
 ━━━━━━━━━━━━━━━━━━━━
 ✅ <b>Subscribed successfully!</b>
 
@@ -112,7 +112,7 @@ To stop notifications, send /unsubscribe
   // ── /unsubscribe ──────────────────────────────────────────────
   if (text.startsWith('/unsubscribe')) {
     if (!alreadySubscribed) {
-      await reply(chatId, '❌ You are not currently subscribed to Baba Roti  Cafénotifications.');
+      await reply(chatId, '❌ You are not currently subscribed to Bloom Bar and Restaurant   Cafénotifications.');
       return;
     }
 
@@ -121,7 +121,7 @@ To stop notifications, send /unsubscribe
     await settings.save();
 
     await reply(chatId,
-      `🏨 <b>Baba Roti  CaféHotel</b>
+      `🏨 <b>Bloom Bar and Restaurant   CaféHotel</b>
 ━━━━━━━━━━━━━━━━━━━━
 🔕 <b>Unsubscribed</b>
 
@@ -136,7 +136,7 @@ Send /subscribe anytime to re-subscribe.
   if (text === '/status') {
     await reply(chatId,
       alreadySubscribed
-        ? `✅ You are <b>subscribed</b> to Baba Roti  CaféHotel notifications.\n\nSend /unsubscribe to stop.`
+        ? `✅ You are <b>subscribed</b> to Bloom Bar and Restaurant   CaféHotel notifications.\n\nSend /unsubscribe to stop.`
         : `❌ You are <b>not subscribed</b>.\n\nSend /subscribe to start receiving notifications.`
     );
     return;
@@ -144,7 +144,7 @@ Send /subscribe anytime to re-subscribe.
 
   // ── Unknown command ───────────────────────────────────────────
   await reply(chatId,
-    `🏨 <b>Baba Roti  CaféHotel Bot</b>
+    `🏨 <b>Bloom Bar and Restaurant   CaféHotel Bot</b>
 
 Available commands:
 /subscribe   — Start receiving notifications
@@ -264,7 +264,7 @@ const removeSubscriber = asyncHandler(async (req, res) => {
   // Send polite unsubscription notice to that Telegram chat
   await reply(
     targetChatId,
-    `🏨 <b>Baba Roti Café</b>\n━━━━━━━━━━━━━━━━━━━━\n🔕 <b>UNSUBSCRIBED BY ADMINISTRATOR</b>\n\nYour Telegram notifications subscription has been removed by the administrator. You will no longer receive alerts.\n━━━━━━━━━━━━━━━━━━━━`
+    `🏨 <b>Bloom Bar and Restaurant  Café</b>\n━━━━━━━━━━━━━━━━━━━━\n🔕 <b>UNSUBSCRIBED BY ADMINISTRATOR</b>\n\nYour Telegram notifications subscription has been removed by the administrator. You will no longer receive alerts.\n━━━━━━━━━━━━━━━━━━━━`
   );
 
   res.json({ message: 'Subscriber removed and notifications stopped.' });

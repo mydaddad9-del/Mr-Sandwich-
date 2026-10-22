@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Baba Roti Café Official Vector Icon Emblem
+ * Bloom Bar and Restaurant  Café Official Vector Icon Emblem
  * Features:
  * - Royal deep sapphire & indigo backdrop with golden caramel rim
  * - Signature warm golden Roti coffee bun with caramel drizzle swirl
@@ -16,7 +16,7 @@ export const BabaRotiIcon = ({ size = 36, className = '' }) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     className={`shrink-0 ${className}`}
-    aria-label="Baba Roti Café Emblem"
+    aria-label="Bloom Bar and Restaurant  Café Emblem"
   >
     <defs>
       {/* Background Gradient */}
@@ -56,7 +56,7 @@ export const BabaRotiIcon = ({ size = 36, className = '' }) => (
 
     {/* Rounded Squircle Container */}
     <rect width="64" height="64" rx="16" fill="url(#brBgGrad)" />
-    
+
     {/* Inner Subtle Border with Gold Highlight */}
     <rect
       x="1.5"
@@ -161,7 +161,7 @@ export const BabaRotiIcon = ({ size = 36, className = '' }) => (
 );
 
 /**
- * Full Baba Roti Café Brand Component
+ * Full Bloom Bar and Restaurant  Café Brand Component
  */
 export default function BabaRotiLogo({
   collapsed = false,
@@ -182,7 +182,7 @@ export default function BabaRotiLogo({
 
   if (collapsed) {
     return (
-      <div className={`flex items-center justify-center ${className}`} title="Baba Roti Café">
+      <div className={`flex items-center justify-center ${className}`} title="Bloom Bar and Restaurant  Café">
         <BabaRotiIcon size={iconPx} />
       </div>
     );
@@ -202,7 +202,7 @@ export default function BabaRotiLogo({
       <div className="min-w-0">
         <div className="flex items-center gap-1.5">
           <span className={`font-extrabold tracking-tight leading-none text-[15px] transition-colors ${brandTextColor}`}>
-            Baba Roti
+            Bloom Bar and Restaurant
           </span>
           <span className="rounded-md bg-gradient-to-r from-amber-400 to-amber-500 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-slate-950 shadow-sm">
             Café
