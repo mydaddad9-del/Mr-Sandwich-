@@ -38,12 +38,57 @@ const deletePrinter = asyncHandler(async (req, res) => {
   res.json({ message: 'Printer deleted' });
 });
 
+// ── In-Memory Cloud Print Relay Engine ──────────────────────────────────────
+const pendingRelayJobs = new Map(); // jobId -> { resolve, timer }
+let relayJobQueue = [];
+let lastRelayAgentHeartbeat = 0;
+let relayAgentWaiters = [];
+
+function hasActiveRelayAgent() {
+  return (Date.now() - lastRelayAgentHeartbeat) < 90000;
+}
+
+function dispatchToRelay(action, payload, timeoutMs = 8000) {
+  return new Promise((resolve) => {
+    const jobId = 'relay_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+    const job = { id: jobId, action, payload, createdAt: Date.now() };
+
+    const timer = setTimeout(() => {
+      pendingRelayJobs.delete(jobId);
+      relayJobQueue = relayJobQueue.filter((j) => j.id !== jobId);
+      resolve({ ok: false, error: 'Local POS print agent timed out' });
+    }, timeoutMs);
+
+    pendingRelayJobs.set(jobId, { resolve, timer });
+
+    if (relayAgentWaiters.length > 0) {
+      const waitingRes = relayAgentWaiters.shift();
+      try {
+        waitingRes.json({ jobs: [job] });
+      } catch (_) {}
+    } else {
+      relayJobQueue.push(job);
+    }
+  });
+}
+
 // ── TEST printer connectivity ────────────────────────────────────────────────
 const pingPrinter = asyncHandler(async (req, res) => {
   const { ip, port } = req.body;
   if (!ip) return res.status(400).json({ ok: false, error: 'IP address is required' });
 
+  // 1. Try direct socket connection (works when running locally on LAN)
   const result = await testPrinter(ip, port || 9100);
+  if (result.ok) {
+    return res.json(result);
+  }
+
+  // 2. If direct fails (cloud server cannot reach private LAN IP), dispatch to relay agent!
+  if (hasActiveRelayAgent()) {
+    const relayRes = await dispatchToRelay('ping', { ip, port: port || 9100 });
+    return res.json(relayRes);
+  }
+
   res.json(result);
 });
 
@@ -162,8 +207,73 @@ const printTestPageEndpoint = asyncHandler(async (req, res) => {
     });
     res.json({ ok: true, message: `Test page sent to ${printer.ipAddress}:${printer.port || 9100}` });
   } catch (err) {
+    // If direct print fails (cloud host), dispatch to local print agent on LAN!
+    if (hasActiveRelayAgent()) {
+      const relayRes = await dispatchToRelay('test_page', {
+        printer,
+        sampleOrder,
+        opts: {
+          hotelName: 'Bloom Bar & Restaurant',
+          headerLine2: 'TCP Network Print Test Passed',
+          footerLine: `TCP OK • ${printer.brand || 'Epson'} • ${printer.paperWidth || '60×80mm'}`.trim(),
+        },
+      });
+      if (relayRes.ok) {
+        return res.json({ ok: true, via: 'relay_agent', message: `Test page printed to ${printer.ipAddress}:${printer.port || 9100} via Local Agent!` });
+      }
+    }
     res.status(500).json({ ok: false, error: err.message });
   }
+});
+
+// ── RELAY AGENT ENDPOINTS ───────────────────────────────────────────────────
+
+// Agent long-poll endpoint
+const relayPollEndpoint = asyncHandler(async (req, res) => {
+  lastRelayAgentHeartbeat = Date.now();
+
+  if (relayJobQueue.length > 0) {
+    const jobs = [...relayJobQueue];
+    relayJobQueue = [];
+    return res.json({ jobs });
+  }
+
+  relayAgentWaiters.push(res);
+  req.on('close', () => {
+    relayAgentWaiters = relayAgentWaiters.filter((r) => r !== res);
+  });
+  setTimeout(() => {
+    relayAgentWaiters = relayAgentWaiters.filter((r) => r !== res);
+    if (!res.headersSent) {
+      res.json({ jobs: [] });
+    }
+  }, 25000);
+});
+
+// Agent completion endpoint
+const relayCompleteEndpoint = asyncHandler(async (req, res) => {
+  lastRelayAgentHeartbeat = Date.now();
+  const { jobId, result } = req.body;
+  if (!jobId) return res.status(400).json({ ok: false, error: 'jobId required' });
+
+  const entry = pendingRelayJobs.get(jobId);
+  if (entry) {
+    clearTimeout(entry.timer);
+    pendingRelayJobs.delete(jobId);
+    entry.resolve(result || { ok: true });
+  }
+  res.json({ ok: true });
+});
+
+// Relay status endpoint
+const relayStatusEndpoint = asyncHandler(async (req, res) => {
+  const online = hasActiveRelayAgent();
+  const secondsAgo = Math.round((Date.now() - lastRelayAgentHeartbeat) / 1000);
+  res.json({
+    online,
+    lastSeenSecondsAgo: lastRelayAgentHeartbeat ? secondsAgo : null,
+    pendingJobs: relayJobQueue.length,
+  });
 });
 
 module.exports = {
@@ -176,4 +286,7 @@ module.exports = {
   printKOTEndpoint,
   printReceiptEndpoint,
   printTestPageEndpoint,
+  relayPollEndpoint,
+  relayCompleteEndpoint,
+  relayStatusEndpoint,
 };

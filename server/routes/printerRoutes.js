@@ -11,6 +11,9 @@ const {
   printKOTEndpoint,
   printReceiptEndpoint,
   printTestPageEndpoint,
+  relayPollEndpoint,
+  relayCompleteEndpoint,
+  relayStatusEndpoint,
 } = require('../controllers/printerController');
 
 // Allow loopback local print bridge (127.0.0.1) or authenticated users
@@ -20,6 +23,11 @@ const localOrProtect = (req, res, next) => {
   if (isLoopback) return next();
   return protect(req, res, next);
 };
+
+// Cloud Print Relay (communicates with local POS machine agent)
+router.get('/relay/poll',      relayPollEndpoint);
+router.post('/relay/complete', relayCompleteEndpoint);
+router.get('/relay/status',    relayStatusEndpoint);
 
 // CRUD
 router.route('/').get(protect, getPrinters).post(protect, createPrinter);

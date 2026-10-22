@@ -319,7 +319,7 @@ export default function Settings() {
     model: 'Epson TM Series (Universal / All TM-T & POS)',
     paperWidth: '60mm',
     connectionType: 'network',
-    ipAddress: '10.241.18.48',
+    ipAddress: '192.168.8.222',
     port: 9100,
     enabled: true,
     printOnOrder: true,
@@ -3050,7 +3050,7 @@ export default function Settings() {
                               paperWidth: '60mm',
                               charWidth: 32,
                               port: 9100,
-                              ipAddress: f.ipAddress || '10.241.18.48',
+                              ipAddress: f.ipAddress || '192.168.8.222',
                             }));
                           }}
                           className="w-full rounded-xl border border-ink-200 py-2.5 px-3 text-sm outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 bg-white"
@@ -3185,22 +3185,22 @@ export default function Settings() {
                                 <button
                                   type="button"
                                   onClick={() => {
-                                    setPrinterForm(f => ({ ...f, ipAddress: '10.241.18.48', port: 9100 }));
-                                    pingPrinter('10.241.18.48', 9100);
+                                    setPrinterForm(f => ({ ...f, ipAddress: '192.168.8.222', port: 9100 }));
+                                    pingPrinter('192.168.8.222', 9100);
                                   }}
                                   className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
                                 >
-                                  Use 10.241.18.48
+                                  Use 192.168.8.222 (RED-RMS)
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => {
-                                    setPrinterForm(f => ({ ...f, ipAddress: '192.168.8.222', port: 9100 }));
-                                    pingPrinter('192.168.8.222', 9100);
+                                    setPrinterForm(f => ({ ...f, ipAddress: '10.241.18.48', port: 9100 }));
+                                    pingPrinter('10.241.18.48', 9100);
                                   }}
                                   className="text-[10px] font-bold px-2 py-0.5 rounded bg-violet-50 text-violet-700 border border-violet-200 hover:bg-violet-100"
                                 >
-                                  Use 192.168.8.222
+                                  Use 10.241.18.48
                                 </button>
                               </div>
                             </div>
@@ -3209,7 +3209,7 @@ export default function Settings() {
                               value={printerForm.ipAddress}
                               onChange={e => setPrinterForm(f => ({ ...f, ipAddress: e.target.value }))}
                               className="w-full rounded-xl border border-ink-200 py-2.5 px-3 text-sm outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 font-mono"
-                              placeholder="10.241.18.48"
+                              placeholder="192.168.8.222"
                             />
                           </div>
 
