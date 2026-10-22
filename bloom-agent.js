@@ -18,7 +18,7 @@ const path = require('path');
 const CONFIG_FILE = path.join(__dirname, 'agent-config.json');
 
 let config = {
-  cloudUrl: 'https://five-stop.app.aletcloud.com',
+  cloudUrl: process.env.BLOOM_CLOUD_URL || process.argv[2] || 'https://bloom-bar-and-restaurant-1.app.aletcloud.com',
   defaultPrinterIp: '192.168.8.222',
   defaultPrinterPort: 9100,
 };
@@ -28,6 +28,10 @@ if (fs.existsSync(CONFIG_FILE)) {
     const saved = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
     config = { ...config, ...saved };
   } catch (_) {}
+}
+
+if (process.argv[2]) {
+  config.cloudUrl = process.argv[2].trim();
 }
 
 const isHttps = config.cloudUrl.startsWith('https://');
