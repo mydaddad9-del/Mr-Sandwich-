@@ -17,6 +17,7 @@ const autoSeed = async () => {
   try {
     const User = require('./models/User');
     const defaults = [
+      { name: 'System Developer', email: 'dev@hotel.com', password: 'admin123', role: 'dev' },
       { name: 'Baba Roti  CaféAdmin', email: 'admin@hotel.com', password: 'admin123', role: 'admin', phone: '0918592028' },
       { name: 'Hotel Manager', email: 'manager@hotel.com', password: 'admin123', role: 'manager' },
       { name: 'Floor Supervisor', email: 'supervisor@hotel.com', password: 'admin123', role: 'supervisor' },

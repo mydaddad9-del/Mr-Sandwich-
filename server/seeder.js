@@ -10,6 +10,17 @@ const RawMaterial = require('./models/RawMaterial');
 const run = async () => {
   await connectDB();
 
+  const devExists = await User.findOne({ email: 'dev@hotel.com' });
+  if (!devExists) {
+    await User.create({
+      name: 'System Developer',
+      email: 'dev@hotel.com',
+      password: 'admin123',
+      role: 'dev',
+    });
+    console.log('Created default dev -> dev@hotel.com / admin123');
+  }
+
   const adminExists = await User.findOne({ email: 'admin@hotel.com' });
   if (!adminExists) {
     await User.create({
