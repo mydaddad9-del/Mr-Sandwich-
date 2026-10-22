@@ -4,13 +4,13 @@ import api from '../api/axios';
 const AuthContext = createContext(null);
 
 const DEFAULT_PERMISSIONS = {
-  recordGoods:      { storekeeper: true,  manager: true,  admin: true },
-  checkReview:      { storekeeper: false, manager: true,  admin: true },
-  approveGoods:     { storekeeper: false, manager: false, admin: true },
-  postLedger:       { storekeeper: false, manager: true,  admin: true },
-  voidTransactions: { storekeeper: false, manager: false, admin: true },
-  viewReports:      { storekeeper: false, manager: true,  admin: true },
-  manageAccounts:   { storekeeper: false, manager: false, admin: true },
+  recordGoods:      { storekeeper: true,  cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+  checkReview:      { storekeeper: false, cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+  approveGoods:     { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true },
+  postLedger:       { storekeeper: false, cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+  voidTransactions: { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true },
+  viewReports:      { storekeeper: false, cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+  manageAccounts:   { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true },
 };
 
 // CRUD privilege defaults per module
@@ -23,26 +23,26 @@ const DEFAULT_CRUD_PERMISSIONS = Object.fromEntries(
   CRUD_MODULES.map((mod) => [
     mod,
     {
-      view:   { storekeeper: true,  manager: true,  admin: true },
-      edit:   { storekeeper: false, manager: true,  admin: true },
-      delete: { storekeeper: false, manager: false, admin: true },
+      view:   { storekeeper: true,  cashier: mod === 'products', waiter: mod === 'products', supervisor: true,  manager: true,  admin: true },
+      edit:   { storekeeper: false, cashier: false,              waiter: false,              supervisor: !['suppliers', 'employees'].includes(mod), manager: true,  admin: true },
+      delete: { storekeeper: false, cashier: false,              waiter: false,              supervisor: false, manager: false, admin: true },
     },
   ])
 );
 const DEFAULT_NAV_VISIBILITY = {
-  dashboard:      { storekeeper: true,  manager: true,  admin: true },
-  pos:            { storekeeper: true,  manager: true,  admin: true },
-  captainOrder:   { storekeeper: true,  manager: true,  admin: true },
-  cashSales:      { storekeeper: true,  manager: true,  admin: true },
-  rawMaterials:   { storekeeper: true,  manager: true,  admin: true },
-  products:       { storekeeper: true,  manager: true,  admin: true },
-  stockMovements: { storekeeper: true,  manager: true,  admin: true },
-  suppliers:      { storekeeper: false, manager: true,  admin: true },
-  consumption:    { storekeeper: true,  manager: true,  admin: true },
-  reports:        { storekeeper: false, manager: true,  admin: true },
-  expenses:       { storekeeper: true,  manager: true,  admin: true },
-  analytics:      { storekeeper: false, manager: true,  admin: true },
-  staffAccounts:  { storekeeper: false, manager: false, admin: true },
+  dashboard:      { storekeeper: true,  cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+  pos:            { storekeeper: true,  cashier: true,  waiter: true,  supervisor: true,  manager: true,  admin: true },
+  captainOrder:   { storekeeper: true,  cashier: true,  waiter: true,  supervisor: true,  manager: true,  admin: true },
+  cashSales:      { storekeeper: true,  cashier: true,  waiter: false, supervisor: true,  manager: true,  admin: true },
+  rawMaterials:   { storekeeper: true,  cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+  products:       { storekeeper: true,  cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+  stockMovements: { storekeeper: true,  cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+  suppliers:      { storekeeper: false, cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+  consumption:    { storekeeper: true,  cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+  reports:        { storekeeper: false, cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+  expenses:       { storekeeper: true,  cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+  analytics:      { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: true,  admin: true },
+  staffAccounts:  { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true },
 };
 
 const DEFAULT_LICENSED_MODULES = {
@@ -211,7 +211,22 @@ export const AuthProvider = ({ children }) => {
       }
     }
     if (user.role === 'dev') return true;
+
+    // Waiter role is strictly restricted to POS ordering & captain table orders in subsystem
+    if (user.role === 'waiter') {
+      if (['subsystem', 'pos', 'captainOrder'].includes(navKey)) {
+        return licensedModules?.subsystem !== false;
+      }
+      return false;
+    }
+
     const nav = navVisibility ?? DEFAULT_NAV_VISIBILITY;
+    if (navKey === 'subsystem') {
+      const p = nav.pos?.[user.role] ?? true;
+      const c = nav.captainOrder?.[user.role] ?? true;
+      const s = nav.cashSales?.[user.role] ?? true;
+      return Boolean(p || c || s);
+    }
     const entry = nav[navKey];
     if (!entry) return true; // unknown key — show by default
     return Boolean(entry[user.role]);

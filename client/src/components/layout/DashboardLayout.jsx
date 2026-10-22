@@ -60,8 +60,8 @@ const DashboardLayout = () => {
         onExpand={() => setSidebarCollapsed(false)}
       />
       <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Topbar: hidden on mobile when viewing the mobile-optimized Dashboard (matches screenshot) */}
-        <div className={isDashboard ? 'hidden lg:block' : 'block'}>
+        {/* Topbar: hidden on mobile when viewing the mobile-optimized Dashboard or POS */}
+        <div className={(isDashboard || isPos) ? 'hidden lg:block' : 'block'}>
           <Topbar
             onMenuClick={() => setSidebarOpen(true)}
             onToggleCollapse={() => setSidebarCollapsed(c => !c)}

@@ -174,8 +174,12 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
+    if (user?.role === 'waiter') {
+      navigate('/pos', { replace: true });
+      return;
+    }
     fetchSummary();
-  }, []);
+  }, [user, navigate]);
 
   const trendData = useMemo(() => {
     if (!data?.trend) return [];

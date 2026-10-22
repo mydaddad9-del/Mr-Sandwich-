@@ -80,6 +80,15 @@ const CRUD_MODULES_LIST = [
   { key: 'employees',      label: 'Employees' },
 ];
 
+const SETTINGS_ROLES = [
+  { key: 'storekeeper', label: 'Storekeeper' },
+  { key: 'cashier',     label: 'Cashier' },
+  { key: 'waiter',      label: 'Waiter' },
+  { key: 'supervisor',  label: 'Supervisor' },
+  { key: 'manager',     label: 'Manager' },
+  { key: 'admin',       label: 'Admin' },
+];
+
 export default function Settings() {
   const { user, updateUser, hasRole, refreshPermissions, licensedModules, isModuleLicensed } = useAuth();
   const { timeoutMinutes, setTimeoutMinutes } = useSessionTimeout();
@@ -141,37 +150,37 @@ export default function Settings() {
     productSellingPriceAdjustPercent: 0,
     applyToMaterialsNow: false,
     rolePermissions: {
-      recordGoods: { storekeeper: true, manager: true, admin: true },
-      checkReview: { storekeeper: false, manager: true, admin: true },
-      approveGoods: { storekeeper: false, manager: false, admin: true },
-      postLedger: { storekeeper: false, manager: true, admin: true },
-      voidTransactions: { storekeeper: false, manager: false, admin: true },
-      viewReports: { storekeeper: false, manager: true, admin: true },
-      manageAccounts: { storekeeper: false, manager: false, admin: true }
+      recordGoods:      { storekeeper: true,  cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+      checkReview:      { storekeeper: false, cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+      approveGoods:     { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true },
+      postLedger:       { storekeeper: false, cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+      voidTransactions: { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true },
+      viewReports:      { storekeeper: false, cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+      manageAccounts:   { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true }
     },
     navVisibility: {
-      dashboard: { storekeeper: true, manager: true, admin: true },
-      captainOrder: { storekeeper: true, manager: true, admin: true },
-      cashSales: { storekeeper: true, manager: true, admin: true },
-      pos: { storekeeper: true, manager: true, admin: true },
-      rawMaterials: { storekeeper: true, manager: true, admin: true },
-      products: { storekeeper: true, manager: true, admin: true },
-      stockMovements: { storekeeper: true, manager: true, admin: true },
-      suppliers: { storekeeper: false, manager: true, admin: true },
-      consumption: { storekeeper: true, manager: true, admin: true },
-      reports: { storekeeper: false, manager: true, admin: true },
-      expenses: { storekeeper: true, manager: true, admin: true },
-      analytics: { storekeeper: false, manager: true, admin: true },
-      staffAccounts: { storekeeper: false, manager: false, admin: true },
+      dashboard:      { storekeeper: true,  cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+      captainOrder:   { storekeeper: true,  cashier: true,  waiter: true,  supervisor: true,  manager: true,  admin: true },
+      cashSales:      { storekeeper: true,  cashier: true,  waiter: false, supervisor: true,  manager: true,  admin: true },
+      pos:            { storekeeper: true,  cashier: true,  waiter: true,  supervisor: true,  manager: true,  admin: true },
+      rawMaterials:   { storekeeper: true,  cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+      products:       { storekeeper: true,  cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+      stockMovements: { storekeeper: true,  cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+      suppliers:      { storekeeper: false, cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+      consumption:    { storekeeper: true,  cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+      reports:        { storekeeper: false, cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+      expenses:       { storekeeper: true,  cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+      analytics:      { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: true,  admin: true },
+      staffAccounts:  { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true },
     },
     // CRUD privileges per module
     crudPermissions: Object.fromEntries(
       CRUD_MODULES_LIST.map(({ key }) => [
         key,
         {
-          view:   { storekeeper: true,  manager: true,  admin: true },
-          edit:   { storekeeper: false, manager: true,  admin: true },
-          delete: { storekeeper: false, manager: false, admin: true },
+          view:   { storekeeper: true,  cashier: key === 'products', waiter: key === 'products', supervisor: true,  manager: true,  admin: true },
+          edit:   { storekeeper: false, cashier: false,              waiter: false,              supervisor: !['suppliers', 'employees'].includes(key), manager: true,  admin: true },
+          delete: { storekeeper: false, cashier: false,              waiter: false,              supervisor: false, manager: false, admin: true },
         },
       ])
     ),
@@ -687,7 +696,11 @@ export default function Settings() {
   const roleBadgeColor = {
     admin: 'bg-brass-100 text-brass-800 border-brass-300',
     manager: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    supervisor: 'bg-indigo-50 text-indigo-700 border-indigo-200',
     storekeeper: 'bg-blue-50 text-blue-700 border-blue-200',
+    cashier: 'bg-teal-50 text-teal-700 border-teal-200',
+    waiter: 'bg-purple-50 text-purple-700 border-purple-200',
+    dev: 'bg-amber-100 text-amber-900 border-amber-300',
   }[user?.role || 'storekeeper'];
 
   return (
@@ -1959,21 +1972,21 @@ export default function Settings() {
                 <thead>
                   <tr className="border-b border-ink-100 bg-ink-50/70 text-ink-600 font-semibold">
                     <th className="py-2.5 px-3">System Capability</th>
-                    <th className="py-2.5 px-3 text-center">Storekeeper</th>
-                    <th className="py-2.5 px-3 text-center">Manager</th>
-                    <th className="py-2.5 px-3 text-center">Admin</th>
+                    {SETTINGS_ROLES.map((r) => (
+                      <th key={r.key} className="py-2.5 px-3 text-center">{r.label}</th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-ink-50 text-ink-700">
                   {CAPABILITIES.map((cap) => (
                     <tr key={cap.key}>
                       <td className="py-2.5 px-3 font-medium">{cap.label}</td>
-                      {['storekeeper', 'manager', 'admin'].map((r) => (
-                        <td key={r} className="py-2.5 px-3 text-center">
+                      {SETTINGS_ROLES.map((r) => (
+                        <td key={r.key} className="py-2.5 px-3 text-center">
                           <input
                             type="checkbox"
                             disabled={!hasRole('admin')}
-                            checked={systemForm.rolePermissions?.[cap.key]?.[r] || false}
+                            checked={systemForm.rolePermissions?.[cap.key]?.[r.key] || false}
                             onChange={(e) => {
                               const checked = e.target.checked;
                               setSystemForm(prev => ({
@@ -1982,7 +1995,7 @@ export default function Settings() {
                                   ...prev.rolePermissions,
                                   [cap.key]: {
                                     ...prev.rolePermissions?.[cap.key],
-                                    [r]: checked
+                                    [r.key]: checked
                                   }
                                 }
                               }));
@@ -2013,21 +2026,21 @@ export default function Settings() {
                   <thead>
                     <tr className="border-b border-ink-100 bg-ink-50/70 text-ink-600 font-semibold">
                       <th className="py-2.5 px-3">Sidebar Section</th>
-                      <th className="py-2.5 px-3 text-center">Storekeeper</th>
-                      <th className="py-2.5 px-3 text-center">Manager</th>
-                      <th className="py-2.5 px-3 text-center">Admin</th>
+                      {SETTINGS_ROLES.map((r) => (
+                        <th key={r.key} className="py-2.5 px-3 text-center">{r.label}</th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-ink-50 text-ink-700">
                     {NAV_ITEMS.map((nav) => (
                       <tr key={nav.key}>
                         <td className="py-2.5 px-3 font-medium">{nav.label}</td>
-                        {['storekeeper', 'manager', 'admin'].map((r) => (
-                          <td key={r} className="py-2.5 px-3 text-center">
+                        {SETTINGS_ROLES.map((r) => (
+                          <td key={r.key} className="py-2.5 px-3 text-center">
                             <input
                               type="checkbox"
                               disabled={!hasRole('admin')}
-                              checked={systemForm.navVisibility?.[nav.key]?.[r] ?? true}
+                              checked={systemForm.navVisibility?.[nav.key]?.[r.key] ?? true}
                               onChange={(e) => {
                                 const checked = e.target.checked;
                                 setSystemForm(prev => ({
@@ -2036,7 +2049,7 @@ export default function Settings() {
                                     ...prev.navVisibility,
                                     [nav.key]: {
                                       ...prev.navVisibility?.[nav.key],
-                                      [r]: checked,
+                                      [r.key]: checked,
                                     },
                                   },
                                 }));
@@ -2068,15 +2081,15 @@ export default function Settings() {
                   <thead>
                     <tr className="border-b border-ink-100 bg-ink-50/70 text-ink-600 font-semibold">
                       <th className="py-2.5 px-3">Module</th>
-                      <th className="py-2.5 px-3 text-center" colSpan={3}>Storekeeper</th>
-                      <th className="py-2.5 px-3 text-center" colSpan={3}>Manager</th>
-                      <th className="py-2.5 px-3 text-center" colSpan={3}>Admin</th>
+                      {SETTINGS_ROLES.map((r) => (
+                        <th key={r.key} className="py-2.5 px-3 text-center" colSpan={3}>{r.label}</th>
+                      ))}
                     </tr>
                     <tr className="border-b border-ink-100 bg-ink-50/40 text-ink-500 text-[10px] font-bold uppercase tracking-wider">
                       <th className="py-1.5 px-3"></th>
-                      {['storekeeper','manager','admin'].map(role =>
+                      {SETTINGS_ROLES.map(r =>
                         ['View','Edit','Delete'].map(act => (
-                          <th key={`${role}-${act}`} className={`py-1.5 px-2 text-center ${act==='Delete'?'text-red-500':act==='Edit'?'text-amber-600':'text-emerald-600'}`}>{act}</th>
+                          <th key={`${r.key}-${act}`} className={`py-1.5 px-2 text-center ${act==='Delete'?'text-red-500':act==='Edit'?'text-amber-600':'text-emerald-600'}`}>{act}</th>
                         ))
                       )}
                     </tr>
@@ -2085,13 +2098,13 @@ export default function Settings() {
                     {CRUD_MODULES_LIST.map((mod) => (
                       <tr key={mod.key} className="hover:bg-blue-50/20">
                         <td className="py-2.5 px-3 font-semibold text-ink-800">{mod.label}</td>
-                        {['storekeeper', 'manager', 'admin'].map((role) =>
+                        {SETTINGS_ROLES.map((r) =>
                           ['view', 'edit', 'delete'].map((action) => (
-                            <td key={`${role}-${action}`} className="py-2.5 px-2 text-center">
+                            <td key={`${r.key}-${action}`} className="py-2.5 px-2 text-center">
                               <input
                                 type="checkbox"
                                 disabled={!hasRole('admin')}
-                                checked={systemForm.crudPermissions?.[mod.key]?.[action]?.[role] ?? (role === 'admin')}
+                                checked={systemForm.crudPermissions?.[mod.key]?.[action]?.[r.key] ?? (r.key === 'admin')}
                                 onChange={(e) => {
                                   const checked = e.target.checked;
                                   setSystemForm(prev => ({
@@ -2102,7 +2115,7 @@ export default function Settings() {
                                         ...prev.crudPermissions?.[mod.key],
                                         [action]: {
                                           ...prev.crudPermissions?.[mod.key]?.[action],
-                                          [role]: checked,
+                                          [r.key]: checked,
                                         },
                                       },
                                     },

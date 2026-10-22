@@ -15,9 +15,12 @@ import MoreHorizRoundedIcon from '@mui/icons-material/MoreHorizRounded';
  */
 export default function MobileBottomNav({ onOpenMenu }) {
   const location = useLocation();
-  const { canSeeNav } = useAuth();
+  const { user, canSeeNav, logout } = useAuth();
+  const isWaiter = user?.role === 'waiter';
 
   const isHomeActive = location.pathname === '/';
+  const isPosActive = location.pathname === '/pos';
+  const isCaptainActive = location.pathname === '/captain-order';
   const isOrdersActive = ['/pos', '/captain-order', '/cash-sales'].some((p) =>
     location.pathname.startsWith(p)
   );
@@ -28,6 +31,74 @@ export default function MobileBottomNav({ onOpenMenu }) {
     location.pathname.startsWith(p)
   );
 
+  // ── Waiter Mobile Phone Navigation ──────────────────────────────
+  if (isWaiter) {
+    return (
+      <nav
+        aria-label="Waiter Mobile Navigation"
+        className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-purple-200/80 px-4 py-1.5 flex items-center justify-around shadow-[0_-4px_25px_rgba(0,0,0,0.08)] lg:hidden"
+        style={{
+          paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))',
+        }}
+      >
+        {/* Waiter 1: Take Order (POS) */}
+        <NavLink
+          to="/pos"
+          className={`flex flex-col items-center justify-center flex-1 py-1 transition-all duration-200 cursor-pointer ${
+            isPosActive
+              ? 'text-purple-700 font-black scale-105'
+              : 'text-slate-500 hover:text-slate-800 font-medium'
+          }`}
+        >
+          <span
+            className={`flex h-8 w-8 items-center justify-center rounded-xl transition-all ${
+              isPosActive ? 'bg-purple-100 text-purple-700 shadow-sm' : 'text-slate-500'
+            }`}
+          >
+            <ReceiptLongRoundedIcon sx={{ fontSize: 22 }} />
+          </span>
+          <span className="text-[10px] tracking-tight mt-0.5">Take Order</span>
+        </NavLink>
+
+        {/* Waiter 2: Active Orders / Tables */}
+        <NavLink
+          to="/captain-order"
+          className={`flex flex-col items-center justify-center flex-1 py-1 transition-all duration-200 cursor-pointer ${
+            isCaptainActive
+              ? 'text-purple-700 font-black scale-105'
+              : 'text-slate-500 hover:text-slate-800 font-medium'
+          }`}
+        >
+          <span
+            className={`flex h-8 w-8 items-center justify-center rounded-xl transition-all ${
+              isCaptainActive ? 'bg-purple-100 text-purple-700 shadow-sm' : 'text-slate-500'
+            }`}
+          >
+            <Inventory2RoundedIcon sx={{ fontSize: 22 }} />
+          </span>
+          <span className="text-[10px] tracking-tight mt-0.5">Tables & Orders</span>
+        </NavLink>
+
+        {/* Waiter 3: Sign Out */}
+        <button
+          type="button"
+          onClick={() => {
+            if (window.confirm('Sign out from waiter account?')) {
+              logout();
+            }
+          }}
+          className="flex flex-col items-center justify-center flex-1 py-1 text-slate-500 hover:text-rose-600 font-medium transition-all duration-200 cursor-pointer"
+        >
+          <span className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-500 hover:bg-rose-50 hover:text-rose-600 transition-colors">
+            <MoreHorizRoundedIcon sx={{ fontSize: 22 }} />
+          </span>
+          <span className="text-[10px] tracking-tight mt-0.5">Logout ({user?.name?.split(' ')[0] || 'Waiter'})</span>
+        </button>
+      </nav>
+    );
+  }
+
+  // ── Standard Mobile Navigation for Other Roles ───────────────────
   return (
     <nav
       aria-label="Mobile Bottom Navigation"
@@ -37,23 +108,25 @@ export default function MobileBottomNav({ onOpenMenu }) {
       }}
     >
       {/* 1. Home */}
-      <NavLink
-        to="/"
-        className={`flex flex-col items-center justify-center flex-1 py-1 transition-all duration-200 cursor-pointer ${
-          isHomeActive
-            ? 'text-blue-600 font-bold scale-105'
-            : 'text-slate-500 hover:text-slate-800 font-medium'
-        }`}
-      >
-        <span
-          className={`flex h-8 w-8 items-center justify-center rounded-xl transition-all ${
-            isHomeActive ? 'bg-blue-50 text-blue-600' : 'text-slate-500'
+      {canSeeNav('dashboard') && (
+        <NavLink
+          to="/"
+          className={`flex flex-col items-center justify-center flex-1 py-1 transition-all duration-200 cursor-pointer ${
+            isHomeActive
+              ? 'text-blue-600 font-bold scale-105'
+              : 'text-slate-500 hover:text-slate-800 font-medium'
           }`}
         >
-          <HomeRoundedIcon sx={{ fontSize: 22 }} />
-        </span>
-        <span className="text-[10px] tracking-tight mt-0.5">Home</span>
-      </NavLink>
+          <span
+            className={`flex h-8 w-8 items-center justify-center rounded-xl transition-all ${
+              isHomeActive ? 'bg-blue-50 text-blue-600' : 'text-slate-500'
+            }`}
+          >
+            <HomeRoundedIcon sx={{ fontSize: 22 }} />
+          </span>
+          <span className="text-[10px] tracking-tight mt-0.5">Home</span>
+        </NavLink>
+      )}
 
       {/* 2. Orders (Subsystem Suite) */}
       {canSeeNav('subsystem') && (
@@ -77,23 +150,25 @@ export default function MobileBottomNav({ onOpenMenu }) {
       )}
 
       {/* 3. Inventory */}
-      <NavLink
-        to="/materials"
-        className={`flex flex-col items-center justify-center flex-1 py-1 transition-all duration-200 cursor-pointer ${
-          isInventoryActive
-            ? 'text-blue-600 font-bold scale-105'
-            : 'text-slate-500 hover:text-slate-800 font-medium'
-        }`}
-      >
-        <span
-          className={`flex h-8 w-8 items-center justify-center rounded-xl transition-all ${
-            isInventoryActive ? 'bg-blue-50 text-blue-600' : 'text-slate-500'
+      {(canSeeNav('rawMaterials') || canSeeNav('products') || canSeeNav('suppliers') || canSeeNav('consumption')) && (
+        <NavLink
+          to="/materials"
+          className={`flex flex-col items-center justify-center flex-1 py-1 transition-all duration-200 cursor-pointer ${
+            isInventoryActive
+              ? 'text-blue-600 font-bold scale-105'
+              : 'text-slate-500 hover:text-slate-800 font-medium'
           }`}
         >
-          <Inventory2RoundedIcon sx={{ fontSize: 22 }} />
-        </span>
-        <span className="text-[10px] tracking-tight mt-0.5">Inventory</span>
-      </NavLink>
+          <span
+            className={`flex h-8 w-8 items-center justify-center rounded-xl transition-all ${
+              isInventoryActive ? 'bg-blue-50 text-blue-600' : 'text-slate-500'
+            }`}
+          >
+            <Inventory2RoundedIcon sx={{ fontSize: 22 }} />
+          </span>
+          <span className="text-[10px] tracking-tight mt-0.5">Inventory</span>
+        </NavLink>
+      )}
 
       {/* 4. Finance & Expenses */}
       {(canSeeNav('expenses') || canSeeNav('analytics')) && (

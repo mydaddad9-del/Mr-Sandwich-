@@ -6,13 +6,13 @@ const Setting = require('../models/Setting');
 const JWT_SECRET = process.env.JWT_SECRET || 'baba_roti_cafe_super_secret_jwt_key_2024';
 
 const DEFAULT_ROLE_PERMISSIONS = {
-  recordGoods: { storekeeper: true, manager: true, admin: true },
-  checkReview: { storekeeper: false, manager: true, admin: true },
-  approveGoods: { storekeeper: false, manager: false, admin: true },
-  postLedger: { storekeeper: false, manager: true, admin: true },
-  voidTransactions: { storekeeper: false, manager: false, admin: true },
-  viewReports: { storekeeper: false, manager: true, admin: true },
-  manageAccounts: { storekeeper: false, manager: false, admin: true },
+  recordGoods:      { storekeeper: true,  cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+  checkReview:      { storekeeper: false, cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+  approveGoods:     { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true },
+  postLedger:       { storekeeper: false, cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+  voidTransactions: { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true },
+  viewReports:      { storekeeper: false, cashier: false, waiter: false, supervisor: true,  manager: true,  admin: true },
+  manageAccounts:   { storekeeper: false, cashier: false, waiter: false, supervisor: false, manager: false, admin: true },
 };
 
 let cachedSettings = null;

@@ -73,6 +73,7 @@ export default function POS() {
   const [orderType, setOrderType] = useState("dine_in");
   const [selectedTable, setSelectedTable] = useState("");
   const [selectedWaiter, setSelectedWaiter] = useState(null);
+  const [mobileCartOpen, setMobileCartOpen] = useState(false);
   const [waiters, setWaiters] = useState(() => {
     try {
       const cached = localStorage.getItem("baba_roti_pos_waiters_cache");
@@ -81,6 +82,18 @@ export default function POS() {
       return [];
     }
   });
+
+  // Automatically assign logged-in waiter for phone ordering
+  useEffect(() => {
+    if (user?.role === 'waiter' && user && (!selectedWaiter || selectedWaiter._id !== user._id)) {
+      setSelectedWaiter({
+        _id: user._id,
+        name: user.name,
+        role: 'Waiter',
+        code: user.phone || '',
+      });
+    }
+  }, [user, selectedWaiter]);
   const [refreshingWaiters, setRefreshingWaiters] = useState(false);
   const [customerName, setCustomerName] = useState("");
   const [discountPct, setDiscountPct] = useState(0);
@@ -512,6 +525,7 @@ export default function POS() {
       setServiceChargePct(0);
       setServiceCharge(0);
       setCustomerName("");
+      setMobileCartOpen(false);
       loadHeldOrders();
     } catch (e) {
       showToast(e.response?.data?.message || "Failed to submit order", "error");
@@ -596,6 +610,7 @@ export default function POS() {
       setCustomerName("");
       setAmountPaid("");
       setShowPayModal(false);
+      setMobileCartOpen(false);
       loadHeldOrders();
     } catch (e) {
       showToast(e.response?.data?.message || "Failed to complete sale", "error");
@@ -689,6 +704,36 @@ export default function POS() {
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         .cart-item { transition: all 0.15s ease; }
         .cart-item:hover { background: #f8fafc !important; }
+        @media (max-width: 1023px) {
+          .pos-cart-aside {
+            position: fixed !important;
+            inset: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: 100% !important;
+            z-index: 100 !important;
+            display: none !important;
+          }
+          .pos-cart-aside.pos-cart-open {
+            display: flex !important;
+          }
+          .pos-mobile-cart-bar {
+            display: flex !important;
+          }
+          .pos-product-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            padding-bottom: 140px !important;
+          }
+        }
+        @media (min-width: 1024px) {
+          .pos-cart-aside {
+            display: flex !important;
+            width: 380px !important;
+          }
+          .pos-mobile-cart-bar {
+            display: none !important;
+          }
+        }
       `}</style>
 
       {/* ── TOPBAR HEADER ────────────────────────────────────────── */}
@@ -956,6 +1001,48 @@ export default function POS() {
               {user?.name || "Cashier"}
             </span>
           </div>
+
+          {/* Mobile Cart Trigger Button */}
+          <button
+            type="button"
+            className="lg:hidden"
+            onClick={() => setMobileCartOpen(true)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              background: items.length > 0 ? "linear-gradient(135deg, #2563eb, #1d4ed8)" : "#f1f5f9",
+              color: items.length > 0 ? "#ffffff" : "#475569",
+              border: items.length > 0 ? "none" : "1px solid #cbd5e1",
+              borderRadius: 12,
+              padding: "6px 12px",
+              fontSize: 12,
+              fontWeight: 800,
+              cursor: "pointer",
+              boxShadow: items.length > 0 ? "0 4px 12px rgba(37,99,235,0.3)" : "none",
+            }}
+          >
+            <ShoppingBag size={14} />
+            <span>Cart</span>
+            {items.length > 0 && (
+              <span
+                style={{
+                  background: "#ffffff",
+                  color: "#2563eb",
+                  fontSize: 10,
+                  fontWeight: 900,
+                  borderRadius: "50%",
+                  width: 18,
+                  height: 18,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {items.length}
+              </span>
+            )}
+          </button>
         </div>
       </header>
 
@@ -966,6 +1053,7 @@ export default function POS() {
             LEFT PANEL: CURRENT ORDER CART (Width ~ 380px)
            ══════════════════════════════════════════════════════════ */}
         <aside
+          className={`pos-cart-aside ${mobileCartOpen ? "pos-cart-open" : ""}`}
           style={{
             width: 380,
             display: "flex",
@@ -1006,6 +1094,30 @@ export default function POS() {
 
               {/* Header Actions */}
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                {/* Mobile Close Button */}
+                <button
+                  type="button"
+                  className="lg:hidden"
+                  onClick={() => setMobileCartOpen(false)}
+                  title="Close cart and return to menu"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 4,
+                    background: "#f1f5f9",
+                    border: "1px solid #cbd5e1",
+                    borderRadius: 8,
+                    color: "#334155",
+                    padding: "4px 8px",
+                    fontSize: 11,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  <X size={13} />
+                  Close
+                </button>
+
                 <button
                   type="button"
                   onClick={() => {
@@ -1949,6 +2061,120 @@ export default function POS() {
                 );
               })
             )}
+          </div>
+
+          {/* Floating Mobile Sticky Order / Cart Bar (only visible on mobile screens) */}
+          <div
+            className="pos-mobile-cart-bar"
+            style={{
+              position: "fixed",
+              bottom: 64,
+              left: 12,
+              right: 12,
+              background: "linear-gradient(135deg, #1e293b, #0f172a)",
+              color: "#ffffff",
+              padding: "10px 14px",
+              borderRadius: 16,
+              boxShadow: "0 10px 25px rgba(0,0,0,0.3)",
+              zIndex: 40,
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 10,
+            }}
+          >
+            <div
+              onClick={() => setMobileCartOpen(true)}
+              style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", flex: 1 }}
+            >
+              <div
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 10,
+                  background: "linear-gradient(135deg, #2563eb, #3b82f6)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  position: "relative",
+                  flexShrink: 0,
+                }}
+              >
+                <ShoppingBag size={18} color="#fff" />
+                {items.length > 0 && (
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: -4,
+                      right: -4,
+                      background: "#ef4444",
+                      color: "#fff",
+                      fontSize: 10,
+                      fontWeight: 900,
+                      borderRadius: 10,
+                      minWidth: 16,
+                      height: 16,
+                      padding: "0 4px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {items.reduce((s, i) => s + (i.quantity || 1), 0)}
+                  </span>
+                )}
+              </div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 800 }}>
+                  {items.length === 0 ? "Cart Empty" : `${items.length} Item${items.length > 1 ? "s" : ""} · ${ETB(grandTotal)}`}
+                </div>
+                <div style={{ fontSize: 10, color: "#94a3b8" }}>
+                  {selectedTable ? `Table: ${selectedTable}` : "No Table Selected"} {selectedWaiter ? `· Waiter: ${selectedWaiter.name}` : ""}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: 8 }}>
+              <button
+                type="button"
+                onClick={() => setMobileCartOpen(true)}
+                style={{
+                  background: "#334155",
+                  border: "1px solid #475569",
+                  color: "#f8fafc",
+                  borderRadius: 10,
+                  padding: "8px 12px",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                View Cart
+              </button>
+              {items.length > 0 && (
+                <button
+                  type="button"
+                  disabled={placing}
+                  onClick={handleOrder}
+                  style={{
+                    background: "linear-gradient(135deg, #f59e0b, #d97706)",
+                    border: "none",
+                    color: "#ffffff",
+                    borderRadius: 10,
+                    padding: "8px 14px",
+                    fontSize: 12,
+                    fontWeight: 800,
+                    cursor: placing ? "not-allowed" : "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    boxShadow: "0 4px 12px rgba(245,158,11,0.4)",
+                  }}
+                >
+                  <UtensilsCrossed size={14} />
+                  <span>Send</span>
+                </button>
+              )}
+            </div>
           </div>
         </main>
       </div>

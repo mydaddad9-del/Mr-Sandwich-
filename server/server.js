@@ -19,7 +19,10 @@ const autoSeed = async () => {
     const defaults = [
       { name: 'Baba Roti  CaféAdmin', email: 'admin@hotel.com', password: 'admin123', role: 'admin', phone: '0918592028' },
       { name: 'Hotel Manager', email: 'manager@hotel.com', password: 'admin123', role: 'manager' },
+      { name: 'Floor Supervisor', email: 'supervisor@hotel.com', password: 'admin123', role: 'supervisor' },
       { name: 'Store Keeper', email: 'storekeeper@hotel.com', password: 'admin123', role: 'storekeeper' },
+      { name: 'Head Cashier', email: 'cashier@hotel.com', password: 'admin123', role: 'cashier' },
+      { name: 'Service Waiter', email: 'waiter@hotel.com', password: 'admin123', role: 'waiter' },
     ];
     for (const u of defaults) {
       const exists = await User.findOne({ email: u.email });

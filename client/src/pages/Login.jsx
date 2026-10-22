@@ -9,7 +9,10 @@ import { BabaRotiIcon } from '../components/ui/BabaRotiLogo';
 const ROLES = [
   { label: 'Admin', email: 'admin@hotel.com' },
   { label: 'Manager', email: 'manager@hotel.com' },
+  { label: 'Supervisor', email: 'supervisor@hotel.com' },
   { label: 'Store Keeper', email: 'storekeeper@hotel.com' },
+  { label: 'Cashier', email: 'cashier@hotel.com' },
+  { label: 'Waiter', email: 'waiter@hotel.com' },
 ];
 
 /* ─── Starburst / asterisk SVG logo mark ───────────────────────── */
@@ -180,8 +183,12 @@ export default function Login() {
     setServerError('');
     setLoading(true);
     try {
-      await login(email, password, otpToken);
-      navigate(location.state?.from || '/', { replace: true });
+      const loggedUser = await login(email, password, otpToken);
+      if (loggedUser?.role === 'waiter') {
+        navigate('/pos', { replace: true });
+      } else {
+        navigate(location.state?.from || '/', { replace: true });
+      }
     } catch (err) {
       setServerError(
         err.response?.data?.message ||

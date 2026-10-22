@@ -32,12 +32,14 @@ const ProtectedRoute = ({ children, roles, capability, module: moduleProp }) => 
     return <ModuleLocked />;
   }
 
+  const fallbackUrl = user?.role === 'waiter' ? '/pos' : '/';
+
   if (capability && !can(capability)) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={fallbackUrl} replace />;
   }
 
   if (roles && !capability && !hasRole(...roles)) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={fallbackUrl} replace />;
   }
 
   return children;

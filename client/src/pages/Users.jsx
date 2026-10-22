@@ -12,7 +12,25 @@ const emptyForm = {
   phone: '', telegramChatId: '',
 };
 
-const roleColor  = { admin: 'brass', manager: 'green', storekeeper: 'ink', dev: 'amber' };
+const roleColor = {
+  admin: 'brass',
+  manager: 'green',
+  supervisor: 'blue',
+  storekeeper: 'ink',
+  cashier: 'emerald',
+  waiter: 'purple',
+  dev: 'amber',
+};
+
+const roleLabels = {
+  admin: 'Admin',
+  manager: 'Manager',
+  supervisor: 'Supervisor',
+  storekeeper: 'Store Keeper',
+  cashier: 'Cashier',
+  waiter: 'Waiter',
+  dev: 'System Developer',
+};
 
 const Users = () => {
   const { user: currentUser } = useAuth();
@@ -167,7 +185,7 @@ const Users = () => {
                     )}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <Badge color={roleColor[u.role]}>{u.role}</Badge>
+                    <Badge color={roleColor[u.role] || 'ink'}>{roleLabels[u.role] || u.role}</Badge>
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <Badge color={u.isActive ? 'green' : 'red'}>{u.isActive ? 'Active' : 'Disabled'}</Badge>
@@ -260,6 +278,9 @@ const Users = () => {
               <select value={form.role} onChange={e => f('role', e.target.value)}
                 className="w-full rounded-lg border border-ink-200 px-3 py-2 text-sm outline-none focus:border-blue-500 bg-white">
                 <option value="storekeeper">Store Keeper</option>
+                <option value="cashier">Cashier</option>
+                <option value="waiter">Waiter (POS Mobile Order)</option>
+                <option value="supervisor">Supervisor</option>
                 <option value="manager">Manager</option>
                 <option value="admin">Admin</option>
                 {/* Dev option only visible to system owner */}
