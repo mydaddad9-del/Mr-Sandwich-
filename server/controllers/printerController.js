@@ -116,7 +116,12 @@ const printKOTEndpoint = asyncHandler(async (req, res) => {
       await printKOT(printer, order, opts || {});
       results.push({ printer: printer.name, ok: true });
     } catch (err) {
-      results.push({ printer: printer.name, ok: false, error: err.message });
+      if (hasActiveRelayAgent()) {
+        const relayRes = await dispatchToRelay('kot', { printer, order, opts });
+        results.push({ printer: printer.name, ok: relayRes.ok, error: relayRes.error });
+      } else {
+        results.push({ printer: printer.name, ok: false, error: err.message });
+      }
     }
   }
 
@@ -147,7 +152,12 @@ const printReceiptEndpoint = asyncHandler(async (req, res) => {
       await printReceipt(printer, order, opts || {});
       results.push({ printer: printer.name, ok: true });
     } catch (err) {
-      results.push({ printer: printer.name, ok: false, error: err.message });
+      if (hasActiveRelayAgent()) {
+        const relayRes = await dispatchToRelay('receipt', { printer, order, opts });
+        results.push({ printer: printer.name, ok: relayRes.ok, error: relayRes.error });
+      } else {
+        results.push({ printer: printer.name, ok: false, error: err.message });
+      }
     }
   }
 

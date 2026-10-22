@@ -175,12 +175,14 @@ async function pollLoop() {
         for (const job of jobs) {
           console.log(`[JOB] Received ${job.action} (id: ${job.id})`);
           if (job.action === 'ping') {
-            const ok = await checkLocalPrinter(job.payload?.ip || config.defaultPrinterIp, job.payload?.port || 9100);
-            console.log(`[PING] Tested ${job.payload?.ip}:${job.payload?.port} -> ${ok ? 'ONLINE [OK]' : 'OFFLINE'}`);
+            const ip = job.payload?.ip || config.defaultPrinterIp;
+            const port = job.payload?.port || 9100;
+            const ok = await checkLocalPrinter(ip, port);
+            console.log(`[PING] Tested ${ip}:${port} -> ${ok ? 'ONLINE [OK]' : 'OFFLINE'}`);
             completeJob(job.id, { ok });
           } else if (job.action === 'test_page') {
-            const ip = job.payload?.printer?.ipAddress || config.defaultPrinterIp;
-            const port = job.payload?.printer?.port || 9100;
+            const ip = job.payload?.printer?.ipAddress || job.payload?.ip || config.defaultPrinterIp;
+            const port = job.payload?.printer?.port || job.payload?.port || 9100;
             const rawBytes = buildTestReceipt('Bloom Bar & Restaurant', 'TCP Cloud Print Passed');
             try {
               await sendRawToPrinter(ip, port, rawBytes);
@@ -188,6 +190,60 @@ async function pollLoop() {
               completeJob(job.id, { ok: true, message: `Printed to ${ip}:${port}` });
             } catch (err) {
               console.error(`[PRINT] Error printing to ${ip}:${port}:`, err.message);
+              completeJob(job.id, { ok: false, error: err.message });
+            }
+          } else if (job.action === 'kot') {
+            const ip = job.payload?.printer?.ipAddress || config.defaultPrinterIp;
+            const port = job.payload?.printer?.port || 9100;
+            const order = job.payload?.order || {};
+            const items = (order.items || []).map(i => `  ${i.quantity || 1}x ${i.productName || i.name || ''}`).join('\n');
+            const kotData = Buffer.concat([
+              Buffer.from([0x1b, 0x40, 0x1b, 0x61, 0x01, 0x1b, 0x21, 0x30]),
+              Buffer.from('** KITCHEN ORDER **\n', 'latin1'),
+              Buffer.from([0x1b, 0x21, 0x00, 0x1b, 0x45, 0x01]),
+              Buffer.from(`Order #${order.orderNo || '--'}  Table: ${order.tableNo || '--'}\n`, 'latin1'),
+              Buffer.from(`Waiter: ${order.waiterName || 'Staff'}  ${new Date().toLocaleTimeString()}\n`, 'latin1'),
+              Buffer.from('--------------------------------\n', 'latin1'),
+              Buffer.from([0x1b, 0x61, 0x00, 0x1b, 0x45, 0x00]),
+              Buffer.from(items + '\n', 'latin1'),
+              Buffer.from('--------------------------------\n', 'latin1'),
+              Buffer.from([0x1b, 0x64, 0x04, 0x1d, 0x56, 0x00]),
+            ]);
+            try {
+              await sendRawToPrinter(ip, port, kotData);
+              console.log(`[PRINT] KOT #${order.orderNo} printed to ${ip}:${port} [SUCCESS]`);
+              completeJob(job.id, { ok: true });
+            } catch (err) {
+              console.error(`[PRINT] KOT error on ${ip}:${port}:`, err.message);
+              completeJob(job.id, { ok: false, error: err.message });
+            }
+          } else if (job.action === 'receipt') {
+            const ip = job.payload?.printer?.ipAddress || config.defaultPrinterIp;
+            const port = job.payload?.printer?.port || 9100;
+            const order = job.payload?.order || {};
+            const items = (order.items || []).map(i => `  ${(i.productName || '').padEnd(18).slice(0, 18)} x${i.quantity}  ${Number(i.totalPrice || 0).toFixed(2)}`).join('\n');
+            const receiptData = Buffer.concat([
+              Buffer.from([0x1b, 0x40, 0x1b, 0x61, 0x01, 0x1b, 0x21, 0x30]),
+              Buffer.from('BLOOM BAR & RESTAURANT\n', 'latin1'),
+              Buffer.from([0x1b, 0x21, 0x00]),
+              Buffer.from(`Order #${order.orderNo || '--'}  Table: ${order.tableNo || '--'}\n`, 'latin1'),
+              Buffer.from(`Date: ${new Date().toLocaleString('en-ET')}\n`, 'latin1'),
+              Buffer.from('--------------------------------\n', 'latin1'),
+              Buffer.from([0x1b, 0x61, 0x00]),
+              Buffer.from(items + '\n', 'latin1'),
+              Buffer.from('--------------------------------\n', 'latin1'),
+              Buffer.from([0x1b, 0x61, 0x02, 0x1b, 0x45, 0x01]),
+              Buffer.from(`TOTAL: ETB ${Number(order.grandTotal || 0).toFixed(2)}\n`, 'latin1'),
+              Buffer.from([0x1b, 0x45, 0x00, 0x1b, 0x61, 0x01]),
+              Buffer.from('Thank you! Come again.\n', 'latin1'),
+              Buffer.from([0x1b, 0x64, 0x04, 0x1d, 0x56, 0x00]),
+            ]);
+            try {
+              await sendRawToPrinter(ip, port, receiptData);
+              console.log(`[PRINT] Receipt #${order.orderNo} printed to ${ip}:${port} [SUCCESS]`);
+              completeJob(job.id, { ok: true });
+            } catch (err) {
+              console.error(`[PRINT] Receipt error on ${ip}:${port}:`, err.message);
               completeJob(job.id, { ok: false, error: err.message });
             }
           }
