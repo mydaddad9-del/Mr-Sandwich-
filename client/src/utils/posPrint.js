@@ -306,7 +306,6 @@ function executePrint(html, frameId = 'pos_print_frame') {
     }, 250);
   };
 }
-
 export const posPrint = {
   printReceipt: printThermalReceipt,
   printKitchen: (order, opts) => printStationTicket(order, 'kitchen', opts),

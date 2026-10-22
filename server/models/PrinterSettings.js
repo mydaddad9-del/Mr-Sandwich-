@@ -29,7 +29,7 @@ const printerSchema = new mongoose.Schema(
     },
     paperWidth: {
       type: String,
-      enum: ['58mm', '80mm', 'A4'],
+      enum: ['58mm', '60mm', '60x80mm', '60*80mm', '80mm', 'A4'],
       default: '80mm',
     },
     connectionType: {

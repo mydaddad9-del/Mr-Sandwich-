@@ -224,7 +224,12 @@ export default function Settings() {
     { key: 'bar', label: 'Bar Printer' },
     { key: 'both', label: 'Kitchen + Receipt' },
   ];
-  const PAPER_WIDTHS = ['58mm', '80mm', 'A4'];
+  const PAPER_WIDTHS = [
+    { key: '60mm', label: '60×80mm (Recommended)', charWidth: 32 },
+    { key: '58mm', label: '58mm Mini', charWidth: 32 },
+    { key: '80mm', label: '80mm Standard', charWidth: 42 },
+    { key: 'A4', label: 'A4 Laser', charWidth: 60 },
+  ];
 
   // Real-world thermal printer models grouped by brand
   const PRINTER_MODELS = {
@@ -232,7 +237,7 @@ export default function Settings() {
       // 80mm POS
       'TM-T20III', 'TM-T20X', 'TM-T70II', 'TM-T82III',
       'TM-T83III', 'TM-T88VI', 'TM-T88VII',
-      // 58mm POS
+      // 58mm / 60mm POS
       'TM-T20II', 'TM-T81III',
       // Kitchen / Open-frame
       'TM-U220', 'TM-U330', 'TM-H6000V',
@@ -269,6 +274,7 @@ export default function Settings() {
       'SRP-270', 'SRP-275III',
     ],
     Generic: [
+      'Generic 60×80mm ESC/POS',
       'Generic 80mm ESC/POS',
       'Generic 58mm ESC/POS',
       'XP-58 (Generic)',
@@ -308,12 +314,12 @@ export default function Settings() {
   };
 
   const blankPrinter = {
-    name: '', type: 'kitchen', brand: 'Generic', model: '',
-    paperWidth: '80mm', connectionType: 'network',
-    ipAddress: '', port: 9100, enabled: true,
+    name: 'Kitchen / Order Printer', type: 'kitchen', brand: 'Epson', model: 'TM-T20III',
+    paperWidth: '60mm', connectionType: 'network',
+    ipAddress: '192.168.8.222', port: 9100, enabled: true,
     printOnOrder: true, printOnCheckout: true, copies: 1,
-    headerLine1: 'Bloom Bar and Restaurant  Café', headerLine2: '', footerLine: 'Thank you! Come again.',
-    charWidth: 42,
+    headerLine1: 'Bloom Bar & Restaurant', headerLine2: '', footerLine: 'Thank you! Come again.',
+    charWidth: 32,
   };
 
   const [printers, setPrinters] = useState([]);
@@ -2717,14 +2723,34 @@ export default function Settings() {
             customerName: 'Test Customer',
             paymentMethod: 'Cash',
             items: [
-              { productName: 'Bloom Bar and Restaurant  Bun (Special)', quantity: 2, unitPrice: 35 },
-              { productName: 'Ethiopian Coffee', quantity: 1, unitPrice: 30 },
+              { productName: 'Bloom Special Burger', quantity: 2, unitPrice: 350, totalPrice: 700 },
+              { productName: 'Fresh Draught Beer / Drink', quantity: 1, unitPrice: 150, totalPrice: 150 },
             ],
-            amountPaid: 100,
+            subtotal: 850,
+            grandTotal: 850,
+            amountPaid: 1000,
+            changeDue: 150,
             taxRate: 15,
           }, {
-            hotelName: printerOrForm?.headerLine1 || 'Bloom Bar and Restaurant  Café',
+            hotelName: printerOrForm?.headerLine1 || 'Bloom Bar & Restaurant',
             footerLine: printerOrForm?.footerLine || 'Thank you! Come again.',
+            paperWidth: printerOrForm?.paperWidth || '60mm',
+          });
+        };
+
+        const printSystemKOT = (printerOrForm) => {
+          posPrint.printKitchen({
+            orderNo: 'KOT-TEST-001',
+            orderType: 'dine_in',
+            tableNo: 'Table 4',
+            cashierName: 'Order Server',
+            items: [
+              { productName: 'Beef Steak with Fries', quantity: 2, station: 'kitchen', notes: 'Medium Rare, No Onion' },
+              { productName: 'Special Club Sandwich', quantity: 1, station: 'kitchen', notes: 'Extra Sauce' },
+            ],
+          }, {
+            businessName: printerOrForm?.headerLine1 || 'Bloom Bar & Restaurant',
+            paperWidth: printerOrForm?.paperWidth || '60mm',
           });
         };
 
@@ -3056,21 +3082,27 @@ export default function Settings() {
 
                       {/* Paper Width */}
                       <div>
-                        <label className="block text-xs font-semibold text-ink-700 mb-1">Paper Width</label>
-                        <div className="flex gap-2">
+                        <label className="block text-xs font-semibold text-ink-700 mb-1">
+                          Paper Width <span className="text-violet-600 font-bold">(Select 60×80mm for your roll)</span>
+                        </label>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                           {PAPER_WIDTHS.map(w => (
                             <button
-                              key={w} type="button"
-                              onClick={() => setPrinterForm(f => ({
-                                ...f,
-                                paperWidth: w,
-                                charWidth: w === '58mm' ? 32 : w === 'A4' ? 60 : 42,
-                              }))}
-                              className={`flex-1 rounded-xl border py-2 text-sm font-semibold transition ${printerForm.paperWidth === w
-                                  ? 'border-violet-500 bg-violet-50 text-violet-700'
-                                  : 'border-ink-200 bg-white text-ink-500 hover:border-violet-300'
-                                }`}
-                            >{w}</button>
+                              key={w.key} type="button"
+                              onClick={() => {
+                                setPrinterForm(f => ({
+                                  ...f,
+                                  paperWidth: w.key,
+                                  charWidth: w.charWidth,
+                                }));
+                                localStorage.setItem('bloom_preferred_paper_width', w.key);
+                              }}
+                              className={`rounded-xl border py-2 text-xs font-semibold transition ${
+                                printerForm.paperWidth === w.key || (w.key === '60mm' && /60/i.test(printerForm.paperWidth))
+                                  ? 'border-violet-600 bg-violet-600 text-white shadow-sm ring-2 ring-violet-400/30'
+                                  : 'border-ink-200 bg-white text-ink-700 hover:border-violet-300'
+                              }`}
+                            >{w.label}</button>
                           ))}
                         </div>
                       </div>
@@ -3091,7 +3123,7 @@ export default function Settings() {
                             <div>
                               <p className="text-xs font-bold text-ink-900">Windows / System Printer</p>
                               <p className="text-[11px] text-ink-500 mt-0.5">
-                                Works everywhere (including Cloud hosting). Prints directly to installed <strong>HP LaserJet M402dn</strong> via browser dialog.
+                                Works everywhere (including Cloud hosting &amp; AnyDesk). Prints directly to installed <strong>Epson TM-T20III</strong> or Windows printer.
                               </p>
                             </div>
                           </button>
@@ -3290,21 +3322,28 @@ export default function Settings() {
                           <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-2">
                             <p className="font-bold flex items-center gap-1.5 text-amber-950">
                               <AlertCircle size={14} className="text-amber-600 flex-shrink-0" />
-                              Why is 10.241.18.48:9100 showing "Unreachable"?
+                              Why does Cloud Ping show "Unreachable" for {printerForm.ipAddress}?
                             </p>
                             <p className="text-[11px] text-amber-800 leading-relaxed">
-                              When using this app hosted in the cloud (Aletcloud / Render), the cloud server on the internet cannot reach private local network IPs like <strong className="font-mono">10.241.18.48</strong>.
+                              Your printer is at local IP <strong className="font-mono bg-white px-1.5 py-0.5 rounded border border-amber-200">{printerForm.ipAddress}:{printerForm.port || 9100}</strong> (which responds to ping on this computer via AnyDesk). When accessing this system through cloud hosting, cloud servers cannot directly route TCP packets into private local IPs like {printerForm.ipAddress}.
+                            </p>
+                            <p className="text-[11px] text-emerald-800 font-semibold">
+                              💡 Good news: You can print directly from this computer (AnyDesk) using the buttons below:
                             </p>
                             <div className="pt-1 flex flex-wrap gap-2">
                               <button
                                 type="button"
-                                onClick={() => {
-                                  setPrinterForm(f => ({ ...f, connectionType: 'system' }));
-                                  printSystemReceipt(printerForm);
-                                }}
-                                className="rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-semibold px-3 py-1.5 text-xs transition shadow-sm"
+                                onClick={() => printSystemReceipt(printerForm)}
+                                className="rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-3 py-1.5 text-xs transition shadow-sm flex items-center gap-1.5"
                               >
-                                Print Test Page via Windows Dialog Now
+                                <Printer size={13} /> Print 60×80mm Customer Receipt (Browser / AnyDesk)
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => printSystemKOT(printerForm)}
+                                className="rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-semibold px-3 py-1.5 text-xs transition shadow-sm flex items-center gap-1.5"
+                              >
+                                <Printer size={13} /> Print 60×80mm Kitchen KOT (Browser / AnyDesk)
                               </button>
                             </div>
                           </div>
