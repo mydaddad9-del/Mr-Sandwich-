@@ -306,17 +306,47 @@ function executePrint(html, frameId = 'pos_print_frame') {
     }, 250);
   };
 }
+import { sendOrderKOT, sendOrderReceipt } from './localPrintDispatcher';
+
 export const posPrint = {
-  printReceipt: printThermalReceipt,
-  printKitchen: (order, opts) => printStationTicket(order, 'kitchen', opts),
+  printReceipt: (order, opts) => {
+    sendOrderReceipt(order, opts).then(res => {
+      if (!res?.ok) {
+        printThermalReceipt(order, opts);
+      }
+    }).catch(() => {
+      printThermalReceipt(order, opts);
+    });
+  },
+  printKitchen: (order, opts) => {
+    sendOrderKOT(order, { targetStation: 'kitchen', ...opts }).then(res => {
+      if (!res?.ok) {
+        printStationTicket(order, 'kitchen', opts);
+      }
+    }).catch(() => {
+      printStationTicket(order, 'kitchen', opts);
+    });
+  },
   printBarista: (order, opts) => printStationTicket(order, 'barista', opts),
   printKOT: (order, opts) => {
-    printStationTicket(order, 'kitchen', opts);
-    const hasBarista = (order.items || []).some(i => i.station === 'barista');
-    if (hasBarista) {
-      setTimeout(() => printStationTicket(order, 'barista', opts), 300);
-    }
+    sendOrderKOT(order, opts).then(res => {
+      if (!res?.ok) {
+        printStationTicket(order, 'kitchen', opts);
+        const hasBarista = (order.items || []).some(i => i.station === 'barista');
+        if (hasBarista) {
+          setTimeout(() => printStationTicket(order, 'barista', opts), 300);
+        }
+      }
+    }).catch(() => {
+      printStationTicket(order, 'kitchen', opts);
+      const hasBarista = (order.items || []).some(i => i.station === 'barista');
+      if (hasBarista) {
+        setTimeout(() => printStationTicket(order, 'barista', opts), 300);
+      }
+    });
   },
+  printThermalReceipt,
+  printStationTicket,
 };
 
 export default posPrint;

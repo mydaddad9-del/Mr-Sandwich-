@@ -37,6 +37,7 @@ import {
 } from 'lucide-react';
 import api from '../api/axios';
 import posPrint from '../utils/posPrint';
+import localPrintDispatcher from '../utils/localPrintDispatcher';
 import { useAuth } from '../context/AuthContext';
 import { useSessionTimeout, TIMEOUT_OPTIONS } from '../context/SessionTimeoutContext';
 import { THEME_OPTIONS } from '../config/sidebarThemes';
@@ -234,12 +235,10 @@ export default function Settings() {
   // Real-world thermal printer models grouped by brand
   const PRINTER_MODELS = {
     Epson: [
-      // 80mm POS
-      'TM-T20III', 'TM-T20X', 'TM-T70II', 'TM-T82III',
-      'TM-T83III', 'TM-T88VI', 'TM-T88VII',
-      // 58mm / 60mm POS
-      'TM-T20II', 'TM-T81III',
-      // Kitchen / Open-frame
+      // Universal model that works across all order printers
+      'Epson TM Series (Universal / All TM-T & POS)',
+      'TM-T20III', 'TM-T20X', 'TM-T82III', 'TM-T88VI',
+      'TM-T20II', 'TM-T70II', 'TM-T83III', 'TM-T88VII',
       'TM-U220', 'TM-U330', 'TM-H6000V',
     ],
     Star: [
@@ -314,11 +313,21 @@ export default function Settings() {
   };
 
   const blankPrinter = {
-    name: 'Kitchen / Order Printer', type: 'kitchen', brand: 'Epson', model: 'TM-T20III',
-    paperWidth: '60mm', connectionType: 'network',
-    ipAddress: '192.168.8.222', port: 9100, enabled: true,
-    printOnOrder: true, printOnCheckout: true, copies: 1,
-    headerLine1: 'Bloom Bar & Restaurant', headerLine2: '', footerLine: 'Thank you! Come again.',
+    name: 'Epson Order & Receipt Printer',
+    type: 'both',
+    brand: 'Epson',
+    model: 'Epson TM Series (Universal / All TM-T & POS)',
+    paperWidth: '60mm',
+    connectionType: 'network',
+    ipAddress: '10.241.18.48',
+    port: 9100,
+    enabled: true,
+    printOnOrder: true,
+    printOnCheckout: true,
+    copies: 1,
+    headerLine1: 'Bloom Bar & Restaurant',
+    headerLine2: '',
+    footerLine: 'Thank you! Come again.',
     charWidth: 32,
   };
 
@@ -2758,8 +2767,15 @@ export default function Settings() {
           const key = `${ip}:${port}`;
           setPingStatus(prev => ({ ...prev, [key]: 'pending' }));
           try {
-            const res = await api.post('/printers/action/ping', { ip, port: Number(port) });
-            setPingStatus(prev => ({ ...prev, [key]: res.data.ok ? 'ok' : 'fail' }));
+            const res = await localPrintDispatcher.pingPrinter(ip, port);
+            setPingStatus(prev => ({ ...prev, [key]: res.ok ? 'ok' : 'fail' }));
+            if (res.ok) {
+              setPrinterSuccess(`✓ Connected to ${ip}:${port} (${res.via === 'local_tcp' ? 'Local TCP Socket' : 'TCP Online'})`);
+              setTimeout(() => setPrinterSuccess(''), 5000);
+            } else {
+              setPrinterError(`Printer ${ip}:${port} not reachable on TCP port 9100`);
+              setTimeout(() => setPrinterError(''), 5000);
+            }
           } catch (_) {
             setPingStatus(prev => ({ ...prev, [key]: 'fail' }));
           }
@@ -2770,29 +2786,22 @@ export default function Settings() {
           setPrintTestStatus(prev => ({ ...prev, [key]: 'pending' }));
           setPrinterError('');
           try {
-            const payload = printerOrForm._id
-              ? { printerId: printerOrForm._id }
-              : {
-                ip: printerOrForm.ipAddress,
-                port: printerOrForm.port,
-                brand: printerOrForm.brand,
-                model: printerOrForm.model,
-              };
-            const res = await api.post('/printers/action/test-page', payload);
-            if (res.data.ok) {
+            const res = await localPrintDispatcher.printTestPage(printerOrForm);
+            if (res.ok) {
               setPrintTestStatus(prev => ({ ...prev, [key]: 'ok' }));
-              setPrinterSuccess(`Test page sent successfully to ${printerOrForm.name || printerOrForm.ipAddress}! Check printer.`);
+              setPrinterSuccess(res.message || `✓ Test page printed directly to ${printerOrForm.ipAddress}:${printerOrForm.port} via TCP! Check printer.`);
               setTimeout(() => {
                 setPrinterSuccess('');
                 setPrintTestStatus(prev => ({ ...prev, [key]: null }));
               }, 6000);
             } else {
               setPrintTestStatus(prev => ({ ...prev, [key]: 'fail' }));
-              setPrinterError(res.data.error || 'Test print failed');
+              setPrinterError(res.error || 'Test print failed');
+              setTimeout(() => setPrinterError(''), 6000);
             }
           } catch (err) {
             setPrintTestStatus(prev => ({ ...prev, [key]: 'fail' }));
-            setPrinterError(err.response?.data?.error || err.response?.data?.message || err.message || 'Test print failed');
+            setPrinterError(err.message || 'Test print failed');
             setTimeout(() => setPrinterError(''), 6000);
           }
         };
@@ -3029,11 +3038,30 @@ export default function Settings() {
                         <label className="block text-xs font-semibold text-ink-700 mb-1">Printer Brand</label>
                         <select
                           value={printerForm.brand}
-                          onChange={e => setPrinterForm(f => ({ ...f, brand: e.target.value }))}
+                          onChange={e => {
+                            const newBrand = e.target.value;
+                            const defaultModel = newBrand === 'Epson'
+                              ? 'Epson TM Series (Universal / All TM-T & POS)'
+                              : (PRINTER_MODELS[newBrand]?.[0] || 'Generic ESC/POS');
+                            setPrinterForm(f => ({
+                              ...f,
+                              brand: newBrand,
+                              model: defaultModel,
+                              paperWidth: '60mm',
+                              charWidth: 32,
+                              port: 9100,
+                              ipAddress: f.ipAddress || '10.241.18.48',
+                            }));
+                          }}
                           className="w-full rounded-xl border border-ink-200 py-2.5 px-3 text-sm outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 bg-white"
                         >
                           {PRINTER_BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
                         </select>
+                        {printerForm.brand === 'Epson' && (
+                          <p className="mt-1 text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
+                            ✓ Universal Epson ESC/POS active: Works for all order stations (Kitchen, Bar, &amp; Cashier).
+                          </p>
+                        )}
                       </div>
 
                       {/* Model — grouped by selected brand */}
@@ -3151,13 +3179,37 @@ export default function Settings() {
                       {printerForm.connectionType === 'network' ? (
                         <>
                           <div>
-                            <label className="block text-xs font-semibold text-ink-700 mb-1">IP Address *</label>
+                            <div className="flex items-center justify-between mb-1">
+                              <label className="block text-xs font-semibold text-ink-700">IP Address *</label>
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setPrinterForm(f => ({ ...f, ipAddress: '10.241.18.48', port: 9100 }));
+                                    pingPrinter('10.241.18.48', 9100);
+                                  }}
+                                  className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
+                                >
+                                  Use 10.241.18.48
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setPrinterForm(f => ({ ...f, ipAddress: '192.168.8.222', port: 9100 }));
+                                    pingPrinter('192.168.8.222', 9100);
+                                  }}
+                                  className="text-[10px] font-bold px-2 py-0.5 rounded bg-violet-50 text-violet-700 border border-violet-200 hover:bg-violet-100"
+                                >
+                                  Use 192.168.8.222
+                                </button>
+                              </div>
+                            </div>
                             <input
                               type="text"
                               value={printerForm.ipAddress}
                               onChange={e => setPrinterForm(f => ({ ...f, ipAddress: e.target.value }))}
                               className="w-full rounded-xl border border-ink-200 py-2.5 px-3 text-sm outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 font-mono"
-                              placeholder="192.168.1.100"
+                              placeholder="10.241.18.48"
                             />
                           </div>
 
@@ -3317,33 +3369,72 @@ export default function Settings() {
                           </div>
                         </div>
 
-                        {/* Unreachable diagnostic banner */}
+                        {/* Active TCP Connected Banner */}
+                        {pingStatus[`${printerForm.ipAddress}:${printerForm.port}`] === 'ok' && (
+                          <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <CheckCircle2 size={16} className="text-emerald-600 flex-shrink-0" />
+                              <div>
+                                <p className="font-bold text-emerald-950">✓ Direct TCP Connected ({printerForm.ipAddress}:{printerForm.port || 9100})</p>
+                                <p className="text-[11px] text-emerald-700">ESC/POS thermal link verified. Orders will print instantly without any browser popups.</p>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => printTestPage(printerForm)}
+                              className="rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-3 py-1.5 text-xs transition shadow-sm flex items-center gap-1.5"
+                            >
+                              <Printer size={12} /> Test Print Direct
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Connection options when offline */}
                         {pingStatus[`${printerForm.ipAddress}:${printerForm.port}`] === 'fail' && (
-                          <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-2">
-                            <p className="font-bold flex items-center gap-1.5 text-amber-950">
-                              <AlertCircle size={14} className="text-amber-600 flex-shrink-0" />
-                              Why does Cloud Ping show "Unreachable" for {printerForm.ipAddress}?
-                            </p>
-                            <p className="text-[11px] text-amber-800 leading-relaxed">
-                              Your printer is at local IP <strong className="font-mono bg-white px-1.5 py-0.5 rounded border border-amber-200">{printerForm.ipAddress}:{printerForm.port || 9100}</strong> (which responds to ping on this computer via AnyDesk). When accessing this system through cloud hosting, cloud servers cannot directly route TCP packets into private local IPs like {printerForm.ipAddress}.
-                            </p>
-                            <p className="text-[11px] text-emerald-800 font-semibold">
-                              💡 Good news: You can print directly from this computer (AnyDesk) using the buttons below:
-                            </p>
-                            <div className="pt-1 flex flex-wrap gap-2">
+                          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 space-y-2.5">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex items-center gap-2">
+                                <AlertCircle size={16} className="text-amber-600 flex-shrink-0" />
+                                <span className="font-bold text-ink-900">Printer {printerForm.ipAddress}:{printerForm.port || 9100} is not responding</span>
+                              </div>
                               <button
                                 type="button"
-                                onClick={() => printSystemReceipt(printerForm)}
-                                className="rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-3 py-1.5 text-xs transition shadow-sm flex items-center gap-1.5"
+                                onClick={() => pingPrinter(printerForm.ipAddress, printerForm.port)}
+                                className="text-[11px] font-bold text-violet-700 hover:text-violet-900 underline"
                               >
-                                <Printer size={13} /> Print 60×80mm Customer Receipt (Browser / AnyDesk)
+                                Retry Ping
+                              </button>
+                            </div>
+                            <p className="text-[11px] text-ink-600">
+                              Select an active printer IP on your local network, or use Windows System Printing:
+                            </p>
+                            <div className="flex flex-wrap gap-2 pt-1">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setPrinterForm(f => ({ ...f, ipAddress: '10.241.18.48', port: 9100 }));
+                                  pingPrinter('10.241.18.48', 9100);
+                                }}
+                                className="rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-3 py-1.5 text-xs transition shadow-sm flex items-center gap-1"
+                              >
+                                Connect 10.241.18.48 (Active Epson LAN)
                               </button>
                               <button
                                 type="button"
-                                onClick={() => printSystemKOT(printerForm)}
-                                className="rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-semibold px-3 py-1.5 text-xs transition shadow-sm flex items-center gap-1.5"
+                                onClick={() => {
+                                  setPrinterForm(f => ({ ...f, ipAddress: '192.168.8.222', port: 9100 }));
+                                  pingPrinter('192.168.8.222', 9100);
+                                }}
+                                className="rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-semibold px-3 py-1.5 text-xs transition shadow-sm flex items-center gap-1"
                               >
-                                <Printer size={13} /> Print 60×80mm Kitchen KOT (Browser / AnyDesk)
+                                Connect 192.168.8.222
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => printSystemReceipt(printerForm)}
+                                className="rounded-lg bg-slate-700 hover:bg-slate-800 text-white font-semibold px-3 py-1.5 text-xs transition shadow-sm flex items-center gap-1"
+                              >
+                                <Printer size={12} /> Print via Windows Driver
                               </button>
                             </div>
                           </div>

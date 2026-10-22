@@ -119,15 +119,19 @@ const printTestPageEndpoint = asyncHandler(async (req, res) => {
     printer = await PrinterSettings.findById(printerId);
     if (!printer) return res.status(404).json({ ok: false, error: 'Printer not found' });
   } else if (ip) {
+    const pWidth = req.body.paperWidth || '60mm';
+    const isNarrow = /58|60/i.test(pWidth);
     printer = {
       name: 'Test Printer',
       ipAddress: ip,
       port: Number(port) || 9100,
-      brand: brand || 'Generic',
-      model: model || '',
+      brand: brand || 'Epson',
+      model: model || 'TM-T20III',
+      paperWidth: pWidth,
+      charWidth: req.body.charWidth || (isNarrow ? 32 : 42),
       enabled: true,
-      headerLine1: 'Bloom Bar and Restaurant  Café',
-      footerLine: 'Test Print Successful!',
+      headerLine1: 'Bloom Bar & Restaurant',
+      footerLine: 'TCP Test Print Successful!',
       copies: 1,
     };
   } else {
@@ -135,25 +139,26 @@ const printTestPageEndpoint = asyncHandler(async (req, res) => {
   }
 
   const sampleOrder = {
-    orderNo: 'TEST-001',
+    orderNo: 'TCP-TEST',
     orderType: 'dine_in',
     tableNo: 'Table 1',
-    waiterName: 'Test Server',
-    customerName: 'Test Customer',
+    waiterName: 'Server',
+    customerName: 'Valued Guest',
     paymentMethod: 'Cash',
     discountPercent: 0,
     serviceCharge: 0,
-    amountPaid: 150,
+    amountPaid: 200,
     items: [
-      { productName: 'Bloom Bar and Restaurant  Special Bun', quantity: 2, unitPrice: 50 },
-      { productName: 'Hot Cappuccino', quantity: 1, unitPrice: 50 },
+      { productName: 'Bloom Special Burger', quantity: 1, unitPrice: 150 },
+      { productName: 'Fresh Draught Drink', quantity: 1, unitPrice: 50 },
     ],
   };
 
   try {
     await printReceipt(printer, sampleOrder, {
-      hotelName: 'Bloom Bar and Restaurant  Café - Test Print',
-      footerLine: `Print Test Passed • ${printer.brand || ''} ${printer.model || ''}`.trim(),
+      hotelName: 'Bloom Bar & Restaurant',
+      headerLine2: 'TCP Network Print Test Passed',
+      footerLine: `TCP OK • ${printer.brand || 'Epson'} • ${printer.paperWidth || '60×80mm'}`.trim(),
     });
     res.json({ ok: true, message: `Test page sent to ${printer.ipAddress}:${printer.port || 9100}` });
   } catch (err) {

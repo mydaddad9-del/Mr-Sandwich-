@@ -13,14 +13,22 @@ const {
   printTestPageEndpoint,
 } = require('../controllers/printerController');
 
+// Allow loopback local print bridge (127.0.0.1) or authenticated users
+const localOrProtect = (req, res, next) => {
+  const ip = req.ip || req.connection?.remoteAddress || '';
+  const isLoopback = ip.includes('127.0.0.1') || ip.includes('::1') || ip === 'localhost';
+  if (isLoopback) return next();
+  return protect(req, res, next);
+};
+
 // CRUD
 router.route('/').get(protect, getPrinters).post(protect, createPrinter);
 router.route('/:id').get(protect, getPrinter).put(protect, updatePrinter).delete(protect, deletePrinter);
 
 // Utility
-router.post('/action/ping',      protect, pingPrinter);
-router.post('/action/test-page', protect, printTestPageEndpoint);
-router.post('/action/kot',       protect, printKOTEndpoint);
-router.post('/action/receipt',   protect, printReceiptEndpoint);
+router.post('/action/ping',      localOrProtect, pingPrinter);
+router.post('/action/test-page', localOrProtect, printTestPageEndpoint);
+router.post('/action/kot',       localOrProtect, printKOTEndpoint);
+router.post('/action/receipt',   localOrProtect, printReceiptEndpoint);
 
 module.exports = router;
