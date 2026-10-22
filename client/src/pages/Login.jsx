@@ -760,10 +760,10 @@ export default function Login() {
         <section className="login-hero" aria-label="Application branding">
           <CurvedLines />
 
-          {/* Bloom Bar and Restaurant  Café Official Emblem */}
+          {/* Bloom Bar & Restaurant Official Brand Emblem */}
           <div style={{ position: 'relative', zIndex: 1 }}>
-            <div className="rounded-2xl p-1.5 shadow-2xl ring-2 ring-white/20 inline-block bg-white/5 backdrop-blur-md">
-              <BloomAfricaIcon size={68} />
+            <div className="rounded-2xl p-1 shadow-2xl ring-2 ring-white/20 inline-block bg-white/10 backdrop-blur-md">
+              <BloomAfricaIcon size={76} />
             </div>
           </div>
 
@@ -771,18 +771,18 @@ export default function Login() {
           <div className="login-hero__content">
             <h1 className="login-hero__heading">
               Hello<br />
-              Bloom Bar and Restaurant  Café!&nbsp;
+              Bloom Bar &amp; Restaurant!&nbsp;
               <span className="login-hero__wave" role="img" aria-label="waving hand">👋</span>
             </h1>
             <p className="login-hero__desc">
-              Run every store and kitchen from one desk. Receive goods, cost recipes,
-              approve vouchers and balance the stock ledger without the paperwork.
+              Run every store, kitchen and bar from one desk. Receive goods, cost recipes,
+              approve vouchers and manage orders without the paperwork.
             </p>
           </div>
 
           {/* left footer */}
           <footer className="login-hero__footer">
-            © 2026 Bloom Bar and Restaurant  Café Hotel &amp; Resort Management SC. All rights reserved.
+            © 2026 Bloom Bar &amp; Restaurant. All rights reserved.
           </footer>
         </section>
 
@@ -792,11 +792,10 @@ export default function Login() {
           {/* top bar */}
           <div className="login-topbar">
             <div className="flex items-center gap-2.5">
-              <BloomAfricaIcon size={26} />
-              <span className="login-wordmark flex items-center gap-1" aria-label="Bloom Bar and Restaurant  Café">
-                <span className="login-wordmark__five">Baba </span>
-                <span className="login-wordmark__stop">Roti</span>
-                <span className="ml-1 rounded bg-amber-400 px-1.5 py-0.5 text-[9px] font-black uppercase text-slate-950">Café</span>
+              <BloomAfricaIcon size={32} />
+              <span className="font-black text-[15px] tracking-tight text-slate-900 flex items-center gap-1.5" aria-label="Bloom Bar & Restaurant">
+                <span>Bloom</span>
+                <span className="rounded bg-gradient-to-r from-red-600 to-rose-600 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow-xs">Bar &amp; Res</span>
               </span>
             </div>
             <div className="login-status" aria-live="polite">
@@ -1008,7 +1007,7 @@ export default function Login() {
             </div>
             <div className="login-footer__bottom">
               <a
-                href="mailto:support@Bloom Bar and Restaurant   Café.com"
+                href="mailto:support@bloombar.com"
                 className="login-footer__support"
               >
                 Contact support
