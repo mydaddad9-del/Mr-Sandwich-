@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import BabaRotiLogo from '../ui/BabaRotiLogo';
+import BloomAfricaLogo from '../ui/BloomAfricaLogo';
 
 // ── Material UI Icons ────────────────────────────────────────────────
 import TrendingUpRoundedIcon from '@mui/icons-material/TrendingUpRounded';
@@ -67,68 +67,68 @@ export default function MobileDashboardView({ data, user }) {
   // Recent activity list
   const recentItems = data?.recentTransactions && data.recentTransactions.length > 0
     ? data.recentTransactions.slice(0, 4).map((tx, idx) => {
-        const isIn = tx.type === 'in';
-        const matName = tx.items?.[0]?.material?.name || tx.material?.name || 'Stock item';
-        const qty = tx.items?.[0]?.quantity || tx.quantity || 1;
-        const timeStr = new Date(tx.createdAt || tx.date || Date.now()).toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit',
-        });
-        const colors = [
-          { icon: RestaurantMenuRoundedIcon, bg: 'bg-emerald-500' },
-          { icon: PaymentsRoundedIcon, bg: 'bg-amber-500' },
-          { icon: Inventory2RoundedIcon, bg: 'bg-purple-500' },
-          { icon: AssessmentRoundedIcon, bg: 'bg-blue-500' },
-        ];
-        const c = colors[idx % colors.length];
-        return {
-          id: tx._id || idx,
-          title: isIn ? 'Stock receiving' : 'Stock dispatch',
-          subtitle: `${matName} · ${isIn ? '+' : '-'}${qty} Qty`,
-          time: timeStr,
-          icon: c.icon,
-          bg: c.bg,
-          link: '/transactions',
-        };
-      })
-    : [
-        {
-          id: 1,
-          title: 'New order received',
-          subtitle: 'Table 5 · 2 items',
-          time: '10:42 AM',
-          icon: RestaurantMenuRoundedIcon,
-          bg: 'bg-emerald-500',
-          link: '/pos',
-        },
-        {
-          id: 2,
-          title: 'Payment received',
-          subtitle: 'Mobile Money · 385.00 ETB',
-          time: '10:30 AM',
-          icon: PaymentsRoundedIcon,
-          bg: 'bg-amber-500',
-          link: '/cash-sales',
-        },
-        {
-          id: 3,
-          title: 'Stock updated',
-          subtitle: 'Bread · +20 Qty',
-          time: '09:55 AM',
-          icon: Inventory2RoundedIcon,
-          bg: 'bg-purple-500',
-          link: '/materials',
-        },
-        {
-          id: 4,
-          title: 'Report generated',
-          subtitle: 'Daily Sales Report',
-          time: '09:12 AM',
-          icon: AssessmentRoundedIcon,
-          bg: 'bg-blue-500',
-          link: '/reports/daily',
-        },
+      const isIn = tx.type === 'in';
+      const matName = tx.items?.[0]?.material?.name || tx.material?.name || 'Stock item';
+      const qty = tx.items?.[0]?.quantity || tx.quantity || 1;
+      const timeStr = new Date(tx.createdAt || tx.date || Date.now()).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+      const colors = [
+        { icon: RestaurantMenuRoundedIcon, bg: 'bg-emerald-500' },
+        { icon: PaymentsRoundedIcon, bg: 'bg-amber-500' },
+        { icon: Inventory2RoundedIcon, bg: 'bg-purple-500' },
+        { icon: AssessmentRoundedIcon, bg: 'bg-blue-500' },
       ];
+      const c = colors[idx % colors.length];
+      return {
+        id: tx._id || idx,
+        title: isIn ? 'Stock receiving' : 'Stock dispatch',
+        subtitle: `${matName} · ${isIn ? '+' : '-'}${qty} Qty`,
+        time: timeStr,
+        icon: c.icon,
+        bg: c.bg,
+        link: '/transactions',
+      };
+    })
+    : [
+      {
+        id: 1,
+        title: 'New order received',
+        subtitle: 'Table 5 · 2 items',
+        time: '10:42 AM',
+        icon: RestaurantMenuRoundedIcon,
+        bg: 'bg-emerald-500',
+        link: '/pos',
+      },
+      {
+        id: 2,
+        title: 'Payment received',
+        subtitle: 'Mobile Money · 385.00 ETB',
+        time: '10:30 AM',
+        icon: PaymentsRoundedIcon,
+        bg: 'bg-amber-500',
+        link: '/cash-sales',
+      },
+      {
+        id: 3,
+        title: 'Stock updated',
+        subtitle: 'Bread · +20 Qty',
+        time: '09:55 AM',
+        icon: Inventory2RoundedIcon,
+        bg: 'bg-purple-500',
+        link: '/materials',
+      },
+      {
+        id: 4,
+        title: 'Report generated',
+        subtitle: 'Daily Sales Report',
+        time: '09:12 AM',
+        icon: AssessmentRoundedIcon,
+        bg: 'bg-blue-500',
+        link: '/reports/daily',
+      },
+    ];
 
   return (
     <div className="min-h-screen bg-[#f8fafc] pb-24 text-slate-800">
@@ -154,7 +154,7 @@ export default function MobileDashboardView({ data, user }) {
         {/* Top Bar Row: Brand Emblem + Notifications & Profile */}
         <div className="relative flex items-center justify-between">
           <Link to="/" className="flex items-center">
-            <BabaRotiLogo size="sm" showSubtitle={true} subtitle="Café & Bakery" />
+            <BloomAfricaLogo size="sm" showSubtitle={true} subtitle="Café & Bakery" />
           </Link>
 
           {/* Top Right Action Icons */}

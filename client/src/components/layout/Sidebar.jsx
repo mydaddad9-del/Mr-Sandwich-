@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import BabaRotiLogo from '../ui/BabaRotiLogo';
+import BloomAfricaLogo from '../ui/BloomAfricaLogo';
 import { SIDEBAR_THEMES } from '../../config/sidebarThemes';
 
 // ── Material UI Icons (@mui/icons-material) ──────────────────────────
@@ -154,8 +154,8 @@ const CollapsibleNav = ({
         ) : (
           <span
             className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all duration-150 group-hover:scale-105 ${isActive
-                ? (theme.isLight ? 'bg-blue-600 text-white shadow-xs' : 'bg-white/20 text-white shadow-xs')
-                : (theme.isLight ? 'bg-slate-200/80 text-slate-700 group-hover:bg-slate-300 group-hover:text-slate-900' : 'bg-white/[0.08] text-white/80 group-hover:bg-white/[0.14] group-hover:text-white')
+              ? (theme.isLight ? 'bg-blue-600 text-white shadow-xs' : 'bg-white/20 text-white shadow-xs')
+              : (theme.isLight ? 'bg-slate-200/80 text-slate-700 group-hover:bg-slate-300 group-hover:text-slate-900' : 'bg-white/[0.08] text-white/80 group-hover:bg-white/[0.14] group-hover:text-white')
               }`}
           >
             <Icon sx={{ fontSize: 16 }} />
@@ -191,8 +191,8 @@ const CollapsibleNav = ({
 
       {open && !collapsed && (
         <div className={`mt-0.5 ml-3 pl-2 py-0.5 space-y-0.5 border-l-2 rounded-r-lg ${theme.isLight
-            ? 'border-blue-400/50 bg-slate-100/70'
-            : 'border-white/20 bg-black/15 backdrop-blur-xs'
+          ? 'border-blue-400/50 bg-slate-100/70'
+          : 'border-white/20 bg-black/15 backdrop-blur-xs'
           }`}>
           {children}
         </div>
@@ -246,8 +246,8 @@ const MenuLink = ({
           ) : (
             <span
               className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all duration-150 group-hover:scale-105 ${isActive
-                  ? (theme.isLight ? 'bg-blue-600 text-white shadow-xs' : 'bg-white/20 text-white shadow-xs')
-                  : (theme.isLight ? 'bg-slate-200/80 text-slate-700 group-hover:bg-slate-300 group-hover:text-slate-900' : 'bg-white/[0.08] text-white/80 group-hover:bg-white/[0.14] group-hover:text-white')
+                ? (theme.isLight ? 'bg-blue-600 text-white shadow-xs' : 'bg-white/20 text-white shadow-xs')
+                : (theme.isLight ? 'bg-slate-200/80 text-slate-700 group-hover:bg-slate-300 group-hover:text-slate-900' : 'bg-white/[0.08] text-white/80 group-hover:bg-white/[0.14] group-hover:text-white')
                 }`}
             >
               <Icon sx={{ fontSize: 16 }} />
@@ -464,7 +464,7 @@ const Sidebar = ({
               className={`flex items-center transition-transform duration-150 group-hover:scale-[1.02] ${collapsed ? 'mx-auto' : ''
                 }`}
             >
-              <BabaRotiLogo
+              <BloomAfricaLogo
                 collapsed={collapsed}
                 size={collapsed ? 28 : 32}
                 showSubtitle={false}

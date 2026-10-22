@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Eye, EyeOff, Phone, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
-import { BabaRotiIcon } from '../components/ui/BabaRotiLogo';
+import { BloomAfricaIcon } from '../components/ui/BloomAfricaLogo';
 
 /* ─── role quick-fill data ─────────────────────────────────────── */
 const ROLES = [
@@ -763,7 +763,7 @@ export default function Login() {
           {/* Bloom Bar and Restaurant  Café Official Emblem */}
           <div style={{ position: 'relative', zIndex: 1 }}>
             <div className="rounded-2xl p-1.5 shadow-2xl ring-2 ring-white/20 inline-block bg-white/5 backdrop-blur-md">
-              <BabaRotiIcon size={68} />
+              <BloomAfricaIcon size={68} />
             </div>
           </div>
 
@@ -792,7 +792,7 @@ export default function Login() {
           {/* top bar */}
           <div className="login-topbar">
             <div className="flex items-center gap-2.5">
-              <BabaRotiIcon size={26} />
+              <BloomAfricaIcon size={26} />
               <span className="login-wordmark flex items-center gap-1" aria-label="Bloom Bar and Restaurant  Café">
                 <span className="login-wordmark__five">Baba </span>
                 <span className="login-wordmark__stop">Roti</span>
