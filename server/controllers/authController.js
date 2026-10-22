@@ -200,7 +200,7 @@ const updatePassword = asyncHandler(async (req, res) => {
 const https = require('https');
 
 function sendTelegramDirect(chatId, text) {
-  const token = process.env.TELEGRAM_BOT_TOKEN || '8849417539:AAFXg2njcRGhnq8EPTtHusuEVuur5qqVzAk';
+  const token = process.env.TELEGRAM_BOT_TOKEN || '8872546305:AAEMvVvs0hMHniDLkRa5cQ9-Ss5OA91xxPg';
   if (!token || token === 'your_bot_token_here') return;
   const body = JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' });
   const options = {
@@ -306,7 +306,7 @@ const requestOtp = asyncHandler(async (req, res) => {
 
   // ── Send OTP to the subscriber's exact Telegram chat ────────────
   sendTelegramDirect(matchedSub.chatId,
-    `🏨 <b>Bloom Bar and Restaurant   CaféHotel</b>
+    `🏨 <b>Bloom Bar & Restaurant</b>
 ━━━━━━━━━━━━━━━━━━━━
 🔐 <b>Login OTP Code</b>
 

@@ -11,13 +11,13 @@
 const https = require('https');
 const Setting = require('../models/Setting');
 
-const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8849417539:AAFXg2njcRGhnq8EPTtHusuEVuur5qqVzAk';
+const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8872546305:AAEMvVvs0hMHniDLkRa5cQ9-Ss5OA91xxPg';
 // Fallback: env-var chat IDs (used if DB has no subscribers yet)
 const ENV_CHAT_IDS = (process.env.TELEGRAM_CHAT_ID || '')
   .split(',')
   .map(id => id.trim())
   .filter(id => id && id !== 'your_chat_id_here');
-const HOTEL = 'Bloom Bar and Restaurant  Café';
+const HOTEL = 'Bloom Bar & Restaurant';
 
 // ── Low-level sender ─────────────────────────────────────────────
 async function getChatIds() {
