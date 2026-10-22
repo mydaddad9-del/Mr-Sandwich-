@@ -992,19 +992,6 @@ export default function Login() {
                     </button>
                   </form>
 
-                  {/* role switcher */}
-                  <div className="login-divider" aria-hidden="true">or sign in as</div>
-                  <div className="login-roles" role="group" aria-label="Quick role switcher">
-                    {ROLES.map(r => (
-                      <button key={r.label} type="button"
-                        onClick={() => handleQuickFill(r)}
-                        className={['login-role-btn', activeRole === r.label ? 'login-role-btn--active' : ''].join(' ')}
-                        aria-pressed={activeRole === r.label}>
-                        {r.label}
-                      </button>
-                    ))}
-                  </div>
-
                   <p className="login-forgot">
                     Forgot your password?{' '}
                     <span role="button" tabIndex={0}>Reset credentials</span>
