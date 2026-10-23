@@ -11,7 +11,7 @@ const connectDB = async () => {
   // Connection in progress — wait for it
   if (connectionPromise) return connectionPromise;
 
-  const FALLBACK_URI = 'mongodb+srv://yalemworkbelay21_db_user:BloomBar2026%40@bloombar.dva6x9r.mongodb.net/bloom_bar_db?retryWrites=true&w=majority&compressors=zlib';
+  const FALLBACK_URI = 'mongodb+srv://mydaddad9_db_user:Mrsandwich2026%40@mrsandwich.focu7wc.mongodb.net/mr_sandwich_db?retryWrites=true&w=majority&compressors=zlib';
 
   let uri =
     process.env.MONGO_URI ||
