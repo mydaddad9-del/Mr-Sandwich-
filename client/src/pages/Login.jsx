@@ -859,7 +859,7 @@ export default function Login() {
                   <h2 className="otp-step__title">Enter OTP</h2>
                   <p className="otp-step__sub">
                     A 6-digit code was sent to <strong>{maskedName ? maskedName + "'s" : 'your'}</strong> Telegram.{' '}
-                    Check <strong>@BloombarrBot</strong> and enter the code below.
+                    Check <strong>@MrsandwiichBot</strong> and enter the code below.
                   </p>
 
                   {otpError && (

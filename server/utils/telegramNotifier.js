@@ -11,7 +11,7 @@
 const https = require('https');
 const Setting = require('../models/Setting');
 
-const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8872546305:AAEMvVvs0hMHniDLkRa5cQ9-Ss5OA91xxPg';
+const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8620209598:AAFFQ-vpWi45mufB1pvd4p-4YRVusSqi76s';
 // Fallback: env-var chat IDs (used if DB has no subscribers yet)
 const ENV_CHAT_IDS = (process.env.TELEGRAM_CHAT_ID || '')
   .split(',')
