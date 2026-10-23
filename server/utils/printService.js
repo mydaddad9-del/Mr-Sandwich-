@@ -26,7 +26,7 @@ function sendToPrinter(ip, port, data) {
     const cleanup = (err) => {
       if (settled) return;
       settled = true;
-      try { socket.destroy(); } catch (_) {}
+      try { socket.destroy(); } catch (_) { }
       if (err) reject(err);
       else resolve();
     };
