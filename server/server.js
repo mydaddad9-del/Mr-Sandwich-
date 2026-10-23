@@ -161,7 +161,7 @@ if (!process.env.VERCEL) {
     // ── Keep-alive ping every 10 minutes ──────────────────────────
     // Prevents free-tier hosting (Aletcloud, Render) from sleeping.
     // Only runs if a PUBLIC_URL env var is set (set it in Aletcloud
-    // to your server URL, e.g. https://bloom-bar-and-restaurant-1.app.aletcloud.com)
+    // to your server URL, e.g. https://mr-sandwich.app.aletcloud.com)
     const publicUrl = process.env.PUBLIC_URL;
     if (publicUrl) {
       const https = require('https');

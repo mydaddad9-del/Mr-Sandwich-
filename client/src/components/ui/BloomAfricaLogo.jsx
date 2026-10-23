@@ -9,11 +9,11 @@ export const BloomAfricaIcon = ({ size = 38, className = '' }) => {
   if (imgError) {
     return (
       <div
-        className={`shrink-0 flex items-center justify-center rounded-xl bg-emerald-900 text-white font-bold border border-emerald-700/50 shadow-md ${className}`}
-        style={{ width: size, height: size, fontSize: Math.max(12, size * 0.38) }}
+        className={`shrink-0 flex items-center justify-center rounded-2xl bg-amber-500 text-white font-bold border border-amber-400/50 shadow-md ${className}`}
+        style={{ width: size, height: size, fontSize: Math.max(12, size * 0.42) }}
         title="Mr Sandwich"
       >
-        🍽️
+        🥪
       </div>
     );
   }
@@ -25,7 +25,7 @@ export const BloomAfricaIcon = ({ size = 38, className = '' }) => {
       width={size}
       height={size}
       onError={() => setImgError(true)}
-      className={`shrink-0 object-contain rounded-xl shadow-md border border-white/10 bg-[#153e2e] p-0.5 transition-transform duration-200 hover:scale-105 ${className}`}
+      className={`shrink-0 object-contain rounded-2xl shadow-md transition-transform duration-200 hover:scale-105 ${className}`}
       style={{ width: size, height: size }}
     />
   );
