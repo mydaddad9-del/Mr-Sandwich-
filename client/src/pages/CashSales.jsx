@@ -152,7 +152,7 @@ export default function CashSales() {
 
       // Print thermal receipt
       posPrint.printReceipt(posOrder, {
-        hotelName: "Bloom Bar and Restaurant  Café",
+        hotelName: "Mr Sandwich",
         taxRate: 15,
       });
 
@@ -256,7 +256,7 @@ export default function CashSales() {
       title: `Cash Sales & Revenue Report (${dateVal || "All Dates"})`,
       columns,
       data: filteredSales,
-      hotelName: "Bloom Bar and Restaurant  Café",
+      hotelName: "Mr Sandwich",
       summary: [
         { label: "Total Paid Sales", value: filteredSales.length },
         { label: "Total Revenue", value: ETB(totalRevenue) },
@@ -955,10 +955,10 @@ export default function CashSales() {
                                       ? "#eff6ff"
                                       : "#fffbeb",
                                 border: `1px solid ${s.paymentMethod === "Cash"
-                                    ? "#a7f3d0"
-                                    : s.paymentMethod === "Telebirr"
-                                      ? "#bfdbfe"
-                                      : "#fde68a"
+                                  ? "#a7f3d0"
+                                  : s.paymentMethod === "Telebirr"
+                                    ? "#bfdbfe"
+                                    : "#fde68a"
                                   }`,
                                 color:
                                   s.paymentMethod === "Cash"
@@ -1034,7 +1034,7 @@ export default function CashSales() {
                                 type="button"
                                 onClick={() =>
                                   posPrint.printReceipt(s, {
-                                    hotelName: "Bloom Bar and Restaurant  Café",
+                                    hotelName: "Mr Sandwich",
                                     taxRate: s.taxPercent || 15,
                                     isReprint: true,
                                   })
@@ -1375,7 +1375,7 @@ export default function CashSales() {
                 type="button"
                 onClick={() =>
                   posPrint.printReceipt(refOrder, {
-                    hotelName: "Bloom Bar and Restaurant  Café",
+                    hotelName: "Mr Sandwich",
                     taxRate: refOrder.taxPercent || 15,
                     isReprint: true,
                   })

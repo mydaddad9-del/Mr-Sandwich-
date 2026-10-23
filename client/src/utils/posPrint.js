@@ -4,7 +4,7 @@
  * Works seamlessly across cloud (AletCloud) and local environments.
  */
 
-export function printThermalReceipt(order, { hotelName = 'Bloom Bar and Restaurant  Café', address = 'Addis Ababa, Ethiopia', phone = '+251 911 000 111', isReprint = false } = {}) {
+export function printThermalReceipt(order, { hotelName = 'Mr Sandwich', address = 'Addis Ababa, Ethiopia', phone = '+251 911 000 111', isReprint = false } = {}) {
   const dateStr = new Date(order.createdAt || Date.now()).toLocaleString('en-US', {
     dateStyle: 'short',
     timeStyle: 'short',
@@ -157,7 +157,7 @@ export function printThermalReceipt(order, { hotelName = 'Bloom Bar and Restaura
   <div class="footer">
     <p class="bold">THANK YOU FOR YOUR VISIT!</p>
     <p>Please come again.</p>
-    <p style="margin-top: 4px; font-size: 9px; opacity: 0.7;">Powered by Bloom Bar and Restaurant  POS</p>
+    <p style="margin-top: 4px; font-size: 9px; opacity: 0.7;">Powered by Mr Sandwich POS</p>
   </div>
 </body>
 </html>`;
@@ -233,7 +233,7 @@ export function printStationTicket(order, targetStation = 'kitchen', { isReprint
   ${isReprint ? '<div class="reprint-banner">*** REPRINT / DUPLICATE ***</div>' : ''}
   <div class="header">
     <h1>*** ${stationTitle} ***</h1>
-    <p style="font-size: 11px; margin-top: 2px;">Bloom Bar and Restaurant  Café</p>
+    <p style="font-size: 11px; margin-top: 2px;">Mr Sandwich</p>
   </div>
 
   <table class="order-meta" style="width: 100%;">

@@ -108,7 +108,7 @@ export default function CaptainOrder() {
   const handleSendToKitchen = async (orderId) => {
     try {
       const res = await api.post(`/captain-orders/${orderId}/send-to-kitchen`);
-      posPrint.printKOT(res.data.order, { businessName: "Bloom Bar and Restaurant  Café" });
+      posPrint.printKOT(res.data.order, { businessName: "Mr Sandwich" });
       showToast("Order sent to Kitchen & KOT printed!");
       loadOrders();
       if (refOrder?._id === orderId) {
@@ -221,7 +221,7 @@ export default function CaptainOrder() {
       title: `Captain Orders Report (${dateVal || "All Dates"})`,
       columns,
       data: filteredOrders,
-      hotelName: "Bloom Bar and Restaurant  Café",
+      hotelName: "Mr Sandwich",
       summary: [
         { label: "Total Orders", value: filteredOrders.length },
         { label: "Total Revenue", value: ETB(totalValue) },
@@ -1118,7 +1118,7 @@ export default function CaptainOrder() {
               {/* Print KOT */}
               <button
                 type="button"
-                onClick={() => posPrint.printKOT(refOrder, { businessName: "Bloom Bar and Restaurant  Café" })}
+                onClick={() => posPrint.printKOT(refOrder, { businessName: "Mr Sandwich" })}
                 style={{
                   padding: "9px 16px",
                   borderRadius: 10,

@@ -1,5 +1,5 @@
 /**
- * Bloom Bar and Restaurant   Café— Telegram Notification Service
+ * Mr Sandwich — Telegram Notification Service
  * ─────────────────────────────────────────────────────────────────
  * Sends richly-formatted HTML messages to a Telegram bot/channel
  * whenever a meaningful CRUD event occurs in the system.
@@ -913,7 +913,7 @@ function notifyStockRequestCreated(req, user) {
   ).join('\n');
   const emoji = req.priority === 'urgent' ? '🚨' : '📋';
   sendTelegram(
-    `🏨 <b>Bloom Bar and Restaurant   CaféHotel</b>
+    `🥪 <b>Mr Sandwich</b>
 ━━━━━━━━━━━━━━━━━━━━
 ${emoji} <b>NEW STOCK REQUEST</b>
 
@@ -933,7 +933,7 @@ ${items || '  —'}
 
 function notifyStockRequestApproved(req, user) {
   sendTelegram(
-    `🏨 <b>Bloom Bar and Restaurant   CaféHotel</b>
+    `🥪 <b>Mr Sandwich</b>
 ━━━━━━━━━━━━━━━━━━━━
 ✅ <b>STOCK REQUEST APPROVED</b>
 
@@ -953,7 +953,7 @@ function notifyStockIssued(req, user) {
     `  • ${i.material?.name || '—'} × <b>${i.issuedQty}</b> ${i.material?.unit || ''} — ${etb(i.totalCost)}`
   ).join('\n');
   sendTelegram(
-    `🏨 <b>Bloom Bar and Restaurant   CaféHotel</b>
+    `🥪 <b>Mr Sandwich</b>
 ━━━━━━━━━━━━━━━━━━━━
 📤 <b>STOCK ISSUED</b>
 

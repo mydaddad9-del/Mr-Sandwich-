@@ -181,7 +181,7 @@ function printVoucher(voucher, formatETB) {
   <div class="voucher">
     <div class="v-header">
       <div>
-        <h1>Bloom Bar and Restaurant  Café</h1>
+        <h1>Mr Sandwich</h1>
         <p class="sub">Hotel Management &amp; Stock Control</p>
         <span class="badge">Overhead Expense Voucher</span>
       </div>
@@ -208,7 +208,7 @@ function printVoucher(voucher, formatETB) {
       ${voucher.notes ? `<div class="notes-lbl">Notes / Purpose</div><div class="notes-box">${voucher.notes}</div>` : ''}
       ${voucher.receiptUrl ? `<div style="margin-top:14px"><div class="notes-lbl">Attached Receipt</div><img src="${voucher.receiptUrl}" alt="Receipt" class="receipt-img"/></div>` : ''}
     </div>
-    <div class="footer">Bloom Bar and Restaurant  Café &middot; ${voucherId} &middot; Printed ${new Date().toLocaleString()}</div>
+    <div class="footer">Mr Sandwich &middot; ${voucherId} &middot; Printed ${new Date().toLocaleString()}</div>
   </div>
 </body>
 </html>`;
@@ -527,7 +527,7 @@ export default function Expenses() {
               data={exportData}
               fileName={`Overhead_Expenses_${new Date().toISOString().slice(0, 10)}`}
               sheetName="Overhead Expenses"
-              pdfTitle="Bloom Bar and Restaurant  Café - Overhead Expenses Report"
+              pdfTitle="Mr Sandwich - Overhead Expenses Report"
               buttonClassName="inline-flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3.5 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-white/20 hover:border-white/30 transition backdrop-blur-md cursor-pointer"
               pdfColumns={[
                 { header: 'Date', dataKey: 'Date' },
@@ -742,8 +742,8 @@ export default function Expenses() {
                 key={p.id}
                 onClick={() => setDatePreset(p.id)}
                 className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${datePreset === p.id
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'bg-ink-50 text-ink-600 hover:bg-ink-100'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'bg-ink-50 text-ink-600 hover:bg-ink-100'
                   }`}
               >
                 {p.label}
@@ -776,7 +776,7 @@ export default function Expenses() {
               data={exportData}
               fileName={`Overhead_Expenses_${new Date().toISOString().slice(0, 10)}`}
               sheetName="Overhead Expenses"
-              pdfTitle="Bloom Bar and Restaurant  Café - Overhead Expenses Report"
+              pdfTitle="Mr Sandwich - Overhead Expenses Report"
               buttonClassName="inline-flex items-center gap-1.5 rounded-xl border border-ink-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-ink-700 shadow-xs hover:border-ink-300 hover:bg-ink-50 transition cursor-pointer"
               pdfColumns={[
                 { header: 'Date', dataKey: 'Date' },
@@ -1236,7 +1236,7 @@ export default function Expenses() {
               {/* Slip Header */}
               <div className="border-b border-ink-100 pb-3 flex items-start justify-between">
                 <div>
-                  <h2 className="text-lg font-black text-ink-900 tracking-tight">Bloom Bar and Restaurant  Café</h2>
+                  <h2 className="text-lg font-black text-ink-900 tracking-tight">Mr Sandwich</h2>
                   <p className="text-[11px] text-ink-500 font-medium">Hotel Management & Stock Control</p>
                   <p className="text-xs font-bold text-blue-700 mt-1 uppercase tracking-wider">
                     Overhead Expense Voucher

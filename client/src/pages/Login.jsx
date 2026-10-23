@@ -771,18 +771,18 @@ export default function Login() {
           <div className="login-hero__content">
             <h1 className="login-hero__heading">
               Hello<br />
-              Bloom Bar &amp; Restaurant!&nbsp;
+              Mr Sandwich!&nbsp;
               <span className="login-hero__wave" role="img" aria-label="waving hand">👋</span>
             </h1>
             <p className="login-hero__desc">
-              Run every store, kitchen and bar from one desk. Receive goods, cost recipes,
+              Run every store, kitchen and station from one desk. Receive goods, cost recipes,
               approve vouchers and manage orders without the paperwork.
             </p>
           </div>
 
           {/* left footer */}
           <footer className="login-hero__footer">
-            © 2026 Bloom Bar &amp; Restaurant. All rights reserved.
+            © 2026 Mr Sandwich. All rights reserved.
           </footer>
         </section>
 
@@ -794,8 +794,7 @@ export default function Login() {
             <div className="flex items-center gap-2.5">
               <BloomAfricaIcon size={32} />
               <span className="font-black text-[15px] tracking-tight text-slate-900 flex items-center gap-1.5" aria-label="Mr Sandwich">
-                <span>Bloom</span>
-                <span className="rounded bg-gradient-to-r from-red-600 to-rose-600 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow-xs">Bar &amp; Res</span>
+                <span>Mr Sandwich</span>
               </span>
             </div>
             <div className="login-status" aria-live="polite">
@@ -1007,7 +1006,7 @@ export default function Login() {
             </div>
             <div className="login-footer__bottom">
               <a
-                href="mailto:support@bloombar.com"
+                href="mailto:support@mrsandwich.com"
                 className="login-footer__support"
               >
                 Contact support

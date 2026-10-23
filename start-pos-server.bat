@@ -1,8 +1,8 @@
 @echo off
-title Bloom Bar and Restaurant  Cafe - POS Server
+title Mr Sandwich - POS Server
 cls
 echo ========================================================
-echo   Bloom Bar and Restaurant  Cafe - Restaurant POS Server
+echo   Mr Sandwich - Restaurant POS Server
 echo ========================================================
 echo.
 echo Starting restaurant server on port 5000...

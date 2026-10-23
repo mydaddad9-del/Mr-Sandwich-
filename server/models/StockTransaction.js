@@ -147,7 +147,7 @@ stockTransactionSchema.virtual('voucherLabel').get(function () {
     pos_adjustment: 'Positive Adjustment',
     fresh_bazaar: 'Fresh Bazaar GRV',
     sales_import: 'Imported Sales',
-    pos_sale: 'Bloom Bar and Restaurant  POS Sale',
+    pos_sale: 'Mr Sandwich POS Sale',
     manual_sale: 'Manual Sale',
   };
   return labels[this.voucherType] ?? this.voucherType;

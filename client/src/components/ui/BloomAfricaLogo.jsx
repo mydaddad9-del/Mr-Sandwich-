@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 /**
- * Bloom Bar and Restaurant Official Brand Icon Emblem
+ * Mr Sandwich Official Brand Icon Emblem
  */
 export const BloomAfricaIcon = ({ size = 38, className = '' }) => {
   const [imgError, setImgError] = useState(false);
@@ -20,7 +20,7 @@ export const BloomAfricaIcon = ({ size = 38, className = '' }) => {
 
   return (
     <img
-      src="/bloom-logo.png"
+      src="/logo.png"
       alt="Mr Sandwich"
       width={size}
       height={size}
@@ -32,13 +32,13 @@ export const BloomAfricaIcon = ({ size = 38, className = '' }) => {
 };
 
 /**
- * Full Bloom Bar and Restaurant Brand Component
+ * Full Mr Sandwich Brand Component
  */
 export default function BloomAfricaLogo({
   collapsed = false,
   size = 'md', // 'sm' | 'md' | 'lg'
   showSubtitle = true,
-  subtitle = 'Bar & Restaurant',
+  subtitle = 'Fast Food & Restaurant',
   className = '',
   isLight = false,
   textColor = '',
@@ -73,10 +73,7 @@ export default function BloomAfricaLogo({
       <div className="min-w-0">
         <div className="flex items-center gap-1.5">
           <span className={`font-black tracking-tight leading-none text-[15px] uppercase transition-colors ${brandTextColor}`}>
-            Bloom
-          </span>
-          <span className="rounded-md bg-gradient-to-r from-red-600 to-rose-600 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow-sm">
-            Bar & Res
+            Mr Sandwich
           </span>
         </div>
 

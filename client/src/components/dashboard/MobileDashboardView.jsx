@@ -154,7 +154,7 @@ export default function MobileDashboardView({ data, user }) {
         {/* Top Bar Row: Brand Emblem + Notifications & Profile */}
         <div className="relative flex items-center justify-between">
           <Link to="/" className="flex items-center">
-            <BloomAfricaLogo size="sm" showSubtitle={true} subtitle="Café & Bakery" />
+            <BloomAfricaLogo size="sm" showSubtitle={true} subtitle="Fast Food & Restaurant" />
           </Link>
 
           {/* Top Right Action Icons */}

@@ -282,7 +282,7 @@ const HelpModal = ({ onClose }) => {
 
         {/* Modal Footer */}
         <div className="flex items-center justify-between border-t border-ink-100 bg-ink-50/40 px-6 py-3">
-          <p className="text-[10px] text-ink-400">Bloom Bar and Restaurant   CaféHotel Management · Powered by MEGA Technology</p>
+          <p className="text-[10px] text-ink-400">Mr Sandwich Management · Powered by MEGA Technology</p>
           <button
             onClick={onClose}
             className="rounded-xl bg-blue-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-blue-700 transition"

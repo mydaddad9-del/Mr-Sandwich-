@@ -1,7 +1,7 @@
 {
-  "name": "hotel-stock-system",
+  "name": "mr-sandwich-inventory-system",
   "version": "1.0.0",
-  "description": "Hotel Stock Management System",
+  "description": "Mr Sandwich Inventory & POS Management System",
   "main": "server/server.js",
   "scripts": {
     "build": "npm install --prefix client --legacy-peer-deps && npm run build --prefix client && npm install --prefix server --omit=dev",

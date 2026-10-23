@@ -145,7 +145,7 @@ const SuggestionChip = ({ text, onClick }) => (
 );
 
 // ── INITIAL GREETING ──────────────────────────────────────────────
-const GREETING = `Hi! I'm **MEGA** — your Bloom Bar and Restaurant   CaféAI Resource Assistant 🌟
+const GREETING = `Hi! I'm **MEGA** — your Mr Sandwich AI Resource Assistant 🌟
 
 I have live access to your entire stock system right now. Ask me anything like:
 • "What items are out of stock?"
@@ -495,7 +495,7 @@ export default function AiChat() {
               </div>
               <div>
                 <p className="text-sm font-black text-white leading-tight">MEGA</p>
-                <p className="text-[10px] text-purple-200 leading-tight">Bloom Bar and Restaurant  Smart Assistant</p>
+                <p className="text-[10px] text-purple-200 leading-tight">Mr Sandwich  Smart Assistant</p>
               </div>
               {analyzed && (
                 <div className="ml-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold text-white">
@@ -510,8 +510,8 @@ export default function AiChat() {
                 type="button"
                 onClick={(e) => { e.stopPropagation(); toggleAutoSpeak(); }}
                 className={`flex h-7 w-7 items-center justify-center rounded-lg transition ${autoSpeak
-                    ? 'bg-white text-violet-700 shadow-sm'
-                    : 'bg-white/15 hover:bg-white/25 text-white'
+                  ? 'bg-white text-violet-700 shadow-sm'
+                  : 'bg-white/15 hover:bg-white/25 text-white'
                   }`}
                 title={autoSpeak ? 'Auto-Voice is ON (click to mute)' : 'Auto-Voice is OFF (click to auto-read answers)'}
               >
@@ -643,8 +643,8 @@ export default function AiChat() {
                     onClick={toggleListening}
                     disabled={loading}
                     className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-xl transition shadow-xs ${isListening
-                        ? 'bg-rose-500 text-white animate-pulse ring-4 ring-rose-200'
-                        : 'bg-violet-100 text-violet-700 hover:bg-violet-200 active:scale-95'
+                      ? 'bg-rose-500 text-white animate-pulse ring-4 ring-rose-200'
+                      : 'bg-violet-100 text-violet-700 hover:bg-violet-200 active:scale-95'
                       }`}
                     title={isListening ? 'Stop listening' : 'Voice input / Click to speak'}
                   >

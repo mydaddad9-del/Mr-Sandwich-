@@ -57,7 +57,7 @@ export function exportToPDF({
   title = 'Inventory Report',
   columns = [],
   data = [],
-  hotelName = 'Bloom Bar and Restaurant   Café Plc Stock / Bloom Bar and Restaurant   Café',
+  hotelName = 'Mr Sandwich',
   summary = null,
 }) {
   if (!data || data.length === 0) {
@@ -148,7 +148,7 @@ export function exportToPDF({
           <tbody>${tbodyHtml}</tbody>
         </table>
         <div class="footer">
-          <span>Bloom Bar and Restaurant   CaféHotel Inventory & Stock Management System</span>
+          <span>Mr Sandwich Inventory & POS Management System</span>
           <span>Confidential Internal Document</span>
         </div>
         <script>

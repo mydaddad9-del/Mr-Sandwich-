@@ -55,7 +55,7 @@ const formatCompactETB = (n) => {
 };
 
 const PIE_COLORS = [
-  '#1a56db', // Bloom Bar and Restaurant   Caféblue
+  '#1a56db', // Mr Sandwich blue
   '#10b981', // emerald
   '#f59e0b', // amber
   '#8b5cf6', // purple

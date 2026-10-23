@@ -1,6 +1,6 @@
-# Bloom Bar and Restaurant   Café Plc Stock — Hotel Stock Management System
+# Mr Sandwich — Inventory & POS Management System
 
-A full-stack stock/inventory management system for a hotel, built with **React (Vite + Tailwind)** on the frontend and **Node.js/Express + MongoDB** on the backend.
+A full-stack stock/inventory and POS management system for **Mr Sandwich**, built with **React (Vite + Tailwind)** on the frontend and **Node.js/Express + MongoDB** on the backend.
 
 ## Features
 

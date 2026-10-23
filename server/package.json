@@ -1,7 +1,7 @@
 {
-  "name": "hotel-stock-server",
+  "name": "mr-sandwich-server",
   "version": "1.0.0",
-  "description": "Backend API for Hotel Stock Management System",
+  "description": "Backend API for Mr Sandwich Inventory & POS Management System",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

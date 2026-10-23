@@ -1,5 +1,5 @@
 /**
- * AI Controller — Bloom Bar and Restaurant   CaféStock Management System
+ * AI Controller — Mr Sandwich Stock Management System
  * ──────────────────────────────────────────────────────────────────
  * Uses Google Gemini 2.5 Flash with live system context from MongoDB.
  * Each request gets a fresh snapshot so the AI always has current data.
@@ -99,7 +99,7 @@ const getFriendlyError = (err) => {
 
 // ── System prompt template ────────────────────────────────────────
 const buildSystemPrompt = (systemContext, userRole) => `
-You are MEGA — Bloom Bar and Restaurant   CaféAI Resource Assistant — an intelligent stock management assistant embedded inside the Bloom Bar and Restaurant   CaféHotel Stock Management System in Addis Ababa, Ethiopia.
+You are MEGA — Mr Sandwich AI Resource Assistant — an intelligent stock management and restaurant POS assistant embedded inside the Mr Sandwich Management System in Addis Ababa, Ethiopia.
 
 Your job is to help hotel staff understand their stock, identify problems, suggest actions, and answer questions about inventory, purchases, suppliers, consumption, and staff.
 

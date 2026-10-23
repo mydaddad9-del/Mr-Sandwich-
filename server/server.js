@@ -145,7 +145,7 @@ if (distExists) {
   });
 } else {
   console.warn('[STATIC] Warning: client/dist/index.html not found. Check build output.');
-  app.get('/', (req, res) => res.send('Bloom Bar and Restaurant  API Server is running. Frontend build in progress or not mounted.'));
+  app.get('/', (req, res) => res.send('Mr Sandwich API Server is running. Frontend build in progress or not mounted.'));
 }
 
 app.use(notFound);

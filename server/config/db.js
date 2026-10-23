@@ -21,7 +21,7 @@ const connectDB = async () => {
     FALLBACK_URI;
 
   if (uri.includes('xxxxx') || uri.includes('<db_') || uri.includes('<username>')) {
-    console.warn('[DB] Placeholder detected in MONGO_URI, using verified Bloom Bar and Restaurant  cluster URI');
+    console.warn('[DB] Placeholder detected in MONGO_URI, using verified cluster URI');
     uri = FALLBACK_URI;
   }
 

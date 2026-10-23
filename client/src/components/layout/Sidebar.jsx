@@ -443,7 +443,7 @@ const Sidebar = ({
         {/* ── TOP HEADER SECTION (COMPACT & REDIRECTS TO DASHBOARD) ── */}
         <div
           onClick={handleHeaderClick}
-          title="Bloom Bar and Restaurant  - Go to Dashboard"
+          title="Mr Sandwich - Go to Dashboard"
           role="button"
           tabIndex={0}
           onKeyDown={(e) => {

@@ -683,7 +683,7 @@ const Products = () => {
             <div className="col-span-2">
               <label className="mb-1 block text-sm font-medium text-ink-600">Product name *</label>
               <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="e.g. Bloom Bar and Restaurant   CaféBurger"
+                placeholder="e.g. Mr Sandwich Club Sandwich"
                 className="w-full rounded-lg border border-ink-200 px-3 py-2 text-sm outline-none focus:border-blue-500" />
             </div>
             <div>

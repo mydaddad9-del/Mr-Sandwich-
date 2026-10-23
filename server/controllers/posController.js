@@ -232,7 +232,7 @@ const createOrder = asyncHandler(async (req, res) => {
         voucherType: 'pos_sale',
         voucherNo,
         type: 'out',
-        reason: `Bloom Bar and Restaurant  POS Sale #${orderNo}`,
+        reason: `Mr Sandwich POS Sale #${orderNo}`,
         date: new Date(),
         reference: orderNo,
         items: transactionItems,

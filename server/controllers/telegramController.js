@@ -264,7 +264,7 @@ const removeSubscriber = asyncHandler(async (req, res) => {
   // Send polite unsubscription notice to that Telegram chat
   await reply(
     targetChatId,
-    `🏨 <b>Bloom Bar and Restaurant  Café</b>\n━━━━━━━━━━━━━━━━━━━━\n🔕 <b>UNSUBSCRIBED BY ADMINISTRATOR</b>\n\nYour Telegram notifications subscription has been removed by the administrator. You will no longer receive alerts.\n━━━━━━━━━━━━━━━━━━━━`
+    `🥪 <b>Mr Sandwich</b>\n━━━━━━━━━━━━━━━━━━━━\n🔕 <b>UNSUBSCRIBED BY ADMINISTRATOR</b>\n\nYour Telegram notifications subscription has been removed by the administrator. You will no longer receive alerts.\n━━━━━━━━━━━━━━━━━━━━`
   );
 
   res.json({ message: 'Subscriber removed and notifications stopped.' });

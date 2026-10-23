@@ -37,7 +37,7 @@ const VOUCHER_LABELS = {
   pos_adjustment: '+ve Adjustment',
   fresh_bazaar: 'Fresh Bazaar',
   sales_import: 'Imported POS Sale',
-  pos_sale: 'Bloom Bar and Restaurant  POS Sale',
+  pos_sale: 'Mr Sandwich  POS Sale',
   manual_sale: 'Manual Sale',
 };
 
@@ -823,7 +823,7 @@ export default function Reports({ defaultTab } = {}) {
   const [tab, setTab] = useState(defaultTab || 'stock_balance');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [hotelName, setHotelName] = useState('Bloom Bar and Restaurant   Café');
+  const [hotelName, setHotelName] = useState('Mr Sandwich');
 
   // Filter & Search states
   const currentYearMonthStr = () => {
@@ -1515,7 +1515,7 @@ export default function Reports({ defaultTab } = {}) {
                   {/* Outwards */}
                   <th className="px-2.5 py-2 text-right bg-rose-50/50">−ve Adj</th>
                   <th className="px-2.5 py-2 text-right bg-rose-50/50">Disposal</th>
-                  <th className="px-2.5 py-2 text-right bg-rose-50/50 text-cyan-800 font-bold" title="Bloom Bar and Restaurant  POS Direct Sales">POS Sales</th>
+                  <th className="px-2.5 py-2 text-right bg-rose-50/50 text-cyan-800 font-bold" title="Mr Sandwich  POS Direct Sales">POS Sales</th>
                   <th className="px-2.5 py-2 text-right bg-rose-50/50 text-purple-800 font-bold" title="External POS Imported Sales">Import Sales</th>
                   <th className="px-2.5 py-2 text-right bg-rose-50/50 text-indigo-800 font-bold" title="Manual Registered Sales">Manual Sales</th>
                   <th className="px-3 py-2 text-right border-r border-ink-200 bg-rose-100/70 font-bold text-rose-900">Total Out</th>
@@ -1588,7 +1588,7 @@ export default function Reports({ defaultTab } = {}) {
                     <td className="px-2.5 py-2 text-right tabular text-orange-600 bg-rose-50/20">
                       {item.disposalQty > 0 ? `−${item.disposalQty}` : '—'}
                     </td>
-                    <td className="px-2.5 py-2 text-right tabular text-cyan-700 bg-rose-50/20 font-medium" title="Bloom Bar and Restaurant  POS Direct Sales">
+                    <td className="px-2.5 py-2 text-right tabular text-cyan-700 bg-rose-50/20 font-medium" title="Mr Sandwich  POS Direct Sales">
                       {item.posSaleQty > 0 ? `−${item.posSaleQty}` : '—'}
                     </td>
                     <td className="px-2.5 py-2 text-right tabular text-purple-600 bg-rose-50/20 font-medium" title="External POS Imported Sales">
@@ -1942,14 +1942,14 @@ export default function Reports({ defaultTab } = {}) {
                             </td>
                             <td className="px-3 py-2 whitespace-nowrap">
                               <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold ${row.voucherType === 'pos_sale'
-                                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                                  : row.voucherType === 'manual_sale'
-                                    ? 'bg-purple-50 text-purple-700 border border-purple-200'
-                                    : row.voucherType === 'sales_import'
-                                      ? 'bg-rose-50 text-rose-700 border border-rose-200'
-                                      : ['cash_grv', 'credit_grv', 'fresh_bazaar', 'pos_adjustment'].includes(row.voucherType)
-                                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                        : 'bg-rose-50 text-rose-700 border border-rose-200'
+                                ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                                : row.voucherType === 'manual_sale'
+                                  ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                                  : row.voucherType === 'sales_import'
+                                    ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                                    : ['cash_grv', 'credit_grv', 'fresh_bazaar', 'pos_adjustment'].includes(row.voucherType)
+                                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                      : 'bg-rose-50 text-rose-700 border border-rose-200'
                                 }`}>
                                 {VOUCHER_LABELS[row.voucherType] || row.voucherType}
                               </span>

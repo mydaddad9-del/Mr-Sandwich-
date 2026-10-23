@@ -34,8 +34,8 @@ const getSettings = asyncHandler(async (req, res) => {
   let settings = await Setting.findOne();
   if (!settings) {
     settings = await Setting.create({
-      hotelName: 'Bloom Bar and Restaurant   Café',
-      systemEmail: 'info@Bloom Bar and Restaurant   Café.com',
+      hotelName: 'Mr Sandwich',
+      systemEmail: 'info@mrsandwich.com',
       phone: '+251 911 000 111',
       address: 'Addis Ababa, Ethiopia',
       currency: 'ETB',

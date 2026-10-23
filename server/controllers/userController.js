@@ -54,7 +54,7 @@ const updateUser = asyncHandler(async (req, res) => {
       if (cleanChatId) {
         tg.sendToOne && tg.sendToOne(
           cleanChatId,
-          `🏨 <b>Bloom Bar and Restaurant  Café</b>\n━━━━━━━━━━━━━━━━━━━━\n🔒 <b>ACCOUNT DISABLED</b>\n\nHello <b>${updated.name}</b>, your staff account has been <b>disabled</b> by the administrator.\n\n🔕 Telegram notifications for this account have been automatically stopped.\n━━━━━━━━━━━━━━━━━━━━`
+          `🥪 <b>Mr Sandwich</b>\n━━━━━━━━━━━━━━━━━━━━\n🔒 <b>ACCOUNT DISABLED</b>\n\nHello <b>${updated.name}</b>, your staff account has been <b>disabled</b> by the administrator.\n\n🔕 Telegram notifications for this account have been automatically stopped.\n━━━━━━━━━━━━━━━━━━━━`
         );
       }
 
@@ -98,7 +98,7 @@ const updateUser = asyncHandler(async (req, res) => {
       }
       tg.sendToOne && tg.sendToOne(
         updated.telegramChatId,
-        `🏨 <b>Bloom Bar and Restaurant  Café</b>\n━━━━━━━━━━━━━━━━━━━━\n✅ <b>ACCOUNT RE-ENABLED</b>\n\nHello <b>${updated.name}</b>, your staff account has been re-enabled by the administrator.\n\n🔔 Telegram notifications are now active.\n━━━━━━━━━━━━━━━━━━━━`
+        `🥪 <b>Mr Sandwich</b>\n━━━━━━━━━━━━━━━━━━━━\n✅ <b>ACCOUNT RE-ENABLED</b>\n\nHello <b>${updated.name}</b>, your staff account has been re-enabled by the administrator.\n\n🔔 Telegram notifications are now active.\n━━━━━━━━━━━━━━━━━━━━`
       );
     } catch (e) {
       console.warn('[UpdateUser] Could not re-subscribe Telegram on reactivate:', e.message);
@@ -171,7 +171,7 @@ const deleteUser = asyncHandler(async (req, res) => {
     if (cleanChatId) {
       tg.sendToOne && tg.sendToOne(
         cleanChatId,
-        `🏨 <b>Bloom Bar and Restaurant  Café</b>\n━━━━━━━━━━━━━━━━━━━━\n🗑️ <b>ACCOUNT REMOVED</b>\n\nHello <b>${user.name}</b>, your staff account has been deleted by the administrator.\n\n🔕 Telegram notifications have been permanently stopped.\n━━━━━━━━━━━━━━━━━━━━`
+        `🥪 <b>Mr Sandwich</b>\n━━━━━━━━━━━━━━━━━━━━\n🗑️ <b>ACCOUNT REMOVED</b>\n\nHello <b>${user.name}</b>, your staff account has been deleted by the administrator.\n\n🔕 Telegram notifications have been permanently stopped.\n━━━━━━━━━━━━━━━━━━━━`
       );
     }
 

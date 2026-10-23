@@ -28,8 +28,8 @@ const DEFAULT_CRUD_PERMISSIONS = {
 
 const settingSchema = new mongoose.Schema(
   {
-    hotelName: { type: String, default: 'Bloom Bar and Restaurant   Café' },
-    systemEmail: { type: String, default: 'info@Bloom Bar and Restaurant   Café.com' },
+    hotelName: { type: String, default: 'Mr Sandwich' },
+    systemEmail: { type: String, default: 'info@mrsandwich.com' },
     phone: { type: String, default: '+251 911 000 111' },
     address: { type: String, default: 'Addis Ababa, Ethiopia' },
     currency: { type: String, default: 'ETB' },
@@ -91,7 +91,7 @@ const settingSchema = new mongoose.Schema(
       type: Array,
       default: [],
     },
-    notes: { type: String, default: 'Bloom Bar and Restaurant   CaféHotel Management & Stock Control System' },
+    notes: { type: String, default: 'Mr Sandwich Restaurant & Stock Control System' },
 
     // ── Pricing & Cost Parameters ─────────────────────────────────
     // Contingency: % buffer added on top of raw material cost (waste, price fluctuation)

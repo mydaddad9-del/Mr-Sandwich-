@@ -161,7 +161,7 @@ function buildKOT(order, opts = {}) {
 // ─────────────────────────────────────────────────────────────────────────────
 function buildReceipt(order, opts = {}) {
   const W = opts.charWidth || 42;
-  const hotelName = opts.hotelName || 'Bloom Bar and Restaurant  Café';
+  const hotelName = opts.hotelName || 'Mr Sandwich';
   const headerLine2 = opts.headerLine2 || '';
   const footerLine = opts.footerLine || 'Thank you! Come again.';
   const taxRate = opts.taxRate || 15;
@@ -337,7 +337,7 @@ function buildKOT_plain(order, opts = {}) {
  */
 function buildReceipt_plain(order, opts = {}) {
   const W = 60;
-  const hotelName = opts.hotelName || 'Bloom Bar and Restaurant  Café';
+  const hotelName = opts.hotelName || 'Mr Sandwich';
   const footerLine = opts.footerLine || 'Thank you! Come again.';
   const taxRate = opts.taxRate ?? 15;
   const currency = opts.currency || 'ETB';

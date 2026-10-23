@@ -1,5 +1,5 @@
 @echo off
-title Bloom Bar - POS TCP Print Bridge
+title Mr Sandwich - POS TCP Print Bridge
 color 0A
 echo ====================================================
 echo   Mr Sandwich - Local TCP Print Bridge

@@ -64,7 +64,7 @@ const printerSchema = new mongoose.Schema(
       min: 1,
       max: 5,
     },
-    headerLine1: { type: String, default: 'Bloom Bar and Restaurant  Café' },
+    headerLine1: { type: String, default: 'Mr Sandwich' },
     headerLine2: { type: String, default: '' },
     footerLine: { type: String, default: 'Thank you! Come again.' },
     charWidth: { type: Number, default: 42 }, // chars per line for 80mm

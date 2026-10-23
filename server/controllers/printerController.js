@@ -201,7 +201,7 @@ const printTestPageEndpoint = asyncHandler(async (req, res) => {
     serviceCharge: 0,
     amountPaid: 200,
     items: [
-      { productName: 'Bloom Special Burger', quantity: 1, unitPrice: 150 },
+      { productName: 'Mr Sandwich Special Burger', quantity: 1, unitPrice: 150 },
       { productName: 'Fresh Draught Drink', quantity: 1, unitPrice: 50 },
     ],
   };
