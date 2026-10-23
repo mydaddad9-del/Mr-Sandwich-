@@ -8,5 +8,5 @@ echo   Supports Epson, Star, Bixolon, Citizen, Datecs & Generic ESC/POS
 echo ========================================================
 echo.
 cd /d "%~dp0"
-node bloom-agent.js
+node mr-sandwich-agent.js
 pause

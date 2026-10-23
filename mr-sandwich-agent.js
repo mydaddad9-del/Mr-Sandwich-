@@ -1,7 +1,7 @@
 /**
- * bloom-agent.js – Mr Sandwich Cloud Print Agent
+ * mr-sandwich-agent.js – Mr Sandwich Cloud Print Agent
  *
- * Runs on the local POS computer (RED-RMS) on the restaurant LAN.
+ * Runs on the local POS computer on the restaurant LAN.
  * Connects outbound to the cloud server and relays print jobs to
  * thermal printers over raw TCP (192.168.8.222:9100).
  *
@@ -18,7 +18,7 @@ const path = require('path');
 const CONFIG_FILE = path.join(__dirname, 'agent-config.json');
 
 let config = {
-  cloudUrl: process.env.MR_SANDWICH_CLOUD_URL || process.env.BLOOM_CLOUD_URL || process.argv[2] || 'https://mr-sandwich.app.aletcloud.com',
+  cloudUrl: process.env.MR_SANDWICH_CLOUD_URL || process.argv[2] || 'https://mr-sandwich.app.aletcloud.com',
   defaultPrinterIp: '192.168.8.222',
   defaultPrinterPort: 9100,
 };

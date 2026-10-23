@@ -3123,7 +3123,7 @@ export default function Settings() {
                                   paperWidth: w.key,
                                   charWidth: w.charWidth,
                                 }));
-                                localStorage.setItem('bloom_preferred_paper_width', w.key);
+                                localStorage.setItem('mrsandwich_preferred_paper_width', w.key);
                               }}
                               className={`rounded-xl border py-2 text-xs font-semibold transition ${printerForm.paperWidth === w.key || (w.key === '60mm' && /60/i.test(printerForm.paperWidth))
                                   ? 'border-violet-600 bg-violet-600 text-white shadow-sm ring-2 ring-violet-400/30'

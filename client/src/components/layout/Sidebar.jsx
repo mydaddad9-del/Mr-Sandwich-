@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import BloomAfricaLogo from '../ui/BloomAfricaLogo';
+import MrSandwichLogo from '../ui/MrSandwichLogo';
 import { SIDEBAR_THEMES } from '../../config/sidebarThemes';
 
 // ── Material UI Icons (@mui/icons-material) ──────────────────────────
@@ -464,7 +464,7 @@ const Sidebar = ({
               className={`flex items-center transition-transform duration-150 group-hover:scale-[1.02] ${collapsed ? 'mx-auto' : ''
                 }`}
             >
-              <BloomAfricaLogo
+              <MrSandwichLogo
                 collapsed={collapsed}
                 size={collapsed ? 28 : 32}
                 showSubtitle={false}

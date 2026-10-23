@@ -24,7 +24,6 @@ async function generate() {
   fs.writeFileSync(path.join(publicDir, 'favicon-16x16.png'), png16);
   fs.writeFileSync(path.join(publicDir, 'apple-touch-icon.png'), png192);
   fs.writeFileSync(path.join(publicDir, 'logo.png'), png512);
-  fs.writeFileSync(path.join(publicDir, 'bloom-logo.png'), png512);
 
   // 2. Generate valid multi-resolution ICO file containing 16, 32, 48, 64 PNG frames
   const frames = [

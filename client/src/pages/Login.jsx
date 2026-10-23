@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Eye, EyeOff, Phone, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
-import { BloomAfricaIcon } from '../components/ui/BloomAfricaLogo';
+import { MrSandwichIcon } from '../components/ui/MrSandwichLogo';
 
 /* ─── role quick-fill data ─────────────────────────────────────── */
 const ROLES = [
@@ -763,7 +763,7 @@ export default function Login() {
           {/* Mr Sandwich Official Brand Emblem */}
           <div style={{ position: 'relative', zIndex: 1 }}>
             <div className="rounded-2xl p-1 shadow-2xl ring-2 ring-white/20 inline-block bg-white/10 backdrop-blur-md">
-              <BloomAfricaIcon size={76} />
+              <MrSandwichIcon size={76} />
             </div>
           </div>
 
@@ -792,7 +792,7 @@ export default function Login() {
           {/* top bar */}
           <div className="login-topbar">
             <div className="flex items-center gap-2.5">
-              <BloomAfricaIcon size={32} />
+              <MrSandwichIcon size={32} />
               <span className="font-black text-[15px] tracking-tight text-slate-900 flex items-center gap-1.5" aria-label="Mr Sandwich">
                 <span>Mr Sandwich</span>
               </span>

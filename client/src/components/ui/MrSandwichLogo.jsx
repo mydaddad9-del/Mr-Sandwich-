@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 /**
  * Mr Sandwich Official Brand Icon Emblem
  */
-export const BloomAfricaIcon = ({ size = 38, className = '' }) => {
+export const MrSandwichIcon = ({ size = 38, className = '' }) => {
   const [imgError, setImgError] = useState(false);
 
   if (imgError) {
@@ -34,7 +34,7 @@ export const BloomAfricaIcon = ({ size = 38, className = '' }) => {
 /**
  * Full Mr Sandwich Brand Component
  */
-export default function BloomAfricaLogo({
+export default function MrSandwichLogo({
   collapsed = false,
   size = 'md', // 'sm' | 'md' | 'lg'
   showSubtitle = true,
@@ -54,19 +54,19 @@ export default function BloomAfricaLogo({
   if (collapsed) {
     return (
       <div className={`flex items-center justify-center ${className}`} title="Mr Sandwich">
-        <BloomAfricaIcon size={iconPx} />
+        <MrSandwichIcon size={iconPx} />
       </div>
     );
   }
 
   const brandTextColor = textColor || (isLight ? 'text-slate-900' : 'text-white');
-  const subTextColor = isLight ? 'text-slate-500' : 'text-emerald-200/80';
+  const subTextColor = isLight ? 'text-slate-500' : 'text-amber-200/80';
 
   return (
     <div className={`flex items-center gap-3 select-none ${className}`}>
       {/* Icon Emblem */}
       <div className="relative group shrink-0">
-        <BloomAfricaIcon size={iconPx} />
+        <MrSandwichIcon size={iconPx} />
       </div>
 
       {/* Brand Typography */}
@@ -79,7 +79,7 @@ export default function BloomAfricaLogo({
 
         {showSubtitle && (
           <p className={`mt-1 flex items-center gap-1.5 text-[10px] font-medium tracking-wide leading-none transition-colors ${subTextColor}`}>
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
             {subtitle}
           </p>
         )}

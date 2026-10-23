@@ -31,7 +31,7 @@ export default {
           600: '#906526',
           700: '#6f4c1f',
         },
-        BloomAfrica: {
+        mrSandwich: {
           50: '#eff6ff',
           100: '#dbeafe',
           200: '#bfdbfe',
