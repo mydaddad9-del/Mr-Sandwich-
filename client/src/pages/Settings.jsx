@@ -325,7 +325,7 @@ export default function Settings() {
     printOnOrder: true,
     printOnCheckout: true,
     copies: 1,
-    headerLine1: 'Bloom Bar & Restaurant',
+    headerLine1: 'Mr Sandwich',
     headerLine2: '',
     footerLine: 'Thank you! Come again.',
     charWidth: 32,
@@ -2741,7 +2741,7 @@ export default function Settings() {
             changeDue: 150,
             taxRate: 15,
           }, {
-            hotelName: printerOrForm?.headerLine1 || 'Bloom Bar & Restaurant',
+            hotelName: printerOrForm?.headerLine1 || 'Mr Sandwich',
             footerLine: printerOrForm?.footerLine || 'Thank you! Come again.',
             paperWidth: printerOrForm?.paperWidth || '60mm',
           });
@@ -2758,7 +2758,7 @@ export default function Settings() {
               { productName: 'Special Club Sandwich', quantity: 1, station: 'kitchen', notes: 'Extra Sauce' },
             ],
           }, {
-            businessName: printerOrForm?.headerLine1 || 'Bloom Bar & Restaurant',
+            businessName: printerOrForm?.headerLine1 || 'Mr Sandwich',
             paperWidth: printerOrForm?.paperWidth || '60mm',
           });
         };

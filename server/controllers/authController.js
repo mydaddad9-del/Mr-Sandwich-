@@ -306,7 +306,7 @@ const requestOtp = asyncHandler(async (req, res) => {
 
   // ── Send OTP to the subscriber's exact Telegram chat ────────────
   sendTelegramDirect(matchedSub.chatId,
-    `🏨 <b>Bloom Bar & Restaurant</b>
+    `🏨 <b>Mr Sandwich</b>
 ━━━━━━━━━━━━━━━━━━━━
 🔐 <b>Login OTP Code</b>
 

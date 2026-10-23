@@ -182,7 +182,7 @@ const printTestPageEndpoint = asyncHandler(async (req, res) => {
       paperWidth: pWidth,
       charWidth: req.body.charWidth || (isNarrow ? 32 : 42),
       enabled: true,
-      headerLine1: 'Bloom Bar & Restaurant',
+      headerLine1: 'Mr Sandwich',
       footerLine: 'TCP Test Print Successful!',
       copies: 1,
     };
@@ -208,7 +208,7 @@ const printTestPageEndpoint = asyncHandler(async (req, res) => {
 
   try {
     await printReceipt(printer, sampleOrder, {
-      hotelName: 'Bloom Bar & Restaurant',
+      hotelName: 'Mr Sandwich',
       headerLine2: 'TCP Network Print Test Passed',
       footerLine: `TCP OK • ${printer.brand || 'Epson'} • ${printer.paperWidth || '60×80mm'}`.trim(),
     });
@@ -220,7 +220,7 @@ const printTestPageEndpoint = asyncHandler(async (req, res) => {
         printer,
         sampleOrder,
         opts: {
-          hotelName: 'Bloom Bar & Restaurant',
+          hotelName: 'Mr Sandwich',
           headerLine2: 'TCP Network Print Test Passed',
           footerLine: `TCP OK • ${printer.brand || 'Epson'} • ${printer.paperWidth || '60×80mm'}`.trim(),
         },

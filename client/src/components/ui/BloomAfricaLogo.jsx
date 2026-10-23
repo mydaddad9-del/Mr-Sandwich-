@@ -11,7 +11,7 @@ export const BloomAfricaIcon = ({ size = 38, className = '' }) => {
       <div
         className={`shrink-0 flex items-center justify-center rounded-xl bg-emerald-900 text-white font-bold border border-emerald-700/50 shadow-md ${className}`}
         style={{ width: size, height: size, fontSize: Math.max(12, size * 0.38) }}
-        title="Bloom Bar & Restaurant"
+        title="Mr Sandwich"
       >
         🍽️
       </div>
@@ -21,7 +21,7 @@ export const BloomAfricaIcon = ({ size = 38, className = '' }) => {
   return (
     <img
       src="/bloom-logo.png"
-      alt="Bloom Bar & Restaurant"
+      alt="Mr Sandwich"
       width={size}
       height={size}
       onError={() => setImgError(true)}
@@ -53,7 +53,7 @@ export default function BloomAfricaLogo({
 
   if (collapsed) {
     return (
-      <div className={`flex items-center justify-center ${className}`} title="Bloom Bar & Restaurant">
+      <div className={`flex items-center justify-center ${className}`} title="Mr Sandwich">
         <BloomAfricaIcon size={iconPx} />
       </div>
     );

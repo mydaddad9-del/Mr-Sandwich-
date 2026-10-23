@@ -1,5 +1,5 @@
 /**
- * bloom-agent.js – Bloom Bar & Restaurant Cloud Print Agent
+ * bloom-agent.js – Mr Sandwich Cloud Print Agent
  *
  * Runs on the local POS computer (RED-RMS) on the restaurant LAN.
  * Connects outbound to the cloud server and relays print jobs to
@@ -38,7 +38,7 @@ const isHttps = config.cloudUrl.startsWith('https://');
 const client = isHttps ? https : http;
 
 console.log('========================================================');
-console.log('  Bloom Bar & Restaurant - Cloud Print Agent');
+console.log('  Mr Sandwich - Cloud Print Agent');
 console.log('========================================================');
 console.log(`[CONFIG] Cloud Server: ${config.cloudUrl}`);
 console.log(`[CONFIG] Default Printer: ${config.defaultPrinterIp}:${config.defaultPrinterPort}`);
@@ -105,7 +105,7 @@ function sendRawToPrinter(ip, port, data) {
 }
 
 // Build ESC/POS bytes for thermal test page
-function buildTestReceipt(hotelName = 'Bloom Bar & Restaurant', footer = 'Print Test Successful!') {
+function buildTestReceipt(hotelName = 'Mr Sandwich', footer = 'Print Test Successful!') {
   const ESC = 0x1b;
   const GS = 0x1d;
   const INIT = Buffer.from([ESC, 0x40]);
@@ -145,7 +145,7 @@ function buildTestReceipt(hotelName = 'Bloom Bar & Restaurant', footer = 'Print 
 }
 
 // Build PCL / ASCII for HP LaserJet test page
-function buildLaserTestPage(hotelName = 'Bloom Bar & Restaurant', footer = 'Print Test Successful!') {
+function buildLaserTestPage(hotelName = 'Mr Sandwich', footer = 'Print Test Successful!') {
   const PCL_RESET = '\x1bE';
   const PCL_SETUP = '\x1b&l0O\x1b(s12V\x1b&k2G';
   const PCL_FF = '\x0c';
@@ -223,8 +223,8 @@ async function pollLoop() {
             const ip = targetPrinter.ipAddress || job.payload?.ip || config.defaultPrinterIp;
             const port = targetPrinter.port || job.payload?.port || 9100;
             const rawBytes = isHpLaser
-              ? buildLaserTestPage('Bloom Bar & Restaurant', 'HP LaserJet TCP Print Passed')
-              : buildTestReceipt('Bloom Bar & Restaurant', 'Epson ESC/POS Print Passed');
+              ? buildLaserTestPage('Mr Sandwich', 'HP LaserJet TCP Print Passed')
+              : buildTestReceipt('Mr Sandwich', 'Epson ESC/POS Print Passed');
             try {
               await sendRawToPrinter(ip, port, rawBytes);
               console.log(`[PRINT] Test page printed to ${ip}:${port} (${isHpLaser ? 'HP Laser' : 'ESC/POS'}) [SUCCESS]`);
@@ -295,7 +295,7 @@ async function pollLoop() {
               const lines = [
                 PCL_RESET + PCL_SETUP,
                 '============================================================',
-                '                 BLOOM BAR & RESTAURANT                     ',
+                '                 Mr Sandwich                     ',
                 '                     CUSTOMER RECEIPT                       ',
                 '============================================================',
                 `Order #: ${order.orderNo || '--'}    Table: ${order.tableNo || '--'}`,
@@ -314,7 +314,7 @@ async function pollLoop() {
               const items = (order.items || []).map(i => `  ${(i.productName || '').padEnd(18).slice(0, 18)} x${i.quantity}  ${Number(i.totalPrice || 0).toFixed(2)}`).join('\n');
               receiptData = Buffer.concat([
                 Buffer.from([0x1b, 0x40, 0x1b, 0x61, 0x01, 0x1b, 0x21, 0x30]),
-                Buffer.from('BLOOM BAR & RESTAURANT\n', 'latin1'),
+                Buffer.from('Mr Sandwich\n', 'latin1'),
                 Buffer.from([0x1b, 0x21, 0x00]),
                 Buffer.from(`Order #${order.orderNo || '--'}  Table: ${order.tableNo || '--'}\n`, 'latin1'),
                 Buffer.from(`Date: ${new Date().toLocaleString('en-ET')}\n`, 'latin1'),

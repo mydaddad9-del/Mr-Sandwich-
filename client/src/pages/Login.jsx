@@ -760,7 +760,7 @@ export default function Login() {
         <section className="login-hero" aria-label="Application branding">
           <CurvedLines />
 
-          {/* Bloom Bar & Restaurant Official Brand Emblem */}
+          {/* Mr Sandwich Official Brand Emblem */}
           <div style={{ position: 'relative', zIndex: 1 }}>
             <div className="rounded-2xl p-1 shadow-2xl ring-2 ring-white/20 inline-block bg-white/10 backdrop-blur-md">
               <BloomAfricaIcon size={76} />
@@ -793,7 +793,7 @@ export default function Login() {
           <div className="login-topbar">
             <div className="flex items-center gap-2.5">
               <BloomAfricaIcon size={32} />
-              <span className="font-black text-[15px] tracking-tight text-slate-900 flex items-center gap-1.5" aria-label="Bloom Bar & Restaurant">
+              <span className="font-black text-[15px] tracking-tight text-slate-900 flex items-center gap-1.5" aria-label="Mr Sandwich">
                 <span>Bloom</span>
                 <span className="rounded bg-gradient-to-r from-red-600 to-rose-600 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow-xs">Bar &amp; Res</span>
               </span>

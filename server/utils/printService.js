@@ -102,7 +102,7 @@ async function printKOT(printer, order, opts = {}) {
     const isNarrow = /58|60/i.test(printer.paperWidth || '');
     data = buildKOT(order, {
       charWidth: printer.charWidth || (isNarrow ? 32 : 42),
-      businessName: opts.businessName || printer.headerLine1 || 'Bloom Bar & Restaurant',
+      businessName: opts.businessName || printer.headerLine1 || 'Mr Sandwich',
       ...opts,
     });
   }
@@ -127,7 +127,7 @@ async function printReceipt(printer, order, opts = {}) {
   if (isLaserPrinter(printer)) {
     // HP LaserJet / PCL plain-text mode
     data = buildReceipt_plain(order, {
-      hotelName: opts.hotelName || printer.headerLine1 || 'Bloom Bar & Restaurant',
+      hotelName: opts.hotelName || printer.headerLine1 || 'Mr Sandwich',
       headerLine2: opts.headerLine2 || printer.headerLine2 || '',
       footerLine: opts.footerLine || printer.footerLine || 'Thank you! Come again.',
       taxRate: opts.taxRate ?? 15,
@@ -139,7 +139,7 @@ async function printReceipt(printer, order, opts = {}) {
     const isNarrow = /58|60/i.test(printer.paperWidth || '');
     data = buildReceipt(order, {
       charWidth: printer.charWidth || (isNarrow ? 32 : 42),
-      hotelName: opts.hotelName || printer.headerLine1 || 'Bloom Bar & Restaurant',
+      hotelName: opts.hotelName || printer.headerLine1 || 'Mr Sandwich',
       headerLine2: opts.headerLine2 || printer.headerLine2 || '',
       footerLine: opts.footerLine || printer.footerLine || 'Thank you! Come again.',
       taxRate: opts.taxRate ?? 15,

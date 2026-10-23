@@ -17,7 +17,7 @@ const ENV_CHAT_IDS = (process.env.TELEGRAM_CHAT_ID || '')
   .split(',')
   .map(id => id.trim())
   .filter(id => id && id !== 'your_chat_id_here');
-const HOTEL = 'Bloom Bar & Restaurant';
+const HOTEL = 'Mr Sandwich';
 
 // ── Low-level sender ─────────────────────────────────────────────
 async function getChatIds() {

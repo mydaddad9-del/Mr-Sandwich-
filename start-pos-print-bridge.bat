@@ -2,7 +2,7 @@
 title Bloom Bar - POS TCP Print Bridge
 color 0A
 echo ====================================================
-echo   Bloom Bar & Restaurant - Local TCP Print Bridge
+echo   Mr Sandwich - Local TCP Print Bridge
 echo   Connecting Cloud POS to Local Thermal Printers
 echo ====================================================
 echo.
