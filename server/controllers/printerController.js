@@ -92,6 +92,21 @@ const pingPrinter = asyncHandler(async (req, res) => {
   res.json(result);
 });
 
+// Helper to print concurrently to multiple printers without blocking
+async function executePrintJob(printer, type, order, opts) {
+  const printFn = type === 'kot' ? printKOT : printReceipt;
+  try {
+    await printFn(printer, order, opts || {});
+    return { printer: printer.name, ip: printer.ipAddress, ok: true };
+  } catch (err) {
+    if (hasActiveRelayAgent()) {
+      const relayRes = await dispatchToRelay(type, { printer, order, opts });
+      return { printer: printer.name, ip: printer.ipAddress, ok: relayRes.ok, error: relayRes.error };
+    }
+    return { printer: printer.name, ip: printer.ipAddress, ok: false, error: err.message };
+  }
+}
+
 // ── PRINT a KOT (kitchen order ticket) ──────────────────────────────────────
 const printKOTEndpoint = asyncHandler(async (req, res) => {
   const { order, printerId, opts } = req.body;
@@ -110,23 +125,14 @@ const printKOTEndpoint = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: 'No kitchen printer configured or enabled' });
   }
 
-  const results = [];
-  for (const printer of printers) {
-    try {
-      await printKOT(printer, order, opts || {});
-      results.push({ printer: printer.name, ok: true });
-    } catch (err) {
-      if (hasActiveRelayAgent()) {
-        const relayRes = await dispatchToRelay('kot', { printer, order, opts });
-        results.push({ printer: printer.name, ok: relayRes.ok, error: relayRes.error });
-      } else {
-        results.push({ printer: printer.name, ok: false, error: err.message });
-      }
-    }
-  }
+  // Execute all printers in parallel so an unreachable printer never blocks a local printer!
+  const settled = await Promise.allSettled(
+    printers.map((printer) => executePrintJob(printer, 'kot', order, opts))
+  );
 
-  const allOk = results.every((r) => r.ok);
-  res.status(allOk ? 200 : 207).json({ results });
+  const results = settled.map((s) => (s.status === 'fulfilled' ? s.value : { ok: false, error: s.reason?.message }));
+  const anyOk = results.some((r) => r.ok);
+  res.status(anyOk ? 200 : 207).json({ ok: anyOk, results });
 });
 
 // ── PRINT a receipt ──────────────────────────────────────────────────────────
@@ -146,23 +152,14 @@ const printReceiptEndpoint = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: 'No receipt printer configured or enabled' });
   }
 
-  const results = [];
-  for (const printer of printers) {
-    try {
-      await printReceipt(printer, order, opts || {});
-      results.push({ printer: printer.name, ok: true });
-    } catch (err) {
-      if (hasActiveRelayAgent()) {
-        const relayRes = await dispatchToRelay('receipt', { printer, order, opts });
-        results.push({ printer: printer.name, ok: relayRes.ok, error: relayRes.error });
-      } else {
-        results.push({ printer: printer.name, ok: false, error: err.message });
-      }
-    }
-  }
+  // Execute all printers in parallel
+  const settled = await Promise.allSettled(
+    printers.map((printer) => executePrintJob(printer, 'receipt', order, opts))
+  );
 
-  const allOk = results.every((r) => r.ok);
-  res.status(allOk ? 200 : 207).json({ results });
+  const results = settled.map((s) => (s.status === 'fulfilled' ? s.value : { ok: false, error: s.reason?.message }));
+  const anyOk = results.some((r) => r.ok);
+  res.status(anyOk ? 200 : 207).json({ ok: anyOk, results });
 });
 
 // ── PRINT TEST PAGE ─────────────────────────────────────────────────────────

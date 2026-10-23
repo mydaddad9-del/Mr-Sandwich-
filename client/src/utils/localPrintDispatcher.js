@@ -26,7 +26,7 @@ export async function pingPrinter(ip, port = 9100) {
   // 1. Try local POS bridge first (direct LAN access)
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2500);
+    const timeoutId = setTimeout(() => controller.abort(), 1000);
     const localRes = await fetch(`${LOCAL_BRIDGE_URL}/ping`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -79,7 +79,7 @@ export async function printTestPage(printerOrForm) {
   // 1. Try local POS bridge first (direct local network socket)
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000);
+    const timeoutId = setTimeout(() => controller.abort(), 1200);
     const localRes = await fetch(`${LOCAL_BRIDGE_URL}/test-page`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -94,7 +94,7 @@ export async function printTestPage(printerOrForm) {
         return {
           ok: true,
           via: 'local_tcp',
-          message: `✓ Test page printed directly to ${ip}:${port} (Epson ESC/POS Local TCP)!`,
+          message: `✓ Test page printed directly to ${ip}:${port}!`,
         };
       }
     }
@@ -127,7 +127,7 @@ export async function printTestPage(printerOrForm) {
 export async function sendOrderKOT(order, opts = {}) {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000);
+    const timeoutId = setTimeout(() => controller.abort(), 1200);
     const localRes = await fetch(`${LOCAL_BRIDGE_URL}/kot`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -155,7 +155,7 @@ export async function sendOrderKOT(order, opts = {}) {
 export async function sendOrderReceipt(order, opts = {}) {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000);
+    const timeoutId = setTimeout(() => controller.abort(), 1200);
     const localRes = await fetch(`${LOCAL_BRIDGE_URL}/receipt`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

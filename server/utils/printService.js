@@ -8,7 +8,7 @@
 const net = require('net');
 const { buildKOT, buildReceipt, buildKOT_plain, buildReceipt_plain } = require('./escpos');
 
-const CONNECT_TIMEOUT_MS = 5000;
+const CONNECT_TIMEOUT_MS = 2500;
 const WRITE_TIMEOUT_MS = 8000;
 
 /**
@@ -23,34 +23,42 @@ function sendToPrinter(ip, port, data) {
     const socket = new net.Socket();
     let settled = false;
 
-    const done = (err) => {
+    const cleanup = (err) => {
       if (settled) return;
       settled = true;
-      socket.destroy();
+      try { socket.destroy(); } catch (_) {}
       if (err) reject(err);
       else resolve();
     };
 
-    const connectTimer = setTimeout(() => done(new Error(`Printer connection timeout (${ip}:${port})`)), CONNECT_TIMEOUT_MS);
+    socket.setTimeout(CONNECT_TIMEOUT_MS);
+    socket.setNoDelay(true); // Flush raw bytes immediately without TCP buffering lag
 
     socket.connect(port, ip, () => {
-      clearTimeout(connectTimer);
-
-      const writeTimer = setTimeout(() => done(new Error('Printer write timeout')), WRITE_TIMEOUT_MS);
+      // Clear connect timeout and set write timeout
+      socket.setTimeout(WRITE_TIMEOUT_MS);
 
       socket.write(data, (err) => {
-        clearTimeout(writeTimer);
-        if (err) done(err);
-        else {
-          // Allow printer buffer to flush before closing
-          setTimeout(() => done(), 500);
-        }
+        if (err) return cleanup(err);
+
+        // Graceful half-close (FIN) so printer spools complete data without RST drop
+        socket.end();
+
+        // Safety fallback: if printer does not close the socket within 1500ms, resolve cleanly
+        setTimeout(() => cleanup(null), 1500);
       });
     });
 
+    socket.on('close', () => {
+      cleanup(null);
+    });
+
     socket.on('error', (err) => {
-      clearTimeout(connectTimer);
-      done(err);
+      cleanup(err);
+    });
+
+    socket.on('timeout', () => {
+      cleanup(new Error(`Printer connection/write timeout (${ip}:${port})`));
     });
   });
 }

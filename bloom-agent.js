@@ -61,37 +61,50 @@ function checkLocalPrinter(ip = config.defaultPrinterIp, port = config.defaultPr
   });
 }
 
+function isLaserPrinter(printer = {}) {
+  const laserBrands = ['hp', 'lexmark', 'brother', 'samsung', 'xerox', 'canon', 'ricoh', 'kyocera', 'konica', 'sharp'];
+  const brand = String(printer.brand || '').toLowerCase();
+  const model = String(printer.model || '').toLowerCase();
+  return laserBrands.some(b => brand.includes(b)) ||
+    model.includes('laserjet') ||
+    model.includes('laser') ||
+    model.includes('m402') ||
+    model.includes('m404') ||
+    model.includes('m428') ||
+    model.includes('m118');
+}
+
 function sendRawToPrinter(ip, port, data) {
   return new Promise((resolve, reject) => {
     const socket = new net.Socket();
     let settled = false;
 
-    const done = (err) => {
+    const cleanup = (err) => {
       if (settled) return;
       settled = true;
-      socket.destroy();
+      try { socket.destroy(); } catch (_) {}
       if (err) reject(err);
       else resolve({ ok: true });
     };
 
-    const timer = setTimeout(() => done(new Error(`Timeout connecting to ${ip}:${port}`)), 4000);
+    socket.setTimeout(6000);
+    socket.setNoDelay(true);
 
     socket.connect(port, ip, () => {
-      clearTimeout(timer);
       socket.write(data, (err) => {
-        if (err) done(err);
-        else setTimeout(() => done(null), 300);
+        if (err) return cleanup(err);
+        socket.end();
+        setTimeout(() => cleanup(null), 1500);
       });
     });
 
-    socket.on('error', (err) => {
-      clearTimeout(timer);
-      done(err);
-    });
+    socket.on('close', () => cleanup(null));
+    socket.on('error', (err) => cleanup(err));
+    socket.on('timeout', () => cleanup(new Error(`Timeout connecting to ${ip}:${port}`)));
   });
 }
 
-// Build ESC/POS bytes for test page
+// Build ESC/POS bytes for thermal test page
 function buildTestReceipt(hotelName = 'Bloom Bar & Restaurant', footer = 'Print Test Successful!') {
   const ESC = 0x1b;
   const GS = 0x1d;
@@ -103,7 +116,6 @@ function buildTestReceipt(hotelName = 'Bloom Bar & Restaurant', footer = 'Print 
   const DBL_ON = Buffer.from([ESC, 0x21, 0x30]);
   const DBL_OFF = Buffer.from([ESC, 0x21, 0x00]);
   const CUT = Buffer.from([GS, 0x56, 0x00]);
-  const LF = Buffer.from('\n', 'latin1');
 
   const text = (str) => Buffer.from(str + '\n', 'latin1');
 
@@ -119,17 +131,41 @@ function buildTestReceipt(hotelName = 'Bloom Bar & Restaurant', footer = 'Print 
     text('--------------------------------'),
     ALIGN_LEFT,
     text('Date: ' + new Date().toLocaleString('en-ET')),
-    text('Printer: 192.168.8.222:9100'),
-    text('Paper: 60x80mm ESC/POS'),
+    text('Printer: RAW TCP Port 9100'),
+    text('Mode: ESC/POS Thermal'),
     text('Status: ONLINE & VERIFIED [OK]'),
     text('--------------------------------'),
     ALIGN_CENTER,
     BOLD_ON,
     text(footer),
     BOLD_OFF,
-    Buffer.from([ESC, 0x64, 4]), // feed 4 lines
+    Buffer.from([ESC, 0x64, 4]),
     CUT,
   ]);
+}
+
+// Build PCL / ASCII for HP LaserJet test page
+function buildLaserTestPage(hotelName = 'Bloom Bar & Restaurant', footer = 'Print Test Successful!') {
+  const PCL_RESET = '\x1bE';
+  const PCL_SETUP = '\x1b&l0O\x1b(s12V\x1b&k2G';
+  const PCL_FF = '\x0c';
+  const lines = [
+    PCL_RESET + PCL_SETUP,
+    '============================================================',
+    `           ** ${hotelName.toUpperCase()} **                 `,
+    '             TCP DIRECT PRINT TEST OK                       ',
+    '============================================================',
+    'Date: ' + new Date().toLocaleString('en-ET'),
+    'Protocol: TCP RAW JetDirect Port 9100',
+    'Mode: HP LaserJet / PCL Laser',
+    'Status: ONLINE & VERIFIED [100% OK]',
+    '============================================================',
+    `           ${footer}                                         `,
+    '============================================================',
+    PCL_FF,
+    PCL_RESET
+  ];
+  return Buffer.from(lines.join('\r\n'), 'utf8');
 }
 
 // Complete job back to cloud server
@@ -174,41 +210,70 @@ async function pollLoop() {
 
         for (const job of jobs) {
           console.log(`[JOB] Received ${job.action} (id: ${job.id})`);
+          const targetPrinter = job.payload?.printer || {};
+          const isHpLaser = isLaserPrinter(targetPrinter);
+
           if (job.action === 'ping') {
-            const ip = job.payload?.ip || config.defaultPrinterIp;
-            const port = job.payload?.port || 9100;
+            const ip = job.payload?.ip || targetPrinter.ipAddress || config.defaultPrinterIp;
+            const port = job.payload?.port || targetPrinter.port || 9100;
             const ok = await checkLocalPrinter(ip, port);
             console.log(`[PING] Tested ${ip}:${port} -> ${ok ? 'ONLINE [OK]' : 'OFFLINE'}`);
             completeJob(job.id, { ok });
           } else if (job.action === 'test_page') {
-            const ip = job.payload?.printer?.ipAddress || job.payload?.ip || config.defaultPrinterIp;
-            const port = job.payload?.printer?.port || job.payload?.port || 9100;
-            const rawBytes = buildTestReceipt('Bloom Bar & Restaurant', 'TCP Cloud Print Passed');
+            const ip = targetPrinter.ipAddress || job.payload?.ip || config.defaultPrinterIp;
+            const port = targetPrinter.port || job.payload?.port || 9100;
+            const rawBytes = isHpLaser
+              ? buildLaserTestPage('Bloom Bar & Restaurant', 'HP LaserJet TCP Print Passed')
+              : buildTestReceipt('Bloom Bar & Restaurant', 'Epson ESC/POS Print Passed');
             try {
               await sendRawToPrinter(ip, port, rawBytes);
-              console.log(`[PRINT] Test page printed to ${ip}:${port} [SUCCESS]`);
+              console.log(`[PRINT] Test page printed to ${ip}:${port} (${isHpLaser ? 'HP Laser' : 'ESC/POS'}) [SUCCESS]`);
               completeJob(job.id, { ok: true, message: `Printed to ${ip}:${port}` });
             } catch (err) {
               console.error(`[PRINT] Error printing to ${ip}:${port}:`, err.message);
               completeJob(job.id, { ok: false, error: err.message });
             }
           } else if (job.action === 'kot') {
-            const ip = job.payload?.printer?.ipAddress || config.defaultPrinterIp;
-            const port = job.payload?.printer?.port || 9100;
+            const ip = targetPrinter.ipAddress || config.defaultPrinterIp;
+            const port = targetPrinter.port || 9100;
             const order = job.payload?.order || {};
-            const items = (order.items || []).map(i => `  ${i.quantity || 1}x ${i.productName || i.name || ''}`).join('\n');
-            const kotData = Buffer.concat([
-              Buffer.from([0x1b, 0x40, 0x1b, 0x61, 0x01, 0x1b, 0x21, 0x30]),
-              Buffer.from('** KITCHEN ORDER **\n', 'latin1'),
-              Buffer.from([0x1b, 0x21, 0x00, 0x1b, 0x45, 0x01]),
-              Buffer.from(`Order #${order.orderNo || '--'}  Table: ${order.tableNo || '--'}\n`, 'latin1'),
-              Buffer.from(`Waiter: ${order.waiterName || 'Staff'}  ${new Date().toLocaleTimeString()}\n`, 'latin1'),
-              Buffer.from('--------------------------------\n', 'latin1'),
-              Buffer.from([0x1b, 0x61, 0x00, 0x1b, 0x45, 0x00]),
-              Buffer.from(items + '\n', 'latin1'),
-              Buffer.from('--------------------------------\n', 'latin1'),
-              Buffer.from([0x1b, 0x64, 0x04, 0x1d, 0x56, 0x00]),
-            ]);
+
+            let kotData;
+            if (isHpLaser) {
+              const PCL_RESET = '\x1bE';
+              const PCL_SETUP = '\x1b&l0O\x1b(s12V\x1b&k2G';
+              const PCL_FF = '\x0c';
+              const lines = [
+                PCL_RESET + PCL_SETUP,
+                '============================================================',
+                '               ** KITCHEN ORDER TICKET **                   ',
+                '============================================================',
+                `Order #: ${order.orderNo || '--'}    Table: ${order.tableNo || '--'}`,
+                `Waiter:  ${order.waiterName || 'Staff'}    Time: ${new Date().toLocaleTimeString('en-ET')}`,
+                '------------------------------------------------------------',
+                ...(order.items || []).map(i => `  x${i.quantity || 1}  ${i.productName || i.name || ''} ${i.notes ? '(' + i.notes + ')' : ''}`),
+                '============================================================',
+                '                 ** PREPARE IMMEDIATELY **                  ',
+                PCL_FF,
+                PCL_RESET
+              ];
+              kotData = Buffer.from(lines.join('\r\n'), 'utf8');
+            } else {
+              const items = (order.items || []).map(i => `  ${i.quantity || 1}x ${i.productName || i.name || ''}`).join('\n');
+              kotData = Buffer.concat([
+                Buffer.from([0x1b, 0x40, 0x1b, 0x61, 0x01, 0x1b, 0x21, 0x30]),
+                Buffer.from('** KITCHEN ORDER **\n', 'latin1'),
+                Buffer.from([0x1b, 0x21, 0x00, 0x1b, 0x45, 0x01]),
+                Buffer.from(`Order #${order.orderNo || '--'}  Table: ${order.tableNo || '--'}\n`, 'latin1'),
+                Buffer.from(`Waiter: ${order.waiterName || 'Staff'}  ${new Date().toLocaleTimeString()}\n`, 'latin1'),
+                Buffer.from('--------------------------------\n', 'latin1'),
+                Buffer.from([0x1b, 0x61, 0x00, 0x1b, 0x45, 0x00]),
+                Buffer.from(items + '\n', 'latin1'),
+                Buffer.from('--------------------------------\n', 'latin1'),
+                Buffer.from([0x1b, 0x64, 0x04, 0x1d, 0x56, 0x00]),
+              ]);
+            }
+
             try {
               await sendRawToPrinter(ip, port, kotData);
               console.log(`[PRINT] KOT #${order.orderNo} printed to ${ip}:${port} [SUCCESS]`);
@@ -218,26 +283,53 @@ async function pollLoop() {
               completeJob(job.id, { ok: false, error: err.message });
             }
           } else if (job.action === 'receipt') {
-            const ip = job.payload?.printer?.ipAddress || config.defaultPrinterIp;
-            const port = job.payload?.printer?.port || 9100;
+            const ip = targetPrinter.ipAddress || config.defaultPrinterIp;
+            const port = targetPrinter.port || 9100;
             const order = job.payload?.order || {};
-            const items = (order.items || []).map(i => `  ${(i.productName || '').padEnd(18).slice(0, 18)} x${i.quantity}  ${Number(i.totalPrice || 0).toFixed(2)}`).join('\n');
-            const receiptData = Buffer.concat([
-              Buffer.from([0x1b, 0x40, 0x1b, 0x61, 0x01, 0x1b, 0x21, 0x30]),
-              Buffer.from('BLOOM BAR & RESTAURANT\n', 'latin1'),
-              Buffer.from([0x1b, 0x21, 0x00]),
-              Buffer.from(`Order #${order.orderNo || '--'}  Table: ${order.tableNo || '--'}\n`, 'latin1'),
-              Buffer.from(`Date: ${new Date().toLocaleString('en-ET')}\n`, 'latin1'),
-              Buffer.from('--------------------------------\n', 'latin1'),
-              Buffer.from([0x1b, 0x61, 0x00]),
-              Buffer.from(items + '\n', 'latin1'),
-              Buffer.from('--------------------------------\n', 'latin1'),
-              Buffer.from([0x1b, 0x61, 0x02, 0x1b, 0x45, 0x01]),
-              Buffer.from(`TOTAL: ETB ${Number(order.grandTotal || 0).toFixed(2)}\n`, 'latin1'),
-              Buffer.from([0x1b, 0x45, 0x00, 0x1b, 0x61, 0x01]),
-              Buffer.from('Thank you! Come again.\n', 'latin1'),
-              Buffer.from([0x1b, 0x64, 0x04, 0x1d, 0x56, 0x00]),
-            ]);
+
+            let receiptData;
+            if (isHpLaser) {
+              const PCL_RESET = '\x1bE';
+              const PCL_SETUP = '\x1b&l0O\x1b(s12V\x1b&k2G';
+              const PCL_FF = '\x0c';
+              const lines = [
+                PCL_RESET + PCL_SETUP,
+                '============================================================',
+                '                 BLOOM BAR & RESTAURANT                     ',
+                '                     CUSTOMER RECEIPT                       ',
+                '============================================================',
+                `Order #: ${order.orderNo || '--'}    Table: ${order.tableNo || '--'}`,
+                `Date:    ${new Date().toLocaleString('en-ET')}`,
+                '------------------------------------------------------------',
+                ...(order.items || []).map(i => `  ${String(i.productName || '').padEnd(30)} x${i.quantity}  ETB ${Number(i.totalPrice || (i.quantity * i.unitPrice) || 0).toFixed(2)}`),
+                '------------------------------------------------------------',
+                `TOTAL: ETB ${Number(order.grandTotal || 0).toFixed(2)}`,
+                '============================================================',
+                '                 Thank you! Come again.                     ',
+                PCL_FF,
+                PCL_RESET
+              ];
+              receiptData = Buffer.from(lines.join('\r\n'), 'utf8');
+            } else {
+              const items = (order.items || []).map(i => `  ${(i.productName || '').padEnd(18).slice(0, 18)} x${i.quantity}  ${Number(i.totalPrice || 0).toFixed(2)}`).join('\n');
+              receiptData = Buffer.concat([
+                Buffer.from([0x1b, 0x40, 0x1b, 0x61, 0x01, 0x1b, 0x21, 0x30]),
+                Buffer.from('BLOOM BAR & RESTAURANT\n', 'latin1'),
+                Buffer.from([0x1b, 0x21, 0x00]),
+                Buffer.from(`Order #${order.orderNo || '--'}  Table: ${order.tableNo || '--'}\n`, 'latin1'),
+                Buffer.from(`Date: ${new Date().toLocaleString('en-ET')}\n`, 'latin1'),
+                Buffer.from('--------------------------------\n', 'latin1'),
+                Buffer.from([0x1b, 0x61, 0x00]),
+                Buffer.from(items + '\n', 'latin1'),
+                Buffer.from('--------------------------------\n', 'latin1'),
+                Buffer.from([0x1b, 0x61, 0x02, 0x1b, 0x45, 0x01]),
+                Buffer.from(`TOTAL: ETB ${Number(order.grandTotal || 0).toFixed(2)}\n`, 'latin1'),
+                Buffer.from([0x1b, 0x45, 0x00, 0x1b, 0x61, 0x01]),
+                Buffer.from('Thank you! Come again.\n', 'latin1'),
+                Buffer.from([0x1b, 0x64, 0x04, 0x1d, 0x56, 0x00]),
+              ]);
+            }
+
             try {
               await sendRawToPrinter(ip, port, receiptData);
               console.log(`[PRINT] Receipt #${order.orderNo} printed to ${ip}:${port} [SUCCESS]`);
