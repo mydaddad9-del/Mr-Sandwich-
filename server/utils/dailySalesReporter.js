@@ -135,13 +135,16 @@ function formatDailyReportMessage(metrics, cafeName = 'Mr Sandwich') {
   const formatBirr = (num) =>
     Number(num || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ETB';
 
+  const rawName = cafeName || 'Mr Sandwich';
+  const cleanCafeName = rawName.replace(/baba\s*roti(\s*caf[eé])?/gi, 'Mr Sandwich').replace(/bloom\s*(africa|bar|restaurant)?/gi, 'Mr Sandwich').replace(/\s+/g, ' ').trim() || 'Mr Sandwich';
+
   const categoryLines = (metrics.topCategories || [])
     .slice(0, 8)
     .map((c) => `  • <b>${c.name}:</b> ${formatBirr(c.revenue)} (${c.quantity} items)`)
     .join('\n');
 
   return (
-    `🏨 <b>${cafeName.toUpperCase()}</b>
+    `🏨 <b>${cleanCafeName.toUpperCase()}</b>
 📊 <b>DAILY SALES DIGEST — ${metrics.dateString}</b>
 ━━━━━━━━━━━━━━━━━━━━
 💰 <b>TOTAL SALES:</b> <code>${formatBirr(metrics.totalSales)}</code>

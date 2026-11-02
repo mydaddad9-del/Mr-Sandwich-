@@ -59,6 +59,16 @@ const getSettings = asyncHandler(async (req, res) => {
       settings.markModified('rolePermissions');
       modified = true;
     }
+    if (settings.hotelName && (/baba\s*roti/i.test(settings.hotelName) || /bloom/i.test(settings.hotelName))) {
+      settings.hotelName = 'Mr Sandwich';
+      settings.markModified('hotelName');
+      modified = true;
+    }
+    if (settings.systemEmail && (/baba\s*roti/i.test(settings.systemEmail) || /bloom/i.test(settings.systemEmail))) {
+      settings.systemEmail = 'info@mrsandwich.com';
+      settings.markModified('systemEmail');
+      modified = true;
+    }
     if (!settings.navVisibility) {
       settings.navVisibility = DEFAULT_NAV_VISIBILITY;
       settings.markModified('navVisibility');
