@@ -68,6 +68,7 @@ const settingSchema = new mongoose.Schema(
       type: Object,
       default: {
         subsystem: true, // Subsystem: POS Ordering, Captain Order, Cash Sales
+        digitalMenu: true, // Digital Menu Suite: Customer QR Menu & Table Self-Ordering
         finance: true, // Finance & Expenses Suite: Overhead Expenses, Analytics & P&L
         themeCustomization: true, // Allow Hotel Admin to customize Sidebar Appearance & Brand Theme
         materialIcons: true, // Material UI Icons with colorful badges (true) vs Classic minimal icons (false)
@@ -91,6 +92,11 @@ const settingSchema = new mongoose.Schema(
       type: Array,
       default: [],
     },
+    // ── Telegram Daily Sales Digest Scheduler ─────────────────────
+    telegramDailyReportEnabled: { type: Boolean, default: true },
+    telegramDailyReportTime: { type: String, default: '12:00' },
+    lastDailyReportExecution: { type: String, default: '' },
+    lastDailyReportDate: { type: String, default: '' },
     notes: { type: String, default: 'Mr Sandwich Restaurant & Stock Control System' },
 
     // ── Pricing & Cost Parameters ─────────────────────────────────
@@ -109,6 +115,73 @@ const settingSchema = new mongoose.Schema(
     rawMaterialPriceAdjustValue: { type: Number, default: 0, min: 0 },
     // Product Selling Price Bulk Adjustment — percentage to add to ALL product selling prices
     productSellingPriceAdjustPercent: { type: Number, default: 0, min: 0, max: 500 },
+
+    // ── Digital Menu & QR Ordering Settings ──────────────────────
+    digitalMenuSettings: {
+      type: Object,
+      default: {
+        enabled: true,
+        allowOrdering: true,
+        enableCallWaiter: true,
+        enableBillRequest: true,
+        bannerText: 'Delicious Food Freshly Made',
+        bannerSubtitle: 'Signature Sandwiches, Burgers & Specialty Drinks',
+        phone: '+251 91 123 4567',
+        landline: '+251 11 667 8900',
+        googleMapsLink: 'https://maps.google.com/?q=Mr+Sandwich+Addis+Ababa',
+        googleMapsEmbedUrl: 'https://maps.google.com/maps?q=Addis%20Ababa,%20Ethiopia&output=embed',
+        tiktokUrl: '',
+        facebookUrl: '',
+        instagramUrl: '',
+        telegramUrl: 'https://t.me/mrsandwichethiopia',
+        tables: [
+          'Table 01', 'Table 02', 'Table 03', 'Table 04', 'Table 05',
+          'Table 06', 'Table 07', 'Table 08', 'Table 09', 'Table 10',
+          'Table 12', 'Table 15', 'VIP 01', 'Patio 01',
+        ],
+        aboutTitle: 'Mr Sandwich',
+        aboutSubtitle: 'Addis Ababa, Ethiopia',
+        aboutDescription: 'Famous for gourmet sandwiches, burgers, artisan snacks, craft beverages, and warm welcoming hospitality.',
+        aboutDescriptionAmharic: 'በልዩ ጥራትና ፍቅር የሚዘጋጁ ምርጥ ሳንድዊቾች፣ በርገሮች እና መጠጦች ከሞቅ ያለ እንግዳ ተቀባይነት ጋር።',
+        aboutBadge1Icon: '🥪',
+        aboutBadge1Label: 'Gourmet Sandwiches',
+        aboutBadge2Icon: '🍔',
+        aboutBadge2Label: 'Fresh Burgers',
+        aboutBadge3Icon: '☕',
+        aboutBadge3Label: 'Specialty Drinks',
+        galleryTitle: 'Our Chefs & Atmosphere',
+        galleryTitleAmharic: 'የሬስቶራንቱ ድባብ እና የእጅ ሙያ',
+        gallerySubtitle: 'Photo Gallery',
+        galleryItems: [
+          {
+            imageUrl: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=600&q=80',
+            caption: '🥪 Fresh Gourmet Sandwiches',
+          },
+          {
+            imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80',
+            caption: '🍔 Juicy Crafted Burgers',
+          },
+          {
+            imageUrl: 'https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&w=600&q=80',
+            caption: '☕ Barista Specialty Drinks',
+          },
+          {
+            imageUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=600&q=80',
+            caption: '✨ Cozy Dining Ambiance',
+          },
+        ],
+      },
+    },
+    menuReviews: [
+      {
+        customerName: { type: String, default: 'Valued Guest' },
+        tableNo:      { type: String, default: '' },
+        rating:       { type: Number, default: 5 },
+        comment:      { type: String, default: '' },
+        approved:     { type: Boolean, default: true },
+        createdAt:    { type: Date, default: Date.now },
+      },
+    ],
   },
   { timestamps: true }
 );

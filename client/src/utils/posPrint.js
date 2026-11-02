@@ -327,19 +327,36 @@ export const posPrint = {
       printStationTicket(order, 'kitchen', opts);
     });
   },
-  printBarista: (order, opts) => printStationTicket(order, 'barista', opts),
+  printBarista: (order, opts) => {
+    sendOrderKOT(order, { targetStation: 'bar', stationTitle: '** BAR & DRINK TICKET **', ...opts }).then(res => {
+      if (!res?.ok) {
+        printStationTicket(order, 'barista', opts);
+      }
+    }).catch(() => {
+      printStationTicket(order, 'barista', opts);
+    });
+  },
+  printBar: (order, opts) => {
+    sendOrderKOT(order, { targetStation: 'bar', stationTitle: '** BAR & DRINK TICKET **', ...opts }).then(res => {
+      if (!res?.ok) {
+        printStationTicket(order, 'barista', opts);
+      }
+    }).catch(() => {
+      printStationTicket(order, 'barista', opts);
+    });
+  },
   printKOT: (order, opts) => {
     sendOrderKOT(order, opts).then(res => {
       if (!res?.ok) {
         printStationTicket(order, 'kitchen', opts);
-        const hasBarista = (order.items || []).some(i => i.station === 'barista');
+        const hasBarista = (order.items || []).some(i => i.station === 'barista' || i.station === 'bar');
         if (hasBarista) {
           setTimeout(() => printStationTicket(order, 'barista', opts), 300);
         }
       }
     }).catch(() => {
       printStationTicket(order, 'kitchen', opts);
-      const hasBarista = (order.items || []).some(i => i.station === 'barista');
+      const hasBarista = (order.items || []).some(i => i.station === 'barista' || i.station === 'bar');
       if (hasBarista) {
         setTimeout(() => printStationTicket(order, 'barista', opts), 300);
       }

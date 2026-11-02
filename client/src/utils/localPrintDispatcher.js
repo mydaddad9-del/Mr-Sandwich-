@@ -1,29 +1,49 @@
 /**
- * localPrintDispatcher.js – Hybrid POS Thermal Printing Engine
+ * localPrintDispatcher.js – Hybrid POS Thermal & Laser Printing Engine
  *
  * Enables 100% functional direct TCP/IP printing (Port 9100) even when the app
- * is hosted on the cloud (AletCloud / Render) by routing raw socket traffic
- * through the local POS bridge (http://127.0.0.1:5000) when available.
+ * is hosted on the cloud (AletCloud / Render / Vercel):
  *
- * If no local bridge is running, it seamlessly falls back to high-fidelity
- * browser thermal printing (iframe) formatted for 60×80mm / 80mm rolls.
+ * 1. Tries the local POS loopback bridge (http://127.0.0.1:5000) first for instant (<5ms)
+ *    socket printing from POS terminals on the same machine.
+ * 2. If the local bridge is not running or blocked, it seamlessly dispatches to
+ *    the cloud API (/api/printers/action/...), which relays to the local agent
+ *    via outbound long-polling without requiring open firewall ports.
  */
 
 import api from '../api/axios';
 
 const LOCAL_BRIDGE_URL = 'http://127.0.0.1:5000/api/printers/action';
-const KNOWN_PRINTER_IPS = ['10.241.18.48', '192.168.8.222', '192.168.1.200', '192.168.0.200'];
+const KNOWN_PRINTER_IPS = [
+  '192.168.8.222',
+  '192.168.1.100',
+  '10.241.18.48',
+  '192.168.1.200',
+  '192.168.0.200',
+];
+
+/**
+ * Check if the Cloud Relay Agent is currently connected & online.
+ */
+export async function getRelayStatus() {
+  try {
+    const res = await api.get('/printers/relay/status');
+    return res.data || { online: false };
+  } catch (_) {
+    return { online: false };
+  }
+}
 
 /**
  * Ping a printer IP over TCP port 9100.
  * Priority:
- *   1. Local loopback bridge (http://127.0.0.1:5000) – reaches local LAN printer even from cloud app!
- *   2. Main backend API (/api/printers/action/ping)
+ *   1. Local loopback bridge (http://127.0.0.1:5000) – reaches local LAN printer in <5ms
+ *   2. Main backend API (/api/printers/action/ping) – triggers cloud relay or direct TCP
  */
 export async function pingPrinter(ip, port = 9100) {
   if (!ip) return { ok: false, error: 'IP address required' };
 
-  // 1. Try local POS bridge first (direct LAN access)
+  // 1. Try local POS bridge first (direct local network socket)
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 1000);
@@ -42,7 +62,7 @@ export async function pingPrinter(ip, port = 9100) {
       }
     }
   } catch (_) {
-    // Local bridge not active or blocked, fall through to main API
+    // Local bridge not active or blocked by browser mixed content, fall through to main API
   }
 
   // 2. Try main API (cloud or local backend)
@@ -76,7 +96,7 @@ export async function printTestPage(printerOrForm) {
     printerId: printerOrForm._id,
   };
 
-  // 1. Try local POS bridge first (direct local network socket)
+  // 1. Try local POS bridge first
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 1200);
@@ -108,8 +128,8 @@ export async function printTestPage(printerOrForm) {
     if (res.data?.ok) {
       return {
         ok: true,
-        via: 'api_tcp',
-        message: `✓ Test page sent to ${ip}:${port}!`,
+        via: res.data.via || 'api_tcp',
+        message: res.data.message || `✓ Test page sent to ${ip}:${port}!`,
       };
     }
     return { ok: false, error: res.data?.error || 'Test print failed' };
@@ -122,16 +142,23 @@ export async function printTestPage(printerOrForm) {
 }
 
 /**
- * Send Kitchen Order Ticket (KOT) directly via network TCP printer.
+ * Send Kitchen / Bar Order Ticket (KOT) directly via network TCP printer.
  */
 export async function sendOrderKOT(order, opts = {}) {
+  const payload = {
+    order,
+    opts,
+    printerId: opts?.printerId || order?.printerId,
+  };
+
+  // 1. Try local loopback bridge
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 1200);
     const localRes = await fetch(`${LOCAL_BRIDGE_URL}/kot`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ order, opts }),
+      body: JSON.stringify(payload),
       signal: controller.signal,
     });
     clearTimeout(timeoutId);
@@ -141,11 +168,12 @@ export async function sendOrderKOT(order, opts = {}) {
     }
   } catch (_) {}
 
+  // 2. Try cloud backend (relays to agent if cloud host)
   try {
-    const res = await api.post('/printers/action/kot', { order, opts });
+    const res = await api.post('/printers/action/kot', payload);
     return { ok: true, via: 'api_tcp', data: res.data };
   } catch (err) {
-    return { ok: false, error: err.message };
+    return { ok: false, error: err.response?.data?.message || err.message };
   }
 }
 
@@ -153,13 +181,20 @@ export async function sendOrderKOT(order, opts = {}) {
  * Send Customer Receipt directly via network TCP printer.
  */
 export async function sendOrderReceipt(order, opts = {}) {
+  const payload = {
+    order,
+    opts,
+    printerId: opts?.printerId || order?.printerId,
+  };
+
+  // 1. Try local loopback bridge
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 1200);
     const localRes = await fetch(`${LOCAL_BRIDGE_URL}/receipt`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ order, opts }),
+      body: JSON.stringify(payload),
       signal: controller.signal,
     });
     clearTimeout(timeoutId);
@@ -169,17 +204,17 @@ export async function sendOrderReceipt(order, opts = {}) {
     }
   } catch (_) {}
 
+  // 2. Try cloud backend
   try {
-    const res = await api.post('/printers/action/receipt', { order, opts });
+    const res = await api.post('/printers/action/receipt', payload);
     return { ok: true, via: 'api_tcp', data: res.data };
   } catch (err) {
-    return { ok: false, error: err.message };
+    return { ok: false, error: err.response?.data?.message || err.message };
   }
 }
 
 /**
  * Auto-detect active thermal printers on the local LAN.
- * Checks known default IPs including 10.241.18.48 and 192.168.8.222.
  */
 export async function detectLocalPrinters() {
   const found = [];
@@ -195,6 +230,7 @@ export async function detectLocalPrinters() {
 }
 
 export default {
+  getRelayStatus,
   pingPrinter,
   printTestPage,
   sendOrderKOT,

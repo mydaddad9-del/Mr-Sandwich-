@@ -47,6 +47,7 @@ const DEFAULT_NAV_VISIBILITY = {
 
 const DEFAULT_LICENSED_MODULES = {
   subsystem: true,
+  digitalMenu: true,
   finance: true,
   themeCustomization: true,
   materialIcons: true,

@@ -1,12 +1,12 @@
 @echo off
-title Mr Sandwich - TCP Print Bridge
+title Mr Sandwich - POS Hybrid Print Bridge
 color 0A
 echo ========================================================
-echo   Mr Sandwich - Cloud TCP Print Bridge
+echo   Mr Sandwich - Cloud-to-Local POS TCP Print Bridge
 echo   Connecting Cloud POS to All Order Printers (Kitchen, Bar, Cashier)
-echo   Supports Epson, Star, Bixolon, Citizen, Datecs & Generic ESC/POS
+echo   Supports Epson, Star, Bixolon, Citizen, Datecs & HP LaserJet
 echo ========================================================
 echo.
 cd /d "%~dp0"
-node mr-sandwich-agent.js
+node pos-agent.js
 pause

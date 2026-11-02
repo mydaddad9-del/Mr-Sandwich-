@@ -87,6 +87,7 @@ function text(str) {
 function buildKOT(order, opts = {}) {
   const W = opts.charWidth || 42;
   const businessName = opts.businessName || 'KITCHEN ORDER';
+  const stationTitle = opts.stationTitle || '** KITCHEN ORDER **';
   const now = new Date();
   const timeStr = now.toLocaleTimeString('en-ET', { hour: '2-digit', minute: '2-digit' });
   const dateStr = now.toLocaleDateString('en-ET');
@@ -95,7 +96,7 @@ function buildKOT(order, opts = {}) {
     INIT,
     ALIGN_CENTER,
     DOUBLE_SIZE_ON,
-    text('** KITCHEN ORDER **'),
+    text(stationTitle),
     DOUBLE_SIZE_OFF,
     BOLD_ON,
     text(businessName.toUpperCase()),
@@ -292,6 +293,7 @@ const PCL_SETUP = '\x1b&l0O\x1b(s12V\x1b&k2G';
 function buildKOT_plain(order, opts = {}) {
   const W = 60; // wider for laser/letter page
   const businessName = opts.businessName || 'KITCHEN ORDER';
+  const stationTitle = opts.stationTitle || '** KITCHEN ORDER TICKET **';
   const now = new Date();
   const timeStr = now.toLocaleTimeString('en-ET', { hour: '2-digit', minute: '2-digit' });
   const dateStr = now.toLocaleDateString('en-ET');
@@ -300,7 +302,7 @@ function buildKOT_plain(order, opts = {}) {
   lines.push(PCL_RESET + PCL_SETUP);
   lines.push('');
   lines.push('='.repeat(W));
-  lines.push(center('** KITCHEN ORDER TICKET **', W));
+  lines.push(center(stationTitle, W));
   lines.push(center(businessName.toUpperCase(), W));
   lines.push('='.repeat(W));
   lines.push(twoCol('Order #:', order.orderNo || '--', W));

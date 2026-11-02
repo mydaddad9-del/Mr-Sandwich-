@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import api from "../api/axios";
 import { posPrint } from "../utils/posPrint";
 import { exportToExcel, exportToCSV, exportToPDF } from "../utils/exportUtils";
+import { triggerNewOrderAlert, triggerWaiterCallAlert } from "../utils/audioAlert";
 import {
   Search, Plus, Minus, Trash2, ChevronDown, X, Clock,
   UtensilsCrossed, ShoppingBag, Printer, User, TableProperties,
@@ -44,6 +45,7 @@ function Toast({ msg, type = "success", onDone }) {
 
 const STATUS_CONFIG = {
   all: { label: "All Orders", bg: "#f1f5f9", border: "#cbd5e1", color: "#475569" },
+  pending_approval: { label: "Awaiting Waiter", bg: "#fff7ed", border: "#fed7aa", color: "#c2410c" },
   held: { label: "Held", bg: "#f5f3ff", border: "#ddd6fe", color: "#7c3aed" },
   open: { label: "Open", bg: "#eff6ff", border: "#bfdbfe", color: "#2563eb" },
   sent_to_kitchen: { label: "In Kitchen", bg: "#fffbeb", border: "#fde68a", color: "#d97706" },
@@ -103,6 +105,84 @@ export default function CaptainOrder() {
   useEffect(() => {
     loadOrders();
   }, [loadOrders]);
+
+  // Live SSE listener for incoming customer QR orders & waiter calls
+  useEffect(() => {
+    let es = null;
+    try {
+      es = new EventSource('/api/captain-orders/stream');
+      es.addEventListener('customer_qr_order', (e) => {
+        try {
+          const payload = JSON.parse(e.data)?.data;
+          if (payload) {
+            triggerNewOrderAlert({
+              orderId: payload._id,
+              orderNo: payload.orderNo,
+              tableNo: payload.tableNo,
+              itemsCount: payload.items?.length,
+              totalAmount: payload.grandTotal,
+            });
+            showToast(`🛎️ New QR Order received from ${payload.tableNo}!`, "info");
+            loadOrders();
+          }
+        } catch (_) {}
+      });
+      es.addEventListener('call_waiter', (e) => {
+        try {
+          const payload = JSON.parse(e.data)?.data;
+          if (payload) {
+            triggerWaiterCallAlert(payload);
+            const isBill = payload.action === 'request_bill';
+            showToast(`🛎️ ${payload.tableNo}: ${isBill ? 'Bill Requested' : 'Waiter Called'}!`, "info");
+          }
+        } catch (_) {}
+      });
+    } catch (_) {}
+
+    return () => {
+      if (es) es.close();
+    };
+  }, [loadOrders]);
+
+  // Waiter Approve customer QR order
+  const handleApproveOrder = async (orderId) => {
+    try {
+      const res = await api.post(`/captain-orders/${orderId}/approve-order`);
+      showToast(res.data?.message || "Order approved & sent to kitchen!", "success");
+      loadOrders();
+      if (refOrder?._id === orderId) {
+        setRefOrder(res.data.order);
+      }
+    } catch (e) {
+      // Fallback to /approve if /approve-order returned 404
+      try {
+        const res2 = await api.post(`/captain-orders/${orderId}/approve`);
+        showToast(res2.data?.message || "Order approved & sent to kitchen!", "success");
+        loadOrders();
+        if (refOrder?._id === orderId) {
+          setRefOrder(res2.data.order);
+        }
+      } catch (err2) {
+        showToast(err2.response?.data?.message || "Failed to approve order", "error");
+      }
+    }
+  };
+
+  // Waiter Reject/Decline customer QR order
+  const handleRejectOrder = async (orderId) => {
+    const reason = window.prompt("Reason for declining order (e.g. Table empty / False order):", "Customer not at table");
+    if (reason === null) return;
+    try {
+      const res = await api.post(`/captain-orders/${orderId}/reject-order`, { reason });
+      showToast(res.data?.message || "Order declined.", "info");
+      loadOrders();
+      if (refOrder?._id === orderId) {
+        setRefOrder(res.data.order);
+      }
+    } catch (e) {
+      showToast(e.response?.data?.message || "Failed to decline order", "error");
+    }
+  };
 
   // Send to kitchen
   const handleSendToKitchen = async (orderId) => {
@@ -640,6 +720,7 @@ export default function CaptainOrder() {
           {Object.keys(STATUS_CONFIG).map((s) => {
             const active = statusFilter === s;
             const cfg = STATUS_CONFIG[s];
+            const count = s === "all" ? orders.length : orders.filter((o) => o.status === s).length;
             return (
               <button
                 key={s}
@@ -655,10 +736,27 @@ export default function CaptainOrder() {
                   fontSize: 11.5,
                   cursor: "pointer",
                   whiteSpace: "nowrap",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
                   boxShadow: active ? "0 4px 12px rgba(37,99,235,0.25)" : "0 1px 2px rgba(0,0,0,0.02)",
                 }}
               >
-                {cfg.label}
+                <span>{cfg.label}</span>
+                {count > 0 && (
+                  <span
+                    style={{
+                      background: active ? "rgba(255,255,255,0.25)" : s === "pending_approval" ? "#fed7aa" : "#f1f5f9",
+                      color: active ? "#ffffff" : s === "pending_approval" ? "#c2410c" : "#64748b",
+                      padding: "1px 6px",
+                      borderRadius: 12,
+                      fontSize: 10,
+                      fontWeight: 800,
+                    }}
+                  >
+                    {count}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -667,6 +765,156 @@ export default function CaptainOrder() {
 
       {/* ── REPORT TABLE ─────────────────────────────────────────── */}
       <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px" }}>
+        {/* ── Awaiting Waiter Table Verification Banner (Security Check) ── */}
+        {orders.filter((o) => o.status === "pending_approval").length > 0 && (
+          <div style={{
+            background: "linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)",
+            border: "2px solid #fde68a",
+            borderRadius: 18,
+            padding: "16px 20px",
+            marginBottom: 16,
+            boxShadow: "0 4px 14px rgba(245,158,11,0.12)",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ fontSize: 22 }}>⚠️</span>
+                <div>
+                  <h3 style={{ fontSize: 14, fontWeight: 900, color: "#92400e", margin: 0 }}>
+                    {orders.filter((o) => o.status === "pending_approval").length} Customer QR Order(s) Awaiting Waiter Table Verification
+                  </h3>
+                  <p style={{ fontSize: 11.5, color: "#b45309", margin: "2px 0 0 0", fontWeight: 600 }}>
+                    Security Check: Please confirm customer presence at the table before approving to prevent remote or prank orders.
+                  </p>
+                </div>
+              </div>
+              <span style={{
+                background: "#fef08a",
+                border: "1.5px solid #eab308",
+                color: "#854d0e",
+                fontSize: 11,
+                fontWeight: 900,
+                padding: "4px 10px",
+                borderRadius: 20,
+                textTransform: "uppercase",
+                letterSpacing: 0.5,
+              }}>
+                Action Required
+              </span>
+            </div>
+
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+              gap: 12,
+            }}>
+              {orders.filter((o) => o.status === "pending_approval").map((o) => (
+                <div
+                  key={o._id}
+                  style={{
+                    background: "#ffffff",
+                    border: "1.5px solid #fed7aa",
+                    borderRadius: 14,
+                    padding: "14px 16px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 10,
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <span style={{
+                      background: "#eff6ff",
+                      border: "1px solid #bfdbfe",
+                      color: "#1d4ed8",
+                      padding: "3px 8px",
+                      borderRadius: 6,
+                      fontSize: 11.5,
+                      fontWeight: 800,
+                      fontFamily: "monospace",
+                    }}>
+                      #{o.orderNo}
+                    </span>
+                    <span style={{ fontSize: 14, fontWeight: 900, color: "#059669" }}>
+                      ETB {Number(o.grandTotal || 0).toFixed(2)}
+                    </span>
+                  </div>
+
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 900, color: "#1e293b", display: "flex", alignItems: "center", gap: 5 }}>
+                      🪑 {o.tableNo}
+                    </div>
+                    <div style={{ fontSize: 11.5, color: "#64748b", marginTop: 2 }}>
+                      👤 {o.customerName || "Guest"}
+                    </div>
+                  </div>
+
+                  {/* Items Preview */}
+                  <div style={{
+                    background: "#f8fafc",
+                    border: "1px solid #f1f5f9",
+                    borderRadius: 8,
+                    padding: "8px 10px",
+                    fontSize: 11.5,
+                  }}>
+                    {(o.items || []).map((it, idx) => (
+                      <div key={idx} style={{ display: "flex", justifyContent: "space-between", color: "#334155", padding: "1px 0" }}>
+                        <span style={{ fontWeight: 600 }}>{it.productName}</span>
+                        <span style={{ fontWeight: 800, color: "#64748b" }}>x{it.quantity}</span>
+                      </div>
+                    ))}
+                    {o.tableNotes && (
+                      <div style={{ fontSize: 10.5, color: "#d97706", fontStyle: "italic", marginTop: 4 }}>
+                        ↳ {o.tableNotes}
+                      </div>
+                    )}
+                  </div>
+
+                  <div style={{ display: "flex", gap: 8, paddingTop: 4 }}>
+                    <button
+                      type="button"
+                      onClick={() => handleApproveOrder(o._id)}
+                      style={{
+                        flex: 1,
+                        padding: "8px 12px",
+                        borderRadius: 10,
+                        border: "none",
+                        background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                        color: "#ffffff",
+                        fontWeight: 800,
+                        fontSize: 12,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 5,
+                        boxShadow: "0 2px 6px rgba(16,185,129,0.3)",
+                      }}
+                    >
+                      <CheckCircle2 size={14} />
+                      Approve & Kitchen
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleRejectOrder(o._id)}
+                      style={{
+                        padding: "8px 14px",
+                        borderRadius: 10,
+                        border: "1px solid #fecdd3",
+                        background: "#fff1f2",
+                        color: "#e11d48",
+                        fontWeight: 700,
+                        fontSize: 12,
+                        cursor: "pointer",
+                      }}
+                    >
+                      Decline
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         {loading ? (
           <div style={{ textAlign: "center", padding: "70px 0" }}>
             <RefreshCw size={34} color="#f59e0b" style={{ animation: "spin 1s linear infinite" }} />
@@ -893,6 +1141,51 @@ export default function CaptainOrder() {
                               Ref
                             </button>
 
+                            {/* Accept & Decline QR Order if pending approval */}
+                            {o.status === "pending_approval" && (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => handleApproveOrder(o._id)}
+                                  title="Accept & Approve QR Order"
+                                  style={{
+                                    padding: "6px 12px",
+                                    borderRadius: 8,
+                                    border: "none",
+                                    background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                                    color: "#ffffff",
+                                    fontWeight: 800,
+                                    fontSize: 11.5,
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 4,
+                                    boxShadow: "0 2px 6px rgba(16,185,129,0.3)",
+                                  }}
+                                >
+                                  <CheckCircle2 size={12} />
+                                  Approve
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRejectOrder(o._id)}
+                                  title="Decline / Reject QR Order"
+                                  style={{
+                                    padding: "6px 10px",
+                                    borderRadius: 8,
+                                    border: "1px solid #fecdd3",
+                                    background: "#fff1f2",
+                                    color: "#e11d48",
+                                    fontWeight: 700,
+                                    fontSize: 11.5,
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  Decline
+                                </button>
+                              </>
+                            )}
+
                             {/* Send to Kitchen if Held or Open */}
                             {["held", "open"].includes(o.status) && (
                               <button
@@ -1088,6 +1381,31 @@ export default function CaptainOrder() {
 
             {/* Modal action buttons */}
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+              {/* Accept & Approve QR Order */}
+              {refOrder.status === "pending_approval" && (
+                <button
+                  type="button"
+                  onClick={() => handleApproveOrder(refOrder._id)}
+                  style={{
+                    padding: "9px 18px",
+                    borderRadius: 10,
+                    border: "none",
+                    background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                    color: "#ffffff",
+                    fontWeight: 700,
+                    fontSize: 12,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    boxShadow: "0 2px 6px rgba(16,185,129,0.3)",
+                  }}
+                >
+                  <CheckCircle2 size={14} />
+                  Accept &amp; Approve Order
+                </button>
+              )}
+
               {/* Void option */}
               {!["paid", "voided", "cancelled"].includes(refOrder.status) && (
                 <button

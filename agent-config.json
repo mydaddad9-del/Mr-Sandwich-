@@ -1,5 +1,7 @@
 {
+  "restaurantName": "Mr Sandwich",
   "cloudUrl": "https://mr-sandwich.app.aletcloud.com",
   "defaultPrinterIp": "192.168.8.222",
-  "defaultPrinterPort": 9100
+  "defaultPrinterPort": 9100,
+  "loopbackPort": 5000
 }

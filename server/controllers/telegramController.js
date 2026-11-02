@@ -195,7 +195,38 @@ const addSubscriber = asyncHandler(async (req, res) => {
 // ── GET /api/telegram/subscribers (admin only) ───────────────────
 const getSubscribers = asyncHandler(async (req, res) => {
   const settings = await Setting.findOne();
-  res.json(settings?.telegramSubscribers || []);
+  const subs = settings?.telegramSubscribers || [];
+
+  // Cross-reference with User collection to flag dev accounts
+  try {
+    const User = require('../models/User');
+    const devUsers = await User.find({ role: 'dev' }).select('phone email telegramChatId name role').lean();
+    const devPhones = new Set(devUsers.map(u => String(u.phone || '').trim()).filter(Boolean));
+    const devChatIds = new Set(devUsers.map(u => String(u.telegramChatId || '').trim()).filter(Boolean));
+    const devEmails = new Set(devUsers.map(u => String(u.email || '').toLowerCase().trim()).filter(Boolean));
+
+    const enriched = subs.map(sub => {
+      const plain = typeof sub.toObject === 'function' ? sub.toObject() : { ...sub };
+      const subPhone = String(plain.phone || '').trim();
+      const subChatId = String(plain.chatId || '').trim();
+      const subUser = String(plain.username || '').toLowerCase().trim();
+
+      const isDev =
+        (subChatId && devChatIds.has(subChatId)) ||
+        (subPhone && devPhones.has(subPhone)) ||
+        (subUser && devEmails.has(subUser));
+
+      return {
+        ...plain,
+        isDev: Boolean(isDev),
+        role: isDev ? 'dev' : (plain.role || 'subscriber'),
+      };
+    });
+
+    res.json(enriched);
+  } catch (err) {
+    res.json(subs);
+  }
 });
 
 // ── PUT /api/telegram/subscribers/:chatId/phone (admin only) ─────
@@ -209,7 +240,12 @@ const updateSubscriberPhone = asyncHandler(async (req, res) => {
   if (!settings) { res.status(404); throw new Error('Settings not found'); }
 
   const subscribers = settings.telegramSubscribers || [];
-  const idx = subscribers.findIndex(s => String(s.chatId) === String(req.params.chatId));
+  const target = String(req.params.chatId).trim();
+  const idx = subscribers.findIndex(s =>
+    String(s.chatId) === target ||
+    String(s.id) === target ||
+    String(s._id) === target
+  );
   if (idx === -1) { res.status(404); throw new Error('Subscriber not found'); }
 
   // Normalize phone — trim whitespace
@@ -236,10 +272,39 @@ const removeSubscriber = asyncHandler(async (req, res) => {
   if (!settings) return res.json({ message: 'No settings found' });
 
   const targetChatId = String(req.params.chatId).trim();
-  const removedSub = (settings.telegramSubscribers || []).find(s => String(s.chatId) === targetChatId);
+  const removedSub = (settings.telegramSubscribers || []).find(s =>
+    String(s.chatId) === targetChatId ||
+    String(s.id) === targetChatId ||
+    String(s._id) === targetChatId
+  );
+
+  // If the subscriber belongs to a Dev account, NO ONE can remove or delete them
+  if (removedSub) {
+    try {
+      const User = require('../models/User');
+      const linkedUser = await User.findOne({
+        $or: [
+          ...(removedSub.chatId ? [{ telegramChatId: String(removedSub.chatId) }] : []),
+          ...(removedSub.phone ? [{ phone: String(removedSub.phone).trim() }] : []),
+          ...(removedSub.username ? [{ email: String(removedSub.username).toLowerCase().trim() }] : []),
+        ]
+      });
+
+      if (linkedUser && linkedUser.role === 'dev') {
+        res.status(403);
+        throw new Error('Access denied: Developer / System Owner accounts are protected. Telegram registration for Dev cannot be deleted by anyone.');
+      }
+    } catch (err) {
+      if (err.status === 403 || err.message?.includes('Developer')) throw err;
+    }
+  }
 
   settings.telegramSubscribers = (settings.telegramSubscribers || [])
-    .filter(s => String(s.chatId) !== targetChatId);
+    .filter(s =>
+      String(s.chatId) !== targetChatId &&
+      String(s.id) !== targetChatId &&
+      String(s._id) !== targetChatId
+    );
   settings.markModified('telegramSubscribers');
   await settings.save();
 
@@ -270,4 +335,36 @@ const removeSubscriber = asyncHandler(async (req, res) => {
   res.json({ message: 'Subscriber removed and notifications stopped.' });
 });
 
-module.exports = { handleWebhook, getSubscribers, addSubscriber, updateSubscriberPhone, removeSubscriber };
+// ── GET /api/telegram/daily-report-preview (admin/dev only) ────────
+const getDailyReportPreview = asyncHandler(async (req, res) => {
+  const { computeDailySalesMetrics, formatDailyReportMessage } = require('../utils/dailySalesReporter');
+  const Setting = require('../models/Setting');
+  const settings = await Setting.findOne();
+  const metrics = await computeDailySalesMetrics();
+  const previewText = formatDailyReportMessage(metrics, settings?.hotelName || 'Mr Sandwich');
+
+  res.json({
+    success: true,
+    metrics,
+    previewText,
+    scheduledTime: settings?.telegramDailyReportTime || '12:00',
+    enabled: settings?.telegramDailyReportEnabled !== false,
+  });
+});
+
+// ── POST /api/telegram/send-daily-report (admin/dev only) ──────────
+const sendManualDailyReport = asyncHandler(async (req, res) => {
+  const { sendDailySalesReport } = require('../utils/dailySalesReporter');
+  const result = await sendDailySalesReport({ isManual: true });
+  res.json(result);
+});
+
+module.exports = {
+  handleWebhook,
+  getSubscribers,
+  addSubscriber,
+  updateSubscriberPhone,
+  removeSubscriber,
+  getDailyReportPreview,
+  sendManualDailyReport,
+};

@@ -41,6 +41,7 @@ import FactCheckRoundedIcon from '@mui/icons-material/FactCheckRounded';
 import SyncAltRoundedIcon from '@mui/icons-material/SyncAltRounded';
 import HistoryRoundedIcon from '@mui/icons-material/HistoryRounded';
 import CircleRoundedIcon from '@mui/icons-material/CircleRounded';
+import QrCode2RoundedIcon from '@mui/icons-material/QrCode2Rounded';
 
 // ── Submenu Link Definitions ──────────────────────────────────────────
 const STOCK_ITEMS = [
@@ -292,7 +293,7 @@ const Sidebar = ({
   onToggleCollapse,
   onExpand,
 }) => {
-  const { user, canSeeNav, sidebarTheme, useMaterialIcons } = useAuth();
+  const { user, canSeeNav, sidebarTheme, useMaterialIcons, isModuleLicensed } = useAuth();
   const theme = SIDEBAR_THEMES[sidebarTheme] || SIDEBAR_THEMES.navy;
   const location = useLocation();
   const navigate = useNavigate();
@@ -382,6 +383,7 @@ const Sidebar = ({
     canSeeNav('captainOrder') && { to: '/captain-order', label: 'Captain Order', icon: ReceiptLongRoundedIcon },
     canSeeNav('cashSales') && { to: '/cash-sales', label: 'Cash Sales', icon: PaidRoundedIcon },
     canSeeNav('pos') && { to: '/pos', label: 'POS Ordering', icon: PointOfSaleRoundedIcon },
+    (isModuleLicensed('digitalMenu') || user?.role === 'dev') && { to: '/menu', label: 'Digital Menu (QR)', icon: QrCode2RoundedIcon, external: true },
   ].filter(Boolean);
 
   const inventoryItems = [
@@ -565,6 +567,9 @@ const Sidebar = ({
                 )}
                 {canSeeNav('pos') && (
                   <SubLink to="/pos" label="POS Ordering" icon={PointOfSaleRoundedIcon} onClick={onClose} />
+                )}
+                {(isModuleLicensed('digitalMenu') || user?.role === 'dev') && (
+                  <SubLink to="/menu" label="Digital Menu (QR)" icon={QrCode2RoundedIcon} onClick={onClose} target="_blank" />
                 )}
               </CollapsibleNav>
             )

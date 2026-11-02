@@ -107,31 +107,119 @@ async function executePrintJob(printer, type, order, opts) {
   }
 }
 
-// ── PRINT a KOT (kitchen order ticket) ──────────────────────────────────────
+// ── PRINT a KOT (kitchen & bar order ticket) ─────────────────────────────────
+// Supports Bloom Bar & Restaurant split printing (Food -> Kitchen, Drinks -> Bar)
 const printKOTEndpoint = asyncHandler(async (req, res) => {
-  const { order, printerId, opts } = req.body;
+  const { order, printerId, opts = {} } = req.body;
   if (!order) return res.status(400).json({ message: 'Order data required' });
 
-  // Find enabled kitchen/both printers
-  let query = { enabled: true, type: { $in: ['kitchen', 'both'] } };
-  if (printerId) query = { _id: printerId };
-
-  let printers = await PrinterSettings.find(query);
-  if (!printers.length && !printerId) {
-    // Fallback to any enabled printer (e.g. single-printer restaurant setup)
-    printers = await PrinterSettings.find({ enabled: true });
-  }
-  if (!printers.length) {
-    return res.status(404).json({ message: 'No kitchen printer configured or enabled' });
+  // 1. Direct explicit printer request
+  if (printerId) {
+    const printer = await PrinterSettings.findById(printerId);
+    if (!printer) return res.status(404).json({ message: 'Printer not found' });
+    const result = await executePrintJob(printer, 'kot', order, opts);
+    return res.json({ ok: result.ok, results: [result] });
   }
 
-  // Execute all printers in parallel so an unreachable printer never blocks a local printer!
-  const settled = await Promise.allSettled(
-    printers.map((printer) => executePrintJob(printer, 'kot', order, opts))
+  // 2. Specific station requested (e.g. opts.targetStation: 'bar' | 'barista' | 'kitchen')
+  const requestedStation = opts.targetStation || opts.station;
+  if (requestedStation === 'bar' || requestedStation === 'barista') {
+    let barPrinters = await PrinterSettings.find({ enabled: true, type: { $in: ['bar', 'both'] } });
+    if (!barPrinters.length) barPrinters = await PrinterSettings.find({ enabled: true });
+
+    const barItems = (order.items || []).filter(i =>
+      i.station === 'barista' || i.station === 'bar' ||
+      /drink|beverage|coffee|tea|cocktail|beer|wine|juice|bar|water/i.test(i.category || i.station || '')
+    );
+    const stationOrder = { ...order, items: barItems.length > 0 ? barItems : order.items };
+    const stationOpts = { ...opts, stationTitle: '** BAR & DRINK TICKET **', businessName: opts.businessName || 'Mr Sandwich - Bar' };
+
+    if (!barPrinters.length) {
+      if (hasActiveRelayAgent()) {
+        const relayRes = await dispatchToRelay('kot', { order: stationOrder, opts: stationOpts });
+        return res.json({ ok: relayRes.ok, results: [relayRes] });
+      }
+      return res.status(404).json({ message: 'No bar printer configured or enabled' });
+    }
+
+    const settled = await Promise.allSettled(
+      barPrinters.map(p => executePrintJob(p, 'kot', stationOrder, stationOpts))
+    );
+    const results = settled.map(s => (s.status === 'fulfilled' ? s.value : { ok: false, error: s.reason?.message }));
+    return res.status(results.some(r => r.ok) ? 200 : 207).json({ ok: results.some(r => r.ok), results });
+  }
+
+  if (requestedStation === 'kitchen') {
+    let kitchenPrinters = await PrinterSettings.find({ enabled: true, type: { $in: ['kitchen', 'both'] } });
+    if (!kitchenPrinters.length) kitchenPrinters = await PrinterSettings.find({ enabled: true });
+
+    const kitchenItems = (order.items || []).filter(i => i.station !== 'barista' && i.station !== 'bar');
+    const stationOrder = { ...order, items: kitchenItems.length > 0 ? kitchenItems : order.items };
+    const stationOpts = { ...opts, stationTitle: '** KITCHEN ORDER **', businessName: opts.businessName || 'Mr Sandwich - Kitchen' };
+
+    if (!kitchenPrinters.length) {
+      if (hasActiveRelayAgent()) {
+        const relayRes = await dispatchToRelay('kot', { order: stationOrder, opts: stationOpts });
+        return res.json({ ok: relayRes.ok, results: [relayRes] });
+      }
+      return res.status(404).json({ message: 'No kitchen printer configured or enabled' });
+    }
+
+    const settled = await Promise.allSettled(
+      kitchenPrinters.map(p => executePrintJob(p, 'kot', stationOrder, stationOpts))
+    );
+    const results = settled.map(s => (s.status === 'fulfilled' ? s.value : { ok: false, error: s.reason?.message }));
+    return res.status(results.some(r => r.ok) ? 200 : 207).json({ ok: results.some(r => r.ok), results });
+  }
+
+  // 3. General order placement (Bloom Bar & Restaurant style multi-station distribution)
+  const allOrderPrinters = await PrinterSettings.find({ enabled: true, type: { $in: ['kitchen', 'bar', 'both'] } });
+
+  const barPrinters = allOrderPrinters.filter(p => p.type === 'bar');
+  const kitchenPrinters = allOrderPrinters.filter(p => p.type === 'kitchen');
+  const bothPrinters = allOrderPrinters.filter(p => p.type === 'both');
+
+  const barItems = (order.items || []).filter(i =>
+    i.station === 'barista' || i.station === 'bar' ||
+    /drink|beverage|coffee|tea|cocktail|beer|wine|juice|bar|water/i.test(i.category || i.station || '')
   );
+  const kitchenItems = (order.items || []).filter(i => i.station !== 'barista' && i.station !== 'bar');
 
-  const results = settled.map((s) => (s.status === 'fulfilled' ? s.value : { ok: false, error: s.reason?.message }));
-  const anyOk = results.some((r) => r.ok);
+  const jobs = [];
+
+  // Bar printer gets bar/drink items if present
+  if (barPrinters.length > 0 && barItems.length > 0) {
+    const barOrder = { ...order, items: barItems };
+    const barOpts = { ...opts, stationTitle: '** BAR & DRINK TICKET **', businessName: 'Mr Sandwich - Bar' };
+    barPrinters.forEach(p => jobs.push(executePrintJob(p, 'kot', barOrder, barOpts)));
+  }
+
+  // Kitchen printer gets food/kitchen items if present
+  if (kitchenPrinters.length > 0 && kitchenItems.length > 0) {
+    const kitchenOrder = { ...order, items: kitchenItems };
+    const kitchenOpts = { ...opts, stationTitle: '** KITCHEN ORDER **', businessName: 'Mr Sandwich - Kitchen' };
+    kitchenPrinters.forEach(p => jobs.push(executePrintJob(p, 'kot', kitchenOrder, kitchenOpts)));
+  }
+
+  // Unified 'both' printers get the full ticket
+  bothPrinters.forEach(p => jobs.push(executePrintJob(p, 'kot', order, opts)));
+
+  // If no split printers were matched (e.g. only 1 printer, or single generic printer in DB)
+  if (jobs.length === 0) {
+    let fallbackPrinters = allOrderPrinters.length > 0 ? allOrderPrinters : await PrinterSettings.find({ enabled: true });
+    if (!fallbackPrinters.length) {
+      if (hasActiveRelayAgent()) {
+        const relayRes = await dispatchToRelay('kot', { order, opts });
+        return res.json({ ok: relayRes.ok, results: [relayRes] });
+      }
+      return res.status(404).json({ message: 'No kitchen or bar printer configured or enabled' });
+    }
+    fallbackPrinters.forEach(p => jobs.push(executePrintJob(p, 'kot', order, opts)));
+  }
+
+  const settled = await Promise.allSettled(jobs);
+  const results = settled.map(s => (s.status === 'fulfilled' ? s.value : { ok: false, error: s.reason?.message }));
+  const anyOk = results.some(r => r.ok);
   res.status(anyOk ? 200 : 207).json({ ok: anyOk, results });
 });
 
@@ -145,10 +233,14 @@ const printReceiptEndpoint = asyncHandler(async (req, res) => {
 
   let printers = await PrinterSettings.find(query);
   if (!printers.length && !printerId) {
-    // Fallback to any enabled printer (e.g. single-printer restaurant setup)
     printers = await PrinterSettings.find({ enabled: true });
   }
+
   if (!printers.length) {
+    if (hasActiveRelayAgent()) {
+      const relayRes = await dispatchToRelay('receipt', { order, opts });
+      return res.json({ ok: relayRes.ok, results: [relayRes] });
+    }
     return res.status(404).json({ message: 'No receipt printer configured or enabled' });
   }
 

@@ -34,10 +34,13 @@ import {
   Percent,
   Palette,
   Sparkles,
+  QrCode,
+  BarChart3,
 } from 'lucide-react';
 import api from '../api/axios';
 import posPrint from '../utils/posPrint';
 import localPrintDispatcher from '../utils/localPrintDispatcher';
+import DigitalMenuSettings from '../components/settings/DigitalMenuSettings';
 import { useAuth } from '../context/AuthContext';
 import { useSessionTimeout, TIMEOUT_OPTIONS } from '../context/SessionTimeoutContext';
 import { THEME_OPTIONS } from '../config/sidebarThemes';
@@ -206,6 +209,7 @@ export default function Settings() {
   // Developer / System Owner: license control state
   const [devLicenseForm, setDevLicenseForm] = useState({
     subsystem: true,
+    digitalMenu: true,
     finance: true,
     themeCustomization: true,
     materialIcons: true,
@@ -340,13 +344,23 @@ export default function Settings() {
   const [printerSuccess, setPrinterSuccess] = useState('');
   const [printerError, setPrinterError] = useState('');
   const [pingStatus, setPingStatus] = useState({}); // { [ip]: 'ok' | 'fail' | 'pending' }
-  const [printTestStatus, setPrintTestStatus] = useState({}); // { [idOrIp]: 'ok' | 'fail' | 'pending' }
+  const [relayStatus, setRelayStatus] = useState({ online: false, lastSeenSecondsAgo: null });
+
+  const checkRelayStatus = async () => {
+    try {
+      const res = await api.get('/printers/relay/status');
+      if (res.data) setRelayStatus(res.data);
+    } catch (_) {}
+  };
 
   // Load printers from API (component-scoped so nav button can call it)
   const loadPrinters = async () => {
     setPrintersLoading(true);
     try {
-      const res = await api.get('/printers');
+      const [res] = await Promise.all([
+        api.get('/printers'),
+        checkRelayStatus(),
+      ]);
       setPrinters(Array.isArray(res.data) ? res.data : []);
     } catch (_) { }
     finally { setPrintersLoading(false); }
@@ -366,6 +380,12 @@ export default function Settings() {
   const [tgAddOpen, setTgAddOpen] = useState(false);
   const [tgAddForm, setTgAddForm] = useState({ name: '', phone: '', username: '', chatId: '' });
   const [tgAddSaving, setTgAddSaving] = useState(false);
+  // Daily Sales Telegram Report state
+  const [tgReportEnabled, setTgReportEnabled] = useState(true);
+  const [tgReportTime, setTgReportTime] = useState('12:00');
+  const [tgReportSending, setTgReportSending] = useState(false);
+  const [tgReportPreview, setTgReportPreview] = useState(null);
+  const [tgReportLoading, setTgReportLoading] = useState(false);
 
   // Sync profile when user updates
   useEffect(() => {
@@ -399,6 +419,7 @@ export default function Settings() {
                 ...prev,
                 ...res.data.licensedModules,
                 subsystem: res.data.licensedModules.subsystem !== false,
+                digitalMenu: res.data.licensedModules.digitalMenu !== false,
                 finance: res.data.licensedModules.finance !== false,
                 themeCustomization: res.data.licensedModules.themeCustomization !== false,
                 materialIcons: res.data.licensedModules.materialIcons !== false,
@@ -442,11 +463,81 @@ export default function Settings() {
       .finally(() => setTgLoading(false));
   };
   useEffect(() => {
-    if (currentTab === 'telegram' && hasRole('admin')) loadTgSubscribers();
-  }, [currentTab]);
+    if (currentTab === 'telegram' && (hasRole('admin') || user?.role === 'dev')) {
+      loadTgSubscribers();
+      loadTgReportPreview();
+    }
+  }, [currentTab, user]);
 
-  // Handle Telegram subscriber removal
-  const handleRemoveTgSubscriber = async (chatId, name) => {
+  // Load Daily Sales Telegram Report Preview
+  const loadTgReportPreview = async () => {
+    try {
+      setTgReportLoading(true);
+      const res = await api.get('/telegram/daily-report-preview');
+      if (res.data?.success) {
+        setTgReportPreview(res.data);
+        if (res.data.scheduledTime) setTgReportTime(res.data.scheduledTime);
+        if (res.data.enabled !== undefined) setTgReportEnabled(res.data.enabled);
+      }
+    } catch (_) { }
+    finally { setTgReportLoading(false); }
+  };
+
+  const handleToggleTgReportEnabled = async (enabled) => {
+    setTgReportEnabled(enabled);
+    try {
+      await api.put('/settings', {
+        telegramDailyReportEnabled: enabled,
+        telegramDailyReportTime: tgReportTime,
+      });
+      setTgSuccess(`Daily Telegram digest ${enabled ? 'enabled' : 'disabled'}!`);
+      setTimeout(() => setTgSuccess(''), 3000);
+      loadTgReportPreview();
+    } catch (_) {
+      setTgError('Failed to update status.');
+    }
+  };
+
+  const handleSaveTgReportConfig = async () => {
+    try {
+      await api.put('/settings', {
+        telegramDailyReportEnabled: tgReportEnabled,
+        telegramDailyReportTime: tgReportTime,
+      });
+      setTgSuccess(`Daily Telegram Report schedule set to ${tgReportTime} (Addis Ababa)!`);
+      setTimeout(() => setTgSuccess(''), 4000);
+      loadTgReportPreview();
+    } catch (err) {
+      setTgError(err.response?.data?.message || 'Failed to update schedule.');
+    }
+  };
+
+  const handleSendManualReport = async () => {
+    if (!window.confirm('Send the current daily sales report to all Telegram bot subscribers right now?')) return;
+    setTgReportSending(true);
+    setTgError('');
+    try {
+      const res = await api.post('/telegram/send-daily-report');
+      if (res.data?.success) {
+        setTgSuccess(res.data.message || 'Daily sales report sent to Telegram!');
+      } else {
+        setTgError(res.data?.message || 'Failed to send report.');
+      }
+      setTimeout(() => { setTgSuccess(''); setTgError(''); }, 6000);
+      loadTgReportPreview();
+    } catch (err) {
+      setTgError(err.response?.data?.message || 'Failed to send daily report.');
+    } finally {
+      setTgReportSending(false);
+    }
+  };
+
+  // Handle Telegram subscriber removal (Dev account protected from deletion)
+  const handleRemoveTgSubscriber = async (chatId, name, isDev) => {
+    if (isDev) {
+      alert('Developer / System Owner accounts are protected and cannot be deleted.');
+      return;
+    }
     if (!window.confirm(`Remove "${name}" from bot subscribers? They will stop receiving notifications.`)) return;
     setTgRemoving(chatId);
     setTgError('');
@@ -807,6 +898,18 @@ export default function Settings() {
               }`}
           >
             <Percent size={16} /> Service Charge
+          </button>
+        )}
+
+        {hasRole('admin', 'manager') && (isModuleLicensed('digitalMenu') || user?.role === 'dev') && (
+          <button
+            onClick={() => setTab('digitalMenu')}
+            className={`flex items-center gap-2 border-b-2 px-3.5 py-3 text-sm font-semibold transition whitespace-nowrap ${currentTab === 'digitalMenu'
+              ? 'border-amber-600 text-amber-600 font-bold'
+              : 'border-transparent text-ink-400 hover:text-ink-700'
+              }`}
+          >
+            <QrCode size={16} /> Digital Menu &amp; QR
           </button>
         )}
 
@@ -2233,13 +2336,16 @@ export default function Settings() {
               <p className="text-xs text-ink-300 mt-1">Share t.me/MrsandwiichBot to get started</p>
             </div>
           ) : (
-            <div className="overflow-hidden rounded-xl border border-ink-100">
-              <table className="min-w-full text-sm" style={{ borderCollapse: 'collapse' }}>
+            <div className="overflow-x-auto rounded-xl border border-ink-100 shadow-xs">
+              <table className="w-full text-sm min-w-[720px]" style={{ borderCollapse: 'collapse' }}>
                 <thead style={{ background: 'linear-gradient(90deg, #1e3a8a 0%, #1d4ed8 50%, #2563eb 100%)' }}>
                   <tr>
-                    {['#', 'Name', 'Username', 'Phone (OTP)', 'Subscribed At', 'Actions'].map(h => (
-                      <th key={h} className="px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-blue-100"
-                        style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}>
+                    {['#', 'Name', 'Username', 'Phone (OTP)', 'Subscribed At', 'Actions'].map((h, idx) => (
+                      <th
+                        key={h}
+                        className={`px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider text-blue-100 ${idx === 5 ? 'text-right min-w-[140px]' : 'text-left'}`}
+                        style={{ borderBottom: '1px solid rgba(147,197,253,0.3)' }}
+                      >
                         {h}
                       </th>
                     ))}
@@ -2249,7 +2355,16 @@ export default function Settings() {
                   {tgSubscribers.map((sub, i) => (
                     <tr key={sub.chatId} className="hover:bg-ink-50/40" style={{ borderBottom: '1px solid #f1f5f9' }}>
                       <td className="px-4 py-3 text-xs text-ink-400 tabular-nums">{i + 1}</td>
-                      <td className="px-4 py-3 font-semibold text-ink-800">{sub.name || '—'}</td>
+                      <td className="px-4 py-3 font-semibold text-ink-800">
+                        <div className="flex items-center gap-1.5">
+                          <span>{sub.name || '—'}</span>
+                          {(sub.isDev || sub.role === 'dev') && (
+                            <span className="inline-flex items-center gap-0.5 rounded px-1.5 py-0.2 text-[10px] font-black bg-amber-100 text-amber-800 border border-amber-300">
+                              DEV
+                            </span>
+                          )}
+                        </div>
+                      </td>
                       <td className="px-4 py-3 text-xs text-blue-600">
                         {sub.username ? `@${sub.username}` : '—'}
                       </td>
@@ -2304,15 +2419,27 @@ export default function Settings() {
                       <td className="px-4 py-3 text-xs text-ink-400 whitespace-nowrap">
                         {sub.subscribedAt ? new Date(sub.subscribedAt).toLocaleString() : '—'}
                       </td>
-                      <td className="px-4 py-3">
-                        <button
-                          onClick={() => handleRemoveTgSubscriber(sub.chatId, sub.name)}
-                          disabled={tgRemoving === sub.chatId}
-                          className="inline-flex items-center gap-1 rounded-lg bg-red-50 hover:bg-red-100 border border-red-200 px-2.5 py-1 text-xs font-semibold text-red-600 transition disabled:opacity-50"
-                        >
-                          <Trash2 size={12} />
-                          {tgRemoving === sub.chatId ? 'Removing…' : 'Remove'}
-                        </button>
+                      <td className="px-4 py-3 text-right whitespace-nowrap">
+                        {sub.isDev || sub.role === 'dev' ? (
+                          <span
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-amber-50 border border-amber-300 px-2.5 py-1 text-xs font-bold text-amber-800"
+                            title="Developer / System Owner accounts are protected and cannot be deleted"
+                          >
+                            <Lock size={12} className="text-amber-600" />
+                            Protected (Dev)
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveTgSubscriber(sub.chatId, sub.name, sub.isDev)}
+                            disabled={tgRemoving === sub.chatId}
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-red-50 hover:bg-red-100 border border-red-200 px-3 py-1 text-xs font-semibold text-red-600 transition disabled:opacity-50 cursor-pointer shadow-2xs"
+                            title="Remove subscriber"
+                          >
+                            <Trash2 size={12} />
+                            {tgRemoving === sub.chatId ? 'Removing…' : 'Remove'}
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -2325,6 +2452,93 @@ export default function Settings() {
               </div>
             </div>
           )}
+
+          {/* ── Automated Daily Sales Telegram Digest Card (Mr Sandwich) ── */}
+          <div className="mt-6 pt-6 border-t border-ink-100">
+            <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <span className="rounded-lg bg-emerald-50 p-1.5 text-emerald-600">
+                  <BarChart3 size={16} />
+                </span>
+                <div>
+                  <h4 className="font-bold text-sm text-ink-900">Automated Daily Sales Telegram Digest</h4>
+                  <p className="text-xs text-ink-400">
+                    Automatically sends the owner &amp; subscribers a complete daily sales summary (categories, QR vs POS orders, and payment totals)
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleSendManualReport}
+                disabled={tgReportSending}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 px-3.5 py-1.5 text-xs font-bold text-white transition disabled:opacity-50 shadow-xs cursor-pointer"
+              >
+                <Send size={13} />
+                <span>{tgReportSending ? 'Broadcasting…' : '⚡ Send Test Report to Telegram Now'}</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-ink-50/70 p-4 rounded-2xl border border-ink-200 text-xs">
+              <div>
+                <label className="block font-semibold text-ink-700 mb-1">Automated Daily Report</label>
+                <div className="flex items-center gap-2 mt-1">
+                  <input
+                    type="checkbox"
+                    id="tgReportEnabled"
+                    checked={tgReportEnabled}
+                    onChange={(e) => handleToggleTgReportEnabled(e.target.checked)}
+                    className="h-4 w-4 accent-emerald-600 cursor-pointer"
+                  />
+                  <label htmlFor="tgReportEnabled" className="font-medium text-ink-800 cursor-pointer">
+                    {tgReportEnabled ? 'Enabled (Active)' : 'Disabled'}
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-ink-700 mb-1">Scheduled Delivery Time (Addis Ababa)</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="time"
+                    value={tgReportTime}
+                    onChange={(e) => setTgReportTime(e.target.value)}
+                    className="border border-ink-200 rounded-lg px-2.5 py-1.5 text-xs bg-white font-mono outline-none focus:border-emerald-600"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleSaveTgReportConfig}
+                    className="rounded-lg bg-ink-900 hover:bg-black px-3 py-1.5 text-xs font-bold text-white transition cursor-pointer"
+                  >
+                    Save Time
+                  </button>
+                </div>
+                <p className="text-[10px] text-ink-400 mt-1">Default 12:00 PM. Changeable anytime.</p>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-ink-700 mb-1">Today's Live Revenue</label>
+                <p className="text-base font-black text-emerald-700 font-mono">
+                  {tgReportPreview?.metrics?.totalSales ? `${tgReportPreview.metrics.totalSales.toLocaleString()} ETB` : '0.00 ETB'}
+                </p>
+                <p className="text-[10px] text-ink-400">
+                  {tgReportPreview?.metrics?.totalOrdersCount || 0} orders recorded today
+                </p>
+              </div>
+            </div>
+
+            {/* Live Message Preview Box */}
+            {tgReportPreview?.previewText && (
+              <div className="mt-3">
+                <span className="text-[11px] font-bold text-ink-500 uppercase tracking-wider block mb-1">
+                  Telegram Message Preview
+                </span>
+                <div
+                  className="rounded-xl border border-emerald-900/30 bg-[#0d1f14] text-emerald-200 p-3.5 text-xs font-mono whitespace-pre-wrap leading-relaxed shadow-inner max-h-56 overflow-y-auto"
+                  dangerouslySetInnerHTML={{ __html: tgReportPreview.previewText }}
+                />
+              </div>
+            )}
+          </div>
 
           {/* ── Add Subscriber Modal ── */}
           {tgAddOpen && (
@@ -2456,7 +2670,34 @@ export default function Settings() {
                 </label>
               </div>
 
-              {/* 2. Finance & Expenses Suite */}
+              {/* 2. Digital Menu Suite */}
+              <div className="flex items-center justify-between rounded-xl border border-ink-100 bg-ink-50/40 px-4 py-3">
+                <div className="pr-4">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-bold text-ink-900">Digital Menu Suite (Customer QR &amp; Self-Ordering)</p>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${devLicenseForm?.digitalMenu !== false
+                        ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                        : 'bg-slate-200 text-slate-700 border border-slate-300'
+                      }`}>
+                      {devLicenseForm?.digitalMenu !== false ? 'Licensed & Active' : 'Locked / Hidden (Off)'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-ink-400 mt-1">
+                    Customer Digital Menu, QR Table self-ordering, interactive live tracker, and customer reviews. Can be licensed and sold as an independent subsystem.
+                  </p>
+                </div>
+                <label className="relative inline-flex cursor-pointer items-center shrink-0">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={devLicenseForm?.digitalMenu !== false}
+                    onChange={(e) => setDevLicenseForm(prev => ({ ...prev, digitalMenu: e.target.checked }))}
+                  />
+                  <div className="h-6 w-11 rounded-full bg-ink-200 peer-focus:ring-2 peer-focus:ring-amber-300 peer-checked:bg-emerald-500 transition-colors after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-full after:shadow" />
+                </label>
+              </div>
+
+              {/* 3. Finance & Expenses Suite */}
               <div className="flex items-center justify-between rounded-xl border border-ink-100 bg-ink-50/40 px-4 py-3">
                 <div className="pr-4">
                   <div className="flex items-center gap-2">
@@ -2844,6 +3085,38 @@ export default function Settings() {
                 <AlertCircle size={16} className="flex-shrink-0" />{printerError}
               </div>
             )}
+
+            {/* Hybrid Cloud-to-Local Bridge Status Banner */}
+            <div className={`mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border p-4 shadow-sm transition ${relayStatus.online ? 'border-emerald-200 bg-emerald-50/70 text-emerald-900' : 'border-amber-200 bg-amber-50/70 text-amber-900'}`}>
+              <div className="flex items-start gap-3">
+                <div className={`mt-0.5 w-3.5 h-3.5 rounded-full flex-shrink-0 ${relayStatus.online ? 'bg-emerald-500 animate-pulse' : 'bg-amber-400'}`} />
+                <div>
+                  <div className="text-xs font-bold flex items-center gap-2 flex-wrap">
+                    <span>Hybrid Cloud-to-Local POS Print Bridge</span>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${relayStatus.online ? 'bg-emerald-200 text-emerald-800' : 'bg-amber-200 text-amber-800'}`}>
+                      {relayStatus.online ? 'AGENT ONLINE' : 'AGENT STANDBY'}
+                    </span>
+                    {relayStatus.lastSeenSecondsAgo !== null && (
+                      <span className="text-[10px] text-ink-500">
+                        (Active {relayStatus.lastSeenSecondsAgo}s ago)
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-ink-600 mt-0.5">
+                    {relayStatus.online
+                      ? 'Local Print Agent (pos-agent.js) is connected via outbound long-polling & local loopback port 5000. Orders print directly to LAN printers.'
+                      : 'Local print agent not detected on this cloud server yet. Run start-printer-agent.bat on the restaurant POS computer to enable direct LAN printing.'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={checkRelayStatus}
+                className="self-start sm:self-center text-xs font-semibold px-3 py-1.5 rounded-xl border border-ink-200 bg-white/80 hover:bg-white transition text-ink-700 shadow-xs"
+              >
+                Refresh Agent
+              </button>
+            </div>
 
             {/* How-to banner */}
             <div className="mb-6 rounded-2xl border border-violet-100 bg-gradient-to-r from-violet-50 to-indigo-50 p-4">
@@ -3763,6 +4036,11 @@ export default function Settings() {
           </div>
         );
       })()}
+
+      {/* ── Tab: Digital Menu & QR Ordering ── */}
+      {currentTab === 'digitalMenu' && (isModuleLicensed('digitalMenu') || user?.role === 'dev') && (
+        <DigitalMenuSettings />
+      )}
 
     </div>
   );

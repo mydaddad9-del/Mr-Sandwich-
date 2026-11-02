@@ -29,13 +29,70 @@ const autoSeed = async () => {
       const exists = await User.findOne({ email: u.email });
       if (!exists) {
         await User.create(u);
-        console.log(`[SEED] Created ${u.role} -> ${u.email}`);
       } else if (u.phone && !exists.phone) {
         // Backfill phone on existing admin account
         exists.phone = u.phone;
         await exists.save();
         console.log(`[SEED] Updated phone for ${u.email}`);
       }
+    }
+
+    // Auto-seed default restaurant & bloom bar printer settings if none exist
+    const PrinterSettings = require('./models/PrinterSettings');
+    const printerCount = await PrinterSettings.countDocuments();
+    if (printerCount === 0) {
+      const defaultPrinters = [
+        {
+          name: 'Restaurant Kitchen Printer',
+          type: 'kitchen',
+          brand: 'Epson',
+          model: 'TM-T20III',
+          paperWidth: '60mm',
+          charWidth: 32,
+          connectionType: 'network',
+          ipAddress: '192.168.8.222',
+          port: 9100,
+          enabled: true,
+          printOnOrder: true,
+          printOnCheckout: false,
+          headerLine1: 'Mr Sandwich - Kitchen',
+          footerLine: 'Prepare Immediately',
+        },
+        {
+          name: 'Bloom Bar & Beverage Printer',
+          type: 'bar',
+          brand: 'Epson',
+          model: 'TM-T20III',
+          paperWidth: '60mm',
+          charWidth: 32,
+          connectionType: 'network',
+          ipAddress: '192.168.8.222',
+          port: 9100,
+          enabled: true,
+          printOnOrder: true,
+          printOnCheckout: false,
+          headerLine1: 'Mr Sandwich - Bar',
+          footerLine: 'Serve Chilled / Fresh',
+        },
+        {
+          name: 'Cashier Receipt Printer',
+          type: 'receipt',
+          brand: 'Epson',
+          model: 'TM-T20III',
+          paperWidth: '60mm',
+          charWidth: 32,
+          connectionType: 'network',
+          ipAddress: '192.168.8.222',
+          port: 9100,
+          enabled: true,
+          printOnOrder: false,
+          printOnCheckout: true,
+          headerLine1: 'Mr Sandwich',
+          footerLine: 'Thank you! Come again.',
+        },
+      ];
+      await PrinterSettings.insertMany(defaultPrinters);
+      console.log('[SEED] Created default restaurant & bloom bar printers (Kitchen, Bar, Cashier)');
     }
   } catch (err) {
     console.error('[SEED] Auto-seed error:', err.message);
@@ -101,6 +158,7 @@ app.use('/api/purchases', require('./routes/purchaseRoutes'));
 app.use('/api/transactions', require('./routes/transactionRoutes'));
 app.use('/api/reports', require('./routes/reportRoutes'));
 app.use('/api/dashboard', require('./routes/dashboardRoutes'));
+app.use('/api', require('./routes/digitalMenuRoutes')); // Public Digital Menu & Customer QR Ordering routes
 app.use('/api/products', require('./routes/productRoutes'));
 app.use('/api/settings', require('./routes/settingRoutes'));
 app.use('/api/analytics', require('./routes/analyticsRoutes'));
@@ -185,6 +243,49 @@ if (!process.env.VERCEL) {
 
       console.log(`[KEEP-ALIVE] Server ping active every 10 min → ${publicUrl}/api/health`);
     }
+
+    // ── Automated Daily Sales Telegram Digest Scheduler ──────────
+    // Checks every 20s if current Addis Ababa time matches scheduled time
+    setInterval(async () => {
+      try {
+        const Setting = require('./models/Setting');
+        const settings = await Setting.findOne();
+        if (!settings || settings.telegramDailyReportEnabled === false) return;
+
+        const now = new Date();
+        const timeFormatter = new Intl.DateTimeFormat('en-GB', {
+          timeZone: 'Africa/Addis_Ababa',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+        });
+        const currentTime = timeFormatter.format(now); // "HH:MM"
+
+        const dateFormatter = new Intl.DateTimeFormat('en-CA', {
+          timeZone: 'Africa/Addis_Ababa',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+        });
+        const todayStr = dateFormatter.format(now); // "YYYY-MM-DD"
+
+        const scheduledTime = (settings.telegramDailyReportTime || '12:00').padStart(5, '0');
+        const reportKey = `${todayStr}_${scheduledTime}`;
+
+        if (currentTime === scheduledTime && settings.lastDailyReportExecution !== reportKey) {
+          console.log(`[DAILY-REPORT] Triggering automated daily sales digest for ${todayStr} at ${currentTime}...`);
+          const { sendDailySalesReport } = require('./utils/dailySalesReporter');
+          const res = await sendDailySalesReport({ isManual: false });
+          if (res?.success) {
+            settings.lastDailyReportExecution = reportKey;
+            settings.lastDailyReportDate = todayStr;
+            await settings.save().catch(() => { });
+          }
+        }
+      } catch (err) {
+        console.warn('[DAILY-REPORT] Scheduler error:', err.message);
+      }
+    }, 20 * 1000);
   });
 }
 

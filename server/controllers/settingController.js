@@ -72,6 +72,7 @@ const getSettings = asyncHandler(async (req, res) => {
     if (!settings.licensedModules) {
       settings.licensedModules = {
         subsystem: true,
+        digitalMenu: true,
         finance: true,
         themeCustomization: true,
         materialIcons: true,
@@ -80,6 +81,11 @@ const getSettings = asyncHandler(async (req, res) => {
       settings.markModified('licensedModules');
       modified = true;
     } else {
+      if (settings.licensedModules.digitalMenu === undefined) {
+        settings.licensedModules.digitalMenu = true;
+        settings.markModified('licensedModules');
+        modified = true;
+      }
       if (settings.licensedModules.finance === undefined) {
         settings.licensedModules.finance = true;
         settings.markModified('licensedModules');
