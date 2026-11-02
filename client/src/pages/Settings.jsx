@@ -344,6 +344,7 @@ export default function Settings() {
   const [printerSuccess, setPrinterSuccess] = useState('');
   const [printerError, setPrinterError] = useState('');
   const [pingStatus, setPingStatus] = useState({}); // { [ip]: 'ok' | 'fail' | 'pending' }
+  const [printTestStatus, setPrintTestStatus] = useState({}); // { [idOrIp]: 'ok' | 'fail' | 'pending' }
   const [relayStatus, setRelayStatus] = useState({ online: false, lastSeenSecondsAgo: null });
 
   const checkRelayStatus = async () => {
