@@ -63,6 +63,12 @@ const inventoryCountSchema = new mongoose.Schema(
     approvedBy:  { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     approvedAt:  { type: Date },
 
+    stockApplied:       { type: Boolean, default: false },
+    stockAppliedAt:     { type: Date },
+    stockAppliedBy:     { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    stockAppliedByName: { type: String, default: '' },
+    appliedAdjustments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'StockTransaction' }],
+
     notes: { type: String, default: '' },
   },
   { timestamps: true }

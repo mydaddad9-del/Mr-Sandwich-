@@ -8,6 +8,7 @@ const {
   updateLines,
   submitCount,
   approveCount,
+  applyCountToStock,
   deleteCount,
   syncCount,
 } = require('../controllers/inventoryCountController');
@@ -21,8 +22,9 @@ router.get  ('/:id',             getCount);
 router.post ('/initialize',      initializeCount);
 router.patch('/:id/lines',       updateLines);
 router.post ('/:id/sync',        syncCount);
-router.post ('/:id/submit',      submitCount);
-router.post ('/:id/approve',     approveCount);
-router.delete('/:id',            deleteCount);
+router.post ('/:id/submit',          submitCount);
+router.post ('/:id/approve',         approveCount);
+router.post ('/:id/apply-to-stock',  applyCountToStock);
+router.delete('/:id',                deleteCount);
 
 module.exports = router;

@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   Printer, Scale, Search, History, X, RefreshCw,
-  ChevronLeft, ChevronRight, Calendar, ArrowRight, CheckCircle, Clock,
+  ChevronLeft, ChevronRight, Calendar, ArrowRight, CheckCircle, CheckCircle2, Clock,
   ClipboardList, Store, PackageSearch, TrendingUp, TrendingDown,
   Minus, Send, ShieldCheck, Trash2, Plus, AlertTriangle, BarChart3,
   ChevronDown, ChevronUp, Eye, EyeOff, Save,
 } from 'lucide-react';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 import Card from '../components/ui/Card';
 import DataTable from '../components/ui/DataTable';
 import Button from '../components/ui/Button';
@@ -112,6 +113,7 @@ const MONTH_NAMES = [
 ];
 
 function InventoryCountPanel() {
+  const { user, hasRole } = useAuth();
   const now = new Date();
   const [stores, setStores] = useState([]);
   const [counts, setCounts] = useState([]);
@@ -134,7 +136,9 @@ function InventoryCountPanel() {
   const [editorLoading, setEditorLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [applyingStock, setApplyingStock] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const [applySuccess, setApplySuccess] = useState('');
   const [expandedStores, setExpandedStores] = useState({});
   const [showUncounted, setShowUncounted] = useState(true);
   const [searchQ, setSearchQ] = useState('');
@@ -245,6 +249,38 @@ function InventoryCountPanel() {
     }
   };
 
+  // ── Apply Physical Counts to Live Stock ─────────────────────────────
+  const handleApplyStock = async () => {
+    if (!activeCount) return;
+    if (Object.keys(edits).length > 0) {
+      await saveEdits();
+    }
+    const countedLinesCount = activeCount.lines?.filter(l => l.isCounted && l.physicalCount !== null).length || 0;
+    if (countedLinesCount === 0) {
+      alert('Please enter and save physical counts before applying to stock.');
+      return;
+    }
+    const confirmed = window.confirm(
+      `Apply Physical Counts to Live Stock?\n\nThis will synchronize the Current Stock of all ${countedLinesCount} counted raw material(s) in the system with their physical count.\n\nStock adjustment transactions (PADJ / NADJ) will be generated and posted automatically.`
+    );
+    if (!confirmed) return;
+
+    setApplyingStock(true);
+    setSaveError('');
+    setApplySuccess('');
+    try {
+      const r = await api.post(`/inventory-count/${activeCount._id}/apply-to-stock`);
+      setActiveCount(r.data.count);
+      setApplySuccess(r.data.message || 'Live raw materials stock updated successfully!');
+      await loadList();
+      setTimeout(() => setApplySuccess(''), 7000);
+    } catch (e) {
+      setSaveError(e.response?.data?.message || 'Failed to apply count to stock');
+    } finally {
+      setApplyingStock(false);
+    }
+  };
+
   // ── Submit / Approve ───────────────────────────────────────────────
   const handleSubmit = async () => {
     if (!activeCount) return;
@@ -261,10 +297,19 @@ function InventoryCountPanel() {
 
   const handleApprove = async () => {
     if (!activeCount) return;
+    if (Object.keys(edits).length > 0) {
+      await saveEdits();
+    }
+    const confirmed = window.confirm(
+      'Approve & Close Inventory Count?\n\nThis will lock the count and automatically synchronize live Raw Materials stock with physical counts.'
+    );
+    if (!confirmed) return;
     try {
       const r = await api.post(`/inventory-count/${activeCount._id}/approve`);
       setActiveCount(r.data.count);
+      setApplySuccess('Inventory count approved and live raw materials stock synchronized!');
       await loadList();
+      setTimeout(() => setApplySuccess(''), 7000);
     } catch (e) {
       setSaveError(e.response?.data?.message || 'Approval failed');
     }
@@ -282,7 +327,7 @@ function InventoryCountPanel() {
   };
 
   const isEditable = activeCount && (activeCount.status === 'draft' || activeCount.status === 'submitted');
-  const canApprove = activeCount?.status === 'submitted';
+  const canApprove = (hasRole && (hasRole('admin') || hasRole('dev') || hasRole('manager'))) || activeCount?.status === 'submitted';
   const isLocked = activeCount && (activeCount.status === 'approved' || activeCount.status === 'closed');
 
   // ── Filter lines ──────────────────────────────────────────────────
@@ -572,6 +617,22 @@ function InventoryCountPanel() {
                   <Save size={13} /> {saving ? 'Saving…' : `Save (${Object.keys(edits).length})`}
                 </button>
               )}
+              {counted > 0 && (
+                <button
+                  type="button"
+                  onClick={handleApplyStock}
+                  disabled={applyingStock || saving}
+                  title="Directly update live Raw Materials Current Stock to match this physical count"
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold shadow transition cursor-pointer ${
+                    activeCount.stockApplied
+                      ? 'bg-indigo-700 hover:bg-indigo-800 text-white'
+                      : 'bg-indigo-600 hover:bg-indigo-700 text-white ring-2 ring-indigo-300'
+                  }`}
+                >
+                  <CheckCircle2 size={13} className={applyingStock ? 'animate-spin' : ''} />
+                  <span>{applyingStock ? 'Updating Stock…' : (activeCount.stockApplied ? 'Re-Apply Live Stock' : 'Apply Count to Stock')}</span>
+                </button>
+              )}
               {activeCount.status === 'draft' && (
                 <button
                   onClick={handleSubmit}
@@ -594,6 +655,70 @@ function InventoryCountPanel() {
           {saveError && (
             <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-2 text-xs">
               <AlertTriangle size={14} /> {saveError}
+            </div>
+          )}
+
+          {applySuccess && (
+            <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl p-4 text-xs font-semibold shadow-xs animate-in fade-in">
+              <CheckCircle2 size={18} className="text-emerald-600 shrink-0" />
+              <span>{applySuccess}</span>
+            </div>
+          )}
+
+          {/* Reconciliation Status Alert Card */}
+          {counted > 0 && !activeCount.stockApplied && (
+            <div className="rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50 p-4 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold text-lg shrink-0 shadow">
+                  ⚖️
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-amber-950">
+                    Physical Count Recorded ({counted}/{total} counted) — Live Stock Not Yet Updated
+                  </h4>
+                  <p className="text-xs text-amber-800 mt-0.5">
+                    Click <strong>Apply Count to Live Stock</strong> to directly update <em>Raw Materials Current Stock</em> to match these physical counts (creating audit adjustments automatically).
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleApplyStock}
+                disabled={applyingStock || saving}
+                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5 shrink-0 cursor-pointer"
+              >
+                <CheckCircle2 size={14} className={applyingStock ? 'animate-spin' : ''} />
+                <span>{applyingStock ? 'Updating Stock…' : 'Apply Count to Live Stock'}</span>
+              </button>
+            </div>
+          )}
+
+          {activeCount.stockApplied && (
+            <div className="rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 p-3.5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-xs">
+                  ✅
+                </div>
+                <div>
+                  <h4 className="text-xs font-black text-emerald-950 uppercase tracking-wide">
+                    Live Stock Synchronized with Physical Count
+                  </h4>
+                  <p className="text-[11px] text-emerald-800 mt-0.5">
+                    Raw material stock balances have been updated to match this physical count
+                    {activeCount.stockAppliedAt && ` on ${new Date(activeCount.stockAppliedAt).toLocaleString()}`}
+                    {activeCount.stockAppliedByName && ` by ${activeCount.stockAppliedByName}`}.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleApplyStock}
+                disabled={applyingStock || saving}
+                className="px-3 py-1.5 rounded-xl border border-emerald-300 bg-white hover:bg-emerald-50 text-emerald-800 font-bold text-xs transition flex items-center gap-1.5 shrink-0 cursor-pointer"
+              >
+                <RefreshCw size={12} className={applyingStock ? 'animate-spin' : ''} />
+                <span>{applyingStock ? 'Syncing…' : 'Re-Sync Stock'}</span>
+              </button>
             </div>
           )}
 
@@ -764,9 +889,15 @@ function InventoryCountPanel() {
                           </td>
                           <td className="px-3 py-2.5 text-center">
                             {line.isCounted ? (
-                              <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full text-[10px] font-bold">
-                                <CheckCircle size={9} /> Counted
-                              </span>
+                              activeCount.stockApplied ? (
+                                <span className="inline-flex items-center gap-1 bg-indigo-100 text-indigo-800 border border-indigo-200 px-2 py-0.5 rounded-full text-[10px] font-extrabold shadow-2xs">
+                                  <CheckCircle2 size={10} className="text-indigo-600" /> Stock Applied
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                                  <CheckCircle size={9} /> Counted
+                                </span>
+                              )
                             ) : (
                               <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full text-[10px] font-bold">
                                 <Clock size={9} /> Pending
